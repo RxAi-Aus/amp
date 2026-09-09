@@ -113,6 +113,11 @@
   }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
   .hero-art { display: block; width: 100%; height: auto; margin-top: 22px; border-radius: 12px; border: 1px solid var(--line); }
+  .proof { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 18px; }
+  .proof .tile { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: var(--panel); }
+  .proof .v { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; color: var(--ok); font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .proof .l { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
+  .proof .src { grid-column: 1 / -1; font-size: 12px; color: var(--muted); margin: 2px 0 0; }
   .diagram { display: block; width: 100%; height: auto; margin: 6px 0 18px; border-radius: 12px; border: 1px solid var(--line); background: #fff; }
   .chip {
     font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
@@ -297,6 +302,12 @@
       <span class="chip t" lang="es">ponderado por resultados</span>
     </div>
     <img class="hero-art" src="assets/hero-ant-trail.png" alt="A glowing trail of ants converging on a GitHub issue card; side trails that lead nowhere fade out" width="1456" height="720">
+    <div class="proof" aria-label="Measured results">
+      <div class="tile"><div class="v">−18%</div><div class="l"><span class="t" lang="en">fewer tokens spent reading the project once memory is on: a heavy-reading model read 18% less of the codebase in an A/B with identical prompts.</span><span class="t" lang="zh-Hant">開啟記憶後，讀取專案所耗的 token 少 18%：閱讀量大的模型在相同提示的 A/B 測試中少讀 18% 的程式碼。</span><span class="t" lang="ja">メモリ有効時、プロジェクト読み込みに使うトークンが 18% 減。読み込み量の多いモデルが同一プロンプトの A/B でコードを 18% 少なく読んだ。</span><span class="t" lang="ko">메모리를 켜면 프로젝트 읽기에 쓰는 토큰이 18% 감소: 읽기가 많은 모델이 동일 프롬프트 A/B에서 코드를 18% 덜 읽음.</span><span class="t" lang="es">18% menos tokens leyendo el proyecto con la memoria activada: un modelo de lectura intensiva leyó un 18% menos del código en un A/B con prompts idénticos.</span></div></div>
+      <div class="tile"><div class="v">−14% · −5%</div><div class="l"><span class="t" lang="en">faster, and cheaper, end to end on the same tasks. The injected memory block costs about 1.5k tokens per call, so the net saving is smaller than the reading saving.</span><span class="t" lang="zh-Hant">同樣的任務端到端快 14%、成本低 5%。注入的記憶區塊每次呼叫約耗 1.5k token，所以淨節省比讀取節省小。</span><span class="t" lang="ja">同じタスクで端から端まで 14% 速く、5% 安い。注入するメモリブロックは呼び出しごとに約 1.5k トークンかかるため、純節約は読み込み削減より小さい。</span><span class="t" lang="ko">같은 작업에서 처음부터 끝까지 14% 빠르고 5% 저렴. 주입되는 기억 블록이 호출당 약 1.5k 토큰이므로 순절감은 읽기 절감보다 작음.</span><span class="t" lang="es">14% más rápido y 5% más barato de extremo a extremo en las mismas tareas. El bloque de memoria inyectado cuesta unos 1,5k tokens por llamada, así que el ahorro neto es menor que el de lectura.</span></div></div>
+      <div class="tile"><div class="v">6.8 KB</div><div class="l"><span class="t" lang="en">to recall from a store of 145 memories, versus 914 KB and 58 API calls for a naive scan of every issue.</span><span class="t" lang="zh-Hant">從 145 筆記憶的儲存庫回憶只需 6.8 KB；逐一掃描每個 Issue 要 914 KB 與 58 次 API 呼叫。</span><span class="t" lang="ja">145 件の記憶からの想起は 6.8 KB。全 Issue の素朴な走査なら 914 KB・API 呼び出し 58 回。</span><span class="t" lang="ko">기억 145건 저장소에서 회상하는 데 6.8 KB. 모든 이슈를 단순 스캔하면 914 KB, API 호출 58회.</span><span class="t" lang="es">para recordar de un almacén de 145 memorias, frente a 914 KB y 58 llamadas a la API de un escaneo ingenuo de cada issue.</span></div></div>
+      <p class="src"><span class="t" lang="en">Measured on a live repository in September 2026: 32 fresh sessions, memory on versus off, identical prompts and tool allow-lists. A sparse-reading model saw no benefit, so the injected volume is tiered by model.</span><span class="t" lang="zh-Hant">2026 年 9 月於真實儲存庫量測：32 個全新工作階段，記憶開啟與關閉，相同提示與工具白名單。閱讀量小的模型沒有好處，因此注入量依模型分級。</span><span class="t" lang="ja">2026年9月、実運用リポジトリで計測：新規 32 セッション、メモリ有効/無効、同一プロンプトとツール許可リスト。読み込み量の少ないモデルには効果がなく、注入量はモデル別に段階化。</span><span class="t" lang="ko">2026년 9월 실제 저장소에서 측정: 새 세션 32개, 메모리 켬/끔, 동일 프롬프트와 도구 허용 목록. 읽기가 적은 모델은 이득이 없어 주입량을 모델별로 차등.</span><span class="t" lang="es">Medido en un repositorio real en septiembre de 2026: 32 sesiones nuevas, memoria activada frente a desactivada, prompts y listas de herramientas idénticos. Un modelo de lectura escasa no obtuvo beneficio, por eso el volumen inyectado se escalona por modelo.</span></p>
+    </div>
   </header>
 
   <section>
