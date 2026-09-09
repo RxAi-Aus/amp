@@ -1,0 +1,42 @@
+Dual License Notice
+
+Copyright (C) 2026 James Ho
+
+This software is available under two licensing options.
+
+Option 1: GNU Affero General Public License v3.0 or later
+
+You may use, copy, modify, distribute, and run this software, including for
+commercial purposes, under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the License, or
+at your option any later version.
+
+If you choose this option, you must comply with the AGPL. In particular, if you
+modify the software and run it as a network service, users of that service must
+be able to receive the complete corresponding source code for your modified
+version under the AGPL.
+
+The full AGPL v3 text is included in COPYING.
+
+Option 2: Commercial License
+
+A separate commercial license is available for proprietary use, closed-source
+integration, SaaS use without AGPL source-sharing obligations, or other use that
+does not comply with the AGPL.
+
+Contact hello@rxai.com.au to purchase a commercial license.
+
+Patent notice
+
+Australian provisional patent application 2026907694 (filed 9 September 2026,
+applicant Chien-min James Ho trading as RxAI) covers mechanisms described in
+PROTOCOL.md. Rights under that application are licensed to AGPL licensees as
+provided by section 11 of the GNU AGPL v3, and to commercial licensees under
+the terms of their commercial license.
+
+Summary
+
+- AGPL use is free, including commercial use, if you comply with the AGPL.
+- A commercial license is required only if you want to use the software without
+  AGPL obligations.
+- If you are unsure which option applies, contact hello@rxai.com.au.

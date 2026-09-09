@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>AMP Board</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <!-- One gear, defined once. The project rows used to draw a "⚙" text glyph
+       while the top bar drew this path, which put two icon styles on screen. -->
+  <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+    <symbol id="icon-gear" viewBox="0 0 16 16">
+      <path fill="currentColor" d="M8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm0 1.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z"/>
+      <path fill="currentColor" opacity=".55" d="M6.9 1h2.2l.4 1.8 1.2.7 1.7-.7 1.1 1.9-1.4 1.2v1.4l1.4 1.2-1.1 1.9-1.7-.7-1.2.7-.4 1.8H6.9l-.4-1.8-1.2-.7-1.7.7-1.1-1.9 1.4-1.2V6.9L2.5 5.7l1.1-1.9 1.7.7 1.2-.7L6.9 1Z"/>
+    </symbol>
+  </svg>
+
+  <header class="topbar" role="banner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <h1>AMP Board</h1>
+    </div>
+    <div class="topbar-meta">
+      <span class="mono" id="clone-path" title="memory clone">—</span>
+      <span class="sep" aria-hidden="true">·</span>
+      <span id="last-compiled">Last compiled —</span>
+      <span class="sep" aria-hidden="true">·</span>
+      <span id="conn" class="conn" role="status" aria-live="polite">connecting</span>
+    </div>
+    <div class="topbar-actions">
+      <button type="button" class="btn" id="refresh-btn" aria-label="Pull the memory clone and rescan">Refresh</button>
+      <ul class="legend" id="agent-legend" aria-label="Agents"></ul>
+      <button type="button" class="btn btn-icon" id="settings-btn" aria-label="Board settings" title="Board settings">
+        <svg width="14" height="14" aria-hidden="true" focusable="false"><use href="#icon-gear"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="board" id="board">
+    <section class="col" id="col-projects" aria-labelledby="h-projects">
+      <header class="col-head"><h2 id="h-projects">Projects</h2><span class="count" id="count-projects">0</span></header>
+      <div class="col-body" id="projects-list" role="list"></div>
+    </section>
+    <div class="handle" data-col="1" role="separator" aria-orientation="vertical" aria-label="Resize Projects column" tabindex="0"></div>
+
+    <section class="col col-split" id="col-issues" aria-labelledby="h-issues">
+      <header class="col-head"><h2 id="h-issues">Memory issues</h2><span class="count" id="count-issues">0</span></header>
+      <div class="col-body" id="issues-list"></div>
+      <!-- Not a live region: selecting an issue replaced the whole pane, so a
+           screen reader read the entire memory body and every comment aloud. -->
+      <div class="detail" id="issue-detail"></div>
+    </section>
+    <div class="handle" data-col="2" role="separator" aria-orientation="vertical" aria-label="Resize Memory issues column" tabindex="0"></div>
+
+    <section class="col" id="col-waiting" aria-labelledby="h-waiting">
+      <header class="col-head"><h2 id="h-waiting">Waiting</h2><span class="count" id="count-waiting">0</span></header>
+      <div class="col-body">
+        <form class="add-task is-collapsed" id="add-task" autocomplete="off">
+          <button type="button" class="add-toggle" id="add-toggle" aria-expanded="false" aria-controls="add-task-fields">New task</button>
+          <div class="add-fields" id="add-task-fields">
+            <label class="field"><span>Title</span><input name="title" required maxlength="200" placeholder="What should the agent do?"></label>
+            <label class="field"><span>Description</span><textarea name="description" rows="3" maxlength="4000" placeholder="Acceptance criteria, context, constraints"></textarea><small class="count" id="desc-count" aria-live="polite" hidden></small></label>
+            <div class="field-row">
+              <label class="field"><span>Linked issue #</span><input name="linkedIssue" inputmode="numeric" pattern="[0-9]*" placeholder="337"></label>
+              <label class="field"><span>Agent</span><select name="assignee" id="add-task-agent"></select></label>
+            </div>
+            <div class="actions">
+              <button type="submit" class="btn btn-primary" data-assign="1">Create and assign</button>
+              <button type="submit" class="btn" data-assign="0">Create</button>
+            </div>
+            <p class="form-error" id="add-task-error" role="alert" hidden></p>
+          </div>
+        </form>
+        <div id="waiting-list"></div>
+      </div>
+    </section>
+    <div class="handle" data-col="3" role="separator" aria-orientation="vertical" aria-label="Resize Waiting column" tabindex="0"></div>
+
+    <section class="col" id="col-finished" aria-labelledby="h-finished">
+      <header class="col-head"><h2 id="h-finished">Finished</h2><span class="count" id="count-finished">0</span></header>
+      <div class="col-body" id="finished-list"></div>
+    </section>
+    <div class="handle" data-col="4" role="separator" aria-orientation="vertical" aria-label="Resize Finished column" tabindex="0"></div>
+
+    <section class="col" id="col-approval" aria-labelledby="h-approval">
+      <header class="col-head"><h2 id="h-approval">Approval</h2><span class="count" id="count-approval">0</span></header>
+      <div class="col-body" id="approval-list"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <!-- The board's single announcer. Task state changes are written here one
+       at a time, instead of every status pill being its own live region. -->
+  <div class="sr-only" id="live-status" role="status" aria-live="polite"></div>
+
+  <dialog class="popover" id="project-dialog" aria-labelledby="project-dialog-title">
+    <form method="dialog" id="project-form">
+      <h3 id="project-dialog-title">Project settings</h3>
+      <p class="hint" id="project-dialog-region"></p>
+      <label class="field"><span>Working directory</span><input name="workdir" class="mono" placeholder="/absolute/path/to/repo"><small>Agents run inside this folder. Leave empty to use the memory clone.</small></label>
+      <label class="field"><span>Notes</span><textarea name="notes" rows="3" maxlength="2000" placeholder="Anything you will want to remember about this project"></textarea></label>
+      <p class="form-error" id="project-form-error" role="alert" hidden></p>
+      <div class="actions end">
+        <button type="button" class="btn" value="cancel" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary" value="save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="popover" id="settings-dialog" aria-labelledby="settings-dialog-title">
+    <form method="dialog" id="settings-form">
+      <h3 id="settings-dialog-title">Board settings</h3>
+      <div class="field-row">
+        <label class="field"><span>Concurrency</span><input name="concurrency" type="number" min="1" max="16" step="1"></label>
+        <label class="field"><span>Timeout (min)</span><input name="timeoutMin" type="number" min="1" max="1440" step="1"></label>
+      </div>
+      <label class="field"><span>Default agent</span><select name="defaultAgent" id="settings-agent"></select></label>
+      <label class="check"><input type="checkbox" name="yolo"><span>Skip agent permission prompts (yolo). Only for trusted working directories.</span></label>
+      <p class="hint">State file: <span class="mono" id="settings-home"></span></p>
+      <p class="form-error" id="settings-form-error" role="alert" hidden></p>
+      <div class="actions end">
+        <button type="button" class="btn" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

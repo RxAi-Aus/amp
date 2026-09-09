@@ -1,0 +1,23 @@
+{
+  "name": "amp-token-monitor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Token usage monitor for the RxAi AMP agent memory system (read-only)",
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run -s build && node --test dist/tests/*.test.js",
+    "scan": "npm run -s build && node dist/src/cli.js scan",
+    "report": "npm run -s build && node dist/src/cli.js report",
+    "sessions": "npm run -s build && node dist/src/cli.js sessions",
+    "backfill": "npm run -s build && node dist/src/cli.js backfill",
+    "serve": "npm run -s build && node dist/src/cli.js serve"
+  },
+  "dependencies": {
+    "gpt-tokenizer": "^3.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0"
+  }
+}

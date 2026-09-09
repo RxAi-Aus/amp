@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AMP Token Monitor</title>
+<style>
+  :root { color-scheme: light dark; }
+  .viz-root {
+    color-scheme: light;
+    --page:           #f9f9f7;
+    --surface-1:      #fcfcfb;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --series-1:       #2a78d6;
+    --series-2:       #eb6834;
+    --status-good:    #0ca30c;
+    --status-warning: #fab219;
+    --status-critical:#d03b3b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --page:           #0d0d0d;
+      --surface-1:      #1a1a19;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:           #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --series-1:       #3987e5;
+      --series-2:       #d95926;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --page:           #0d0d0d;
+    --surface-1:      #1a1a19;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:           #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --series-1:       #3987e5;
+    --series-2:       #d95926;
+  }
+
+  * { box-sizing: border-box; margin: 0; }
+  body.viz-root {
+    background: var(--page);
+    color: var(--text-primary);
+    font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 20px;
+  }
+  header { max-width: 1080px; margin: 0 auto 16px; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 18px; font-weight: 650; }
+  header .sub { color: var(--text-muted); font-size: 12px; }
+  main { max-width: 1080px; margin: 0 auto; display: grid; gap: 14px; grid-template-columns: repeat(12, 1fr); }
+  .panel {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    min-width: 0;
+  }
+  .panel h2 { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
+  .tile { grid-column: span 3; }
+  .wide { grid-column: span 6; }
+  .full { grid-column: span 12; }
+  @media (max-width: 900px) { .tile { grid-column: span 6; } .wide, .full { grid-column: span 12; } }
+  @media (max-width: 560px) { .tile { grid-column: span 12; } }
+
+  .hero { font-size: 30px; font-weight: 650; line-height: 1.1; }
+  .hero small { font-size: 13px; font-weight: 400; color: var(--text-muted); margin-left: 4px; }
+  .tile .caption { color: var(--text-secondary); font-size: 12px; margin-top: 4px; }
+  .meter { height: 6px; border-radius: 3px; background: var(--grid); margin-top: 10px; overflow: hidden; }
+  .meter > div { height: 100%; border-radius: 3px; }
+  .status { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12px; margin-top: 8px; }
+
+  svg { display: block; width: 100%; height: auto; }
+  svg text { font: 11px system-ui, -apple-system, "Segoe UI", sans-serif; fill: var(--text-muted); }
+  svg text.val { fill: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  svg text.cat { fill: var(--text-primary); }
+  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+  #tooltip {
+    position: fixed; pointer-events: none; z-index: 10; display: none;
+    background: var(--surface-1); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 10px; font-size: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    max-width: 260px;
+  }
+  #tooltip .t { color: var(--text-muted); }
+  details { margin-top: 10px; }
+  summary { cursor: pointer; color: var(--text-secondary); font-size: 12px; }
+  table { border-collapse: collapse; width: 100%; margin-top: 8px; font-size: 12px; }
+  th, td { text-align: right; padding: 4px 8px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--text-muted); font-weight: 500; }
+  .empty { color: var(--text-muted); font-size: 12px; padding: 12px 0; }
+</style>
+</head>
+<body class="viz-root">
+<header>
+  <h1>AMP Token Monitor</h1>
+  <span class="sub" id="meta">loading…</span>
+</header>
+<main>
+  <section class="panel tile">
+    <h2>Recall budget</h2>
+    <div class="hero" id="budget-hero">–</div>
+    <div class="caption" id="budget-caption"></div>
+    <div class="meter"><div id="budget-meter" style="width:0%"></div></div>
+    <div class="status" id="budget-status"></div>
+  </section>
+  <section class="panel tile">
+    <h2>Cache efficiency</h2>
+    <div class="hero" id="cache-hero">–</div>
+    <div class="caption">share of prompt tokens served from cache (memory sessions)</div>
+    <div class="meter"><div id="cache-meter" style="width:0%"></div></div>
+  </section>
+  <section class="panel tile">
+    <h2>Memory session spend</h2>
+    <div class="hero" id="cost-hero">–</div>
+    <div class="caption" id="cost-caption">estimated API-equivalent cost, all memory-project sessions</div>
+  </section>
+  <section class="panel tile">
+    <h2>Memory corpus</h2>
+    <div class="hero" id="corpus-hero">–</div>
+    <div class="caption" id="corpus-caption">o200k tokens across all memory artifacts</div>
+  </section>
+
+  <section class="panel wide">
+    <h2>Artifact cost by category</h2>
+    <div id="artifact-chart"><div class="empty">loading…</div></div>
+    <details><summary>Table view</summary><div id="artifact-table"></div></details>
+  </section>
+  <section class="panel wide">
+    <h2>Session tokens per day <span style="text-transform:none;color:var(--text-muted)">(memory projects, last 14 days)</span></h2>
+    <div id="daily-chart"><div class="empty">loading…</div></div>
+  </section>
+
+  <section class="panel full">
+    <h2>Growth over time</h2>
+    <div class="legend">
+      <span><i class="swatch" style="background:var(--series-1)"></i>injection (INDEX + not_indexed)</span>
+      <span><i class="swatch" style="background:var(--series-2)"></i>full corpus</span>
+    </div>
+    <div id="growth-chart"><div class="empty">loading…</div></div>
+  </section>
+</main>
+<div id="tooltip"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const NS = 'http://www.w3.org/2000/svg';
+const el = (tag, attrs = {}, text) => {
+  const n = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+  if (text != null) n.textContent = text;
+  return n;
+};
+const fmt = (n) => {
+  if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(n >= 1e4 ? 0 : 1) + 'k';
+  return String(Math.round(n));
+};
+const tooltip = $('tooltip');
+function showTip(evt, html) {
+  tooltip.innerHTML = html;
+  tooltip.style.display = 'block';
+  const pad = 14;
+  let x = evt.clientX + pad, y = evt.clientY + pad;
+  const r = tooltip.getBoundingClientRect();
+  if (x + r.width > innerWidth - 8) x = evt.clientX - r.width - pad;
+  if (y + r.height > innerHeight - 8) y = evt.clientY - r.height - pad;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = y + 'px';
+}
+function hideTip() { tooltip.style.display = 'none'; }
+
+// horizontal bar with square baseline edge and 4px-rounded data end
+function hBarPath(x, y, w, h, r) {
+  r = Math.min(r, w, h / 2);
+  return `M${x},${y} h${w - r} a${r},${r} 0 0 1 ${r},${r} v${h - 2 * r} a${r},${r} 0 0 1 -${r},${r} h-${w - r} Z`;
+}
+function vBarPath(x, yTop, w, h, r) {
+  r = Math.min(r, h, w / 2);
+  return `M${x},${yTop + r} a${r},${r} 0 0 1 ${r},-${r} h${w - 2 * r} a${r},${r} 0 0 1 ${r},${r} v${h - r} h-${w} Z`;
+}
+const css = (name) => getComputedStyle(document.body).getPropertyValue(name).trim();
+
+function renderBudget(scan, budgets) {
+  const b = scan.budget;
+  $('budget-hero').innerHTML = `${fmt(b.injectionEstTokens)}<small>/ ${fmt(b.budgetTokens)} tokens</small>`;
+  $('budget-caption').textContent =
+    `session-start injection, calibrated (${b.injectionRawTokens} o200k raw)`;
+  const pct = Math.min(100, b.usedRatio * 100);
+  const color = b.status === 'OK' ? 'var(--status-good)'
+    : b.status === 'WARN' ? 'var(--status-warning)' : 'var(--status-critical)';
+  const icon = b.status === 'OK' ? '●' : b.status === 'WARN' ? '▲' : '■';
+  $('budget-meter').style.cssText = `width:${Math.max(pct, 2)}%;background:${color}`;
+  $('budget-status').innerHTML =
+    `<span style="color:${color}">${icon}</span> ${b.status} — ${(b.usedRatio * 100).toFixed(1)}% of budget`;
+}
+
+function renderArtifacts(scan, models) {
+  const cats = Object.entries(scan.totalsByCategory)
+    .map(([cat, t]) => ({ cat, ...t }))
+    .sort((a, b) => b.rawTokens - a.rawTokens);
+  if (!cats.length) { $('artifact-chart').innerHTML = '<div class="empty">no artifacts found</div>'; return; }
+  const W = 520, rowH = 26, left = 76, right = 52, H = cats.length * rowH + 6;
+  const max = Math.max(...cats.map((c) => c.rawTokens));
+  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'tokens per artifact category' });
+  cats.forEach((c, i) => {
+    const y = i * rowH + 4;
+    const w = Math.max(2, (c.rawTokens / max) * (W - left - right));
+    svg.appendChild(el('text', { x: left - 8, y: y + 13, 'text-anchor': 'end', class: 'cat' }, c.cat));
+    const bar = el('path', { d: hBarPath(left, y, w, 18, 4), fill: 'var(--series-1)' });
+    const tip = () => `<b>${c.cat}</b> — ${c.files} file(s)<br>` +
+      `${c.rawTokens.toLocaleString()} o200k tokens · ${fmt(c.bytes)}B<br>` +
+      models.slice(0, 3).map((m) =>
+        `<span class="t">≈ ${Math.ceil(c.rawTokens * m.calibrationRatio).toLocaleString()} on ${m.id}</span>`).join('<br>');
+    bar.addEventListener('mousemove', (e) => showTip(e, tip()));
+    bar.addEventListener('mouseleave', hideTip);
+    svg.appendChild(bar);
+    svg.appendChild(el('text', { x: left + w + 6, y: y + 13, class: 'val' }, fmt(c.rawTokens)));
+  });
+  $('artifact-chart').replaceChildren(svg);
+
+  const rows = scan.artifacts.slice().sort((a, b) => b.rawTokens - a.rawTokens)
+    .map((a) => `<tr><td>${a.path}</td><td>${a.category}</td><td>${a.bytes.toLocaleString()}</td><td>${a.rawTokens.toLocaleString()}</td></tr>`)
+    .join('');
+  $('artifact-table').innerHTML =
+    `<table><thead><tr><th>artifact</th><th>category</th><th>bytes</th><th>o200k tokens</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderDaily(sessions) {
+  const days = Object.entries(sessions.byDay).sort(([a], [b]) => a.localeCompare(b)).slice(-14);
+  if (!days.length) { $('daily-chart').innerHTML = '<div class="empty">no memory-project sessions found</div>'; return; }
+  const W = 520, H = 170, bottom = 22, top = 8;
+  const totals = days.map(([, u]) => u.input + u.output + u.cacheRead + u.cacheCreate);
+  const max = Math.max(...totals);
+  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'session tokens per day' });
+  const plotH = H - bottom - top;
+  const slot = W / days.length;
+  const barW = Math.max(6, Math.min(34, slot - 2));   // 2px surface gap between bars
+  for (const frac of [0.5, 1]) {
+    const gy = top + plotH * (1 - frac);
+    svg.appendChild(el('line', { x1: 0, x2: W, y1: gy, y2: gy, stroke: 'var(--grid)', 'stroke-width': 1 }));
+    svg.appendChild(el('text', { x: 2, y: gy - 3 }, fmt(max * frac)));
+  }
+  days.forEach(([day, u], i) => {
+    const total = totals[i];
+    const h = Math.max(2, (total / max) * plotH);
+    const x = i * slot + (slot - barW) / 2;
+    const bar = el('path', { d: vBarPath(x, top + plotH - h, barW, h, 4), fill: 'var(--series-1)' });
+    bar.addEventListener('mousemove', (e) => showTip(e,
+      `<b>${day}</b><br>${total.toLocaleString()} total tokens<br>` +
+      `<span class="t">in ${fmt(u.input)} · out ${fmt(u.output)} · cacheRead ${fmt(u.cacheRead)} · cacheWrite ${fmt(u.cacheCreate)}</span>`));
+    bar.addEventListener('mouseleave', hideTip);
+    svg.appendChild(bar);
+    if (days.length <= 8 || i % 2 === 0) {
+      svg.appendChild(el('text', { x: x + barW / 2, y: H - 6, 'text-anchor': 'middle' }, day.slice(5)));
+    }
+  });
+  svg.appendChild(el('line', { x1: 0, x2: W, y1: top + plotH, y2: top + plotH, stroke: 'var(--baseline)', 'stroke-width': 1 }));
+  $('daily-chart').replaceChildren(svg);
+}
+
+function renderGrowth(snapshots) {
+  if (snapshots.length < 2) { $('growth-chart').innerHTML = '<div class="empty">need ≥2 snapshots — run scan/backfill</div>'; return; }
+  const pts = snapshots.map((s) => ({
+    t: Date.parse(s.ts),
+    injection: s.injectionRawTokens,
+    total: s.historical ? null
+      : Object.values(s.totalsByCategory).reduce((sum, c) => sum + c.rawTokens, 0),
+    ts: s.ts, historical: !!s.historical,
+  })).filter((p) => Number.isFinite(p.t)).sort((a, b) => a.t - b.t);
+  const W = 1040, H = 220, left = 46, right = 14, top = 10, bottom = 24;
+  const t0 = pts[0].t, t1 = pts[pts.length - 1].t || t0 + 1;
+  const maxY = Math.max(...pts.map((p) => Math.max(p.injection, p.total ?? 0))) || 1;
+  const X = (t) => left + ((t - t0) / Math.max(1, t1 - t0)) * (W - left - right);
+  const Y = (v) => top + (1 - v / maxY) * (H - top - bottom);
+  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'memory token growth over time' });
+
+  for (const frac of [0, 0.5, 1]) {
+    const gy = Y(maxY * frac);
+    svg.appendChild(el('line', { x1: left, x2: W - right, y1: gy, y2: gy, stroke: frac === 0 ? 'var(--baseline)' : 'var(--grid)', 'stroke-width': 1 }));
+    svg.appendChild(el('text', { x: left - 6, y: gy + 4, 'text-anchor': 'end', class: 'val' }, fmt(maxY * frac)));
+  }
+  const months = new Set();
+  for (const p of pts) {
+    const m = p.ts.slice(0, 7);
+    if (!months.has(m)) {
+      months.add(m);
+      svg.appendChild(el('text', { x: X(p.t), y: H - 6 }, m));
+    }
+  }
+
+  const line = (series, color) => {
+    const d = pts.filter((p) => p[series] != null)
+      .map((p, i) => `${i ? 'L' : 'M'}${X(p.t).toFixed(1)},${Y(p[series]).toFixed(1)}`).join('');
+    if (d) svg.appendChild(el('path', { d, fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linejoin': 'round' }));
+  };
+  line('injection', 'var(--series-1)');
+  line('total', 'var(--series-2)');
+
+  const cross = el('line', { y1: top, y2: H - bottom, stroke: 'var(--baseline)', 'stroke-width': 1, opacity: 0 });
+  const dot = el('circle', { r: 4, fill: 'var(--series-1)', stroke: 'var(--surface-1)', 'stroke-width': 2, opacity: 0 });
+  svg.appendChild(cross); svg.appendChild(dot);
+  const overlay = el('rect', { x: left, y: top, width: W - left - right, height: H - top - bottom, fill: 'transparent' });
+  overlay.addEventListener('mousemove', (e) => {
+    const rect = svg.getBoundingClientRect();
+    const mx = ((e.clientX - rect.left) / rect.width) * W;
+    let best = pts[0];
+    for (const p of pts) if (Math.abs(X(p.t) - mx) < Math.abs(X(best.t) - mx)) best = p;
+    cross.setAttribute('x1', X(best.t)); cross.setAttribute('x2', X(best.t)); cross.setAttribute('opacity', 0.6);
+    dot.setAttribute('cx', X(best.t)); dot.setAttribute('cy', Y(best.injection)); dot.setAttribute('opacity', 1);
+    showTip(e, `<b>${best.ts.slice(0, 10)}</b>${best.historical ? ' <span class="t">(git history)</span>' : ''}<br>` +
+      `injection ${best.injection.toLocaleString()} o200k` +
+      (best.total != null ? `<br>full corpus ${best.total.toLocaleString()} o200k` : ''));
+  });
+  overlay.addEventListener('mouseleave', () => { cross.setAttribute('opacity', 0); dot.setAttribute('opacity', 0); hideTip(); });
+  svg.appendChild(overlay);
+  $('growth-chart').replaceChildren(svg);
+}
+
+async function refresh() {
+  try {
+    const [summary, snapshots, sessions] = await Promise.all([
+      fetch('/api/summary').then((r) => r.json()),
+      fetch('/api/snapshots').then((r) => r.json()),
+      fetch('/api/sessions').then((r) => r.json()),
+    ]);
+    $('meta').textContent =
+      `${summary.scan.memoryRepoPath} · scanned ${summary.scan.scannedAt.slice(0, 19)}Z` +
+      (summary.watch ? ' · watch on' : '');
+    renderBudget(summary.scan, summary.budgets);
+    renderArtifacts(summary.scan, summary.models);
+    renderGrowth(snapshots);
+    renderDaily(sessions);
+
+    const m = sessions.totals.memory;
+    const denom = m.input + m.cacheRead + m.cacheCreate;
+    const eff = denom ? (m.cacheRead / denom) * 100 : 0;
+    $('cache-hero').innerHTML = `${eff.toFixed(1)}<small>%</small>`;
+    $('cache-meter').style.cssText = `width:${eff}%;background:var(--status-good)`;
+    $('cost-hero').textContent = `$${m.costUSD.toFixed(2)}`;
+    $('cost-caption').textContent =
+      `${sessions.memorySessions.length} session(s) · in ${fmt(m.input)} · out ${fmt(m.output)} · cacheRead ${fmt(m.cacheRead)}`;
+    const corpus = Object.values(summary.scan.totalsByCategory).reduce((s, c) => s + c.rawTokens, 0);
+    $('corpus-hero').textContent = fmt(corpus);
+    $('corpus-caption').textContent =
+      `${summary.scan.artifacts.length} artifacts · o200k base measure (per-model ≈ in tooltips)`;
+  } catch (err) {
+    $('meta').textContent = 'failed to load: ' + err.message;
+  }
+}
+refresh();
+setInterval(refresh, 60_000);
+</script>
+</body>
+</html>

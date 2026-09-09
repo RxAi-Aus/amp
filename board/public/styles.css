@@ -1,0 +1,820 @@
+/* AMP Board — plain CSS, no build. These tokens are the source of truth; DESIGN.md records them. */
+
+:root {
+  color-scheme: light dark;
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --surface-2: #f4f4f5;
+  --surface-3: #ebebee;
+  --border: #e5e7eb;
+  --border-strong: #848d99;
+  --text: #1b1b1d;
+  --text-2: #3f4650;
+  --muted: #5f6f86;
+  --accent: #2360e8;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(35, 96, 232, 0.1);
+  --terminal-bg: #0f172a;
+  --terminal-fg: #cbd5e1;
+  --terminal-muted: #73839b;
+  --terminal-err: #fda4af;
+  --shadow-pop: 0 8px 24px rgba(0, 0, 0, 0.2);
+  --scrim: rgba(15, 23, 42, 0.32);
+
+  /* Status foregrounds clear 4.5:1 against their own tint on every ground the
+     pill can land on: the plain surface, a hovered row, and the selected row's
+     accent wash. The selected row is the strictest and sets these values. */
+  --st-queued: #475569;      --st-queued-bg: rgba(100, 116, 139, 0.12);
+  --st-running: #1a57de;     --st-running-bg: rgba(59, 130, 246, 0.12);
+  --st-blocked: #a84800;     --st-blocked-bg: rgba(245, 158, 11, 0.14);
+  --st-failed: #c90011;      --st-failed-bg: rgba(239, 68, 68, 0.1);
+  --st-finished: #037169;    --st-finished-bg: rgba(20, 184, 166, 0.12);
+  --st-reviewing: #7e22ce;   --st-reviewing-bg: rgba(168, 85, 247, 0.12);
+  --st-approve: #007533;     --st-approve-bg: rgba(34, 197, 94, 0.12);
+  --st-reject: #c90011;      --st-reject-bg: rgba(239, 68, 68, 0.1);
+  --st-done: #475569;        --st-done-bg: rgba(100, 116, 139, 0.12);
+  --st-approval: #7e22ce;    --st-approval-bg: rgba(168, 85, 247, 0.12);
+
+  --ty-intent: #1d4ed8;      --ty-intent-bg: rgba(29, 78, 216, 0.1);
+  --ty-facts: #0f766e;       --ty-facts-bg: rgba(15, 118, 110, 0.1);
+  --ty-pattern: #7e22ce;     --ty-pattern-bg: rgba(126, 34, 206, 0.1);
+  --ty-invalidation: #b91c1c;--ty-invalidation-bg: rgba(185, 28, 28, 0.1);
+  --ty-discovery: #ad4d00;   --ty-discovery-bg: rgba(180, 83, 9, 0.12);
+  --ty-events: #475569;      --ty-events-bg: rgba(71, 85, 105, 0.12);
+  --ty-lifefact: #be185d;    --ty-lifefact-bg: rgba(190, 24, 93, 0.1);
+
+  --font: -apple-system, "SF Pro Text", Inter, "Segoe UI", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur: 160ms;
+  --radius: 6px;
+  --z-sticky: 10;
+  --z-handle: 20;
+  --z-toast: 40;
+
+  --col-1: minmax(220px, 0.8fr);
+  --col-2: minmax(300px, 1.3fr);
+  --col-3: minmax(260px, 1fr);
+  --col-4: minmax(260px, 1fr);
+  --col-5: minmax(260px, 1fr);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c2128;
+    --surface-3: #22272e;
+    --border: #30363d;
+    --border-strong: #656c76;
+    --text: #f0f6fc;
+    --text-2: #c9d1d9;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --accent-ink: #0d1117;
+    --accent-soft: rgba(88, 166, 255, 0.14);
+    --terminal-bg: #010409;
+    --terminal-fg: #c9d1d9;
+    --terminal-muted: #8b949e;
+    --terminal-err: #ff7b72;
+    --shadow-pop: 0 8px 24px rgba(0, 0, 0, 0.6);
+    --scrim: rgba(1, 4, 9, 0.66);
+
+    --st-queued: #9fa8b3;      --st-queued-bg: rgba(139, 148, 158, 0.14);
+    --st-running: #61afff;     --st-running-bg: rgba(88, 166, 255, 0.14);
+    --st-blocked: #d89f2b;     --st-blocked-bg: rgba(210, 153, 34, 0.14);
+    --st-failed: #ff7b72;      --st-failed-bg: rgba(218, 54, 51, 0.16);
+    --st-finished: #7ee787;    --st-finished-bg: rgba(35, 134, 54, 0.18);
+    --st-reviewing: #bc8cff;   --st-reviewing-bg: rgba(137, 87, 229, 0.18);
+    --st-approve: #7ee787;     --st-approve-bg: rgba(35, 134, 54, 0.18);
+    --st-reject: #ff7b72;      --st-reject-bg: rgba(218, 54, 51, 0.16);
+    --st-done: #9fa8b3;        --st-done-bg: rgba(139, 148, 158, 0.14);
+    --st-approval: #bc8cff;    --st-approval-bg: rgba(137, 87, 229, 0.18);
+
+    --ty-intent: #79c0ff;      --ty-intent-bg: rgba(121, 192, 255, 0.12);
+    --ty-facts: #56d4c9;       --ty-facts-bg: rgba(86, 212, 201, 0.12);
+    --ty-pattern: #d2a8ff;     --ty-pattern-bg: rgba(210, 168, 255, 0.12);
+    --ty-invalidation: #ff7b72;--ty-invalidation-bg: rgba(255, 123, 114, 0.12);
+    --ty-discovery: #e3b341;   --ty-discovery-bg: rgba(227, 179, 65, 0.12);
+    --ty-events: #8b949e;      --ty-events-bg: rgba(139, 148, 158, 0.14);
+    --ty-lifefact: #f778ba;    --ty-lifefact-bg: rgba(247, 120, 186, 0.12);
+  }
+}
+
+/* ---------- base ---------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.45 var(--font);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, p, ul { margin: 0; }
+ul { padding: 0; list-style: none; }
+button, input, select, textarea { font: inherit; color: inherit; }
+.mono { font-family: var(--mono); font-size: 12px; }
+a { color: var(--accent); }
+[hidden] { display: none !important; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- header ---------- */
+
+.topbar {
+  height: 48px;
+  flex: 0 0 48px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.brand { display: flex; align-items: center; gap: 8px; }
+.brand-mark { width: 10px; height: 10px; border-radius: 2px; background: var(--accent); }
+.brand h1 { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+.topbar-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.topbar-meta .mono { overflow: hidden; text-overflow: ellipsis; }
+.sep { color: var(--border-strong); }
+.conn::before {
+  content: "";
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin-right: 5px;
+  background: var(--st-blocked);
+  vertical-align: 1px;
+}
+.conn.is-live::before { background: var(--st-approve); }
+.conn.is-down::before { background: var(--st-failed); }
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+.legend { display: flex; gap: 6px; }
+.legend li {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-2);
+  background: var(--surface-2);
+}
+.legend li.is-off { color: var(--muted); border-style: dashed; background: transparent; text-decoration: line-through; }
+.legend li.is-dev { font-family: var(--mono); }
+
+/* ---------- buttons & fields ---------- */
+
+.btn {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.btn:hover { background: var(--surface-2); }
+.btn:active { background: var(--surface-3); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn-primary:hover { filter: brightness(1.08); background: var(--accent); }
+.btn-danger { color: var(--st-failed); }
+.btn-icon { width: 28px; padding: 0; justify-content: center; color: var(--muted); }
+.btn-sm { height: 24px; padding: 0 8px; font-size: 11px; }
+.btn.is-busy::after {
+  content: "";
+  width: 10px; height: 10px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field > span { font-size: 11px; font-weight: 600; color: var(--muted); }
+.field small { font-size: 11px; color: var(--muted); }
+.field input, .field textarea, .field select, .select {
+  width: 100%;
+  min-height: 28px;
+  padding: 4px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12px;
+}
+.field textarea { resize: vertical; line-height: 1.4; }
+.field input::placeholder, .field textarea::placeholder { color: var(--muted); opacity: 1; }
+/* A disabled control has to look disabled. These used to accept a click and
+   silently refuse to take text whenever no project was selected. */
+.field input:disabled, .field textarea:disabled, .field select:disabled, .select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--surface-2);
+}
+.field:has(:disabled) > span { opacity: 0.6; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+/* Two fields side by side stop being two fields below roughly 280 px of
+   column: the labels clip before the inputs do. */
+@container col (max-width: 280px) {
+  .field-row { grid-template-columns: 1fr; }
+  .task-actions .select { flex: 1 1 100%; }
+}
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; color: var(--text-2); }
+.check input { margin: 3px 0 0; }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.actions.end { justify-content: flex-end; }
+.form-error { font-size: 12px; color: var(--st-failed); }
+.hint { font-size: 12px; color: var(--muted); }
+
+/* ---------- board grid ---------- */
+
+.board {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: var(--col-1) 6px var(--col-2) 6px var(--col-3) 6px var(--col-4) 6px var(--col-5);
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: var(--bg);
+}
+.col {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+.col:last-of-type { border-right: 0; }
+.col-head {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.col-head h2 { font-size: 12px; font-weight: 600; letter-spacing: 0.01em; color: var(--text-2); }
+.col-head .count {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0 6px;
+  line-height: 16px;
+}
+/* Columns are dragged to whatever width the user wants, so how much room a
+   form has is a question about the column, not the window. Container queries
+   are the only ones that can answer it. */
+.col-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; container: col / inline-size; }
+/* The split follows the content instead of being fixed at half and half. With
+   nothing selected the detail pane is one empty-state block tall and the list
+   keeps the column; with an issue open it grows to what it holds and stops at
+   55%, scrolling past that. */
+.col-split .col-body { flex: 1 1 auto; min-height: 120px; }
+.col-split .detail {
+  flex: 0 1 auto;
+  max-height: 55%;
+  min-height: 0;
+  overflow-y: auto;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.handle {
+  cursor: col-resize;
+  background: transparent;
+  z-index: var(--z-handle);
+  position: relative;
+  margin: 0 -1px;
+  transition: background var(--dur) var(--ease);
+}
+.handle:hover, .handle.is-dragging, .handle:focus-visible { background: var(--accent-soft); outline: none; }
+/* The divider stays a hairline but its target does not: the pseudo-element
+   widens the grab area to 24 px without moving the visible line. It reaches
+   into each neighbour's padding, so it is kept just clear of their content. */
+.handle::after { content: ""; position: absolute; inset: 0 -9px; }
+body.is-resizing { cursor: col-resize; user-select: none; }
+
+.empty {
+  padding: 24px 16px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+  text-wrap: pretty;
+}
+.empty strong { display: block; color: var(--text-2); font-weight: 500; margin-bottom: 2px; }
+
+/* ---------- column 1: projects ---------- */
+
+/* The row is a plain wrapper holding two sibling buttons: one selects the
+   project, one opens its settings. Neither is nested inside the other. */
+.project {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  transition: background var(--dur) var(--ease);
+}
+.project-main {
+  display: grid;
+  gap: 2px 8px;
+  padding: 8px 4px 8px 12px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  min-width: 0;
+  font: inherit;
+  color: inherit;
+}
+.project:hover { background: var(--surface-2); }
+.project:active { background: var(--surface-3); }
+.project.is-selected { background: var(--accent-soft); box-shadow: inset 2px 0 0 var(--accent); }
+.project .name { display: block; font-size: 13px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.project.is-selected .name { color: var(--accent); }
+.project .gear {
+  align-self: start;
+  margin: 8px 8px 0 0;
+  width: 24px; height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.project:hover .gear, .project.is-selected .gear, .project .gear:focus-visible { opacity: 1; }
+.project .gear:hover { background: var(--surface-3); color: var(--text); }
+.project .gear:active { background: var(--border); }
+.project .counts { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.project .counts b { font-weight: 600; color: var(--text-2); }
+.project .badges { grid-column: 1; display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+.project .badges:empty { display: none; }
+.project .wd { grid-column: 1; font-family: var(--mono); font-size: 10px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- pills & chips ---------- */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 18px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--st-queued);
+  background: var(--st-queued-bg);
+}
+.pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+.pill.st-queued { color: var(--st-queued); background: var(--st-queued-bg); }
+.pill.st-running { color: var(--st-running); background: var(--st-running-bg); }
+.pill.st-blocked { color: var(--st-blocked); background: var(--st-blocked-bg); }
+.pill.st-failed { color: var(--st-failed); background: var(--st-failed-bg); }
+.pill.st-finished { color: var(--st-finished); background: var(--st-finished-bg); }
+.pill.st-reviewing { color: var(--st-reviewing); background: var(--st-reviewing-bg); }
+.pill.st-approval { color: var(--st-approval); background: var(--st-approval-bg); }
+.pill.st-approve { color: var(--st-approve); background: var(--st-approve-bg); }
+.pill.st-reject { color: var(--st-reject); background: var(--st-reject-bg); }
+.pill.st-done { color: var(--st-done); background: var(--st-done-bg); }
+.pill.is-spinning::before {
+  width: 8px; height: 8px;
+  background: transparent;
+  border: 1.5px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 0.9s linear infinite;
+}
+.pill.sm { height: 16px; padding: 0 6px; font-size: 10px; font-weight: 600; }
+.pill.sm::before { width: 5px; height: 5px; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 18px;
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-2);
+  background: var(--surface-2);
+  white-space: nowrap;
+  appearance: none; /* interactive chips are real <button>s */
+}
+/* An interactive chip keeps the 18 px look of the static ones beside it and
+   grows only its target, upward and downward into the card's own padding
+   where there is nothing else to click. */
+.chip.is-link { cursor: pointer; color: var(--accent); border-color: var(--border); position: relative; }
+.chip.is-link:hover { border-color: var(--accent); }
+.chip.is-link:active { background: var(--surface-3); }
+/* Offsets resolve against the padding box, so -5px clears the 1px border and
+   lands a 26 px target around an 18 px chip, inside the row's own margins. */
+.chip.is-link::after { content: ""; position: absolute; inset: -5px 0; }
+
+.tag {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ty-events);
+  background: var(--ty-events-bg);
+}
+.tag.ty-intent { color: var(--ty-intent); background: var(--ty-intent-bg); }
+.tag.ty-facts { color: var(--ty-facts); background: var(--ty-facts-bg); }
+.tag.ty-pattern { color: var(--ty-pattern); background: var(--ty-pattern-bg); }
+.tag.ty-invalidation { color: var(--ty-invalidation); background: var(--ty-invalidation-bg); }
+.tag.ty-discovery { color: var(--ty-discovery); background: var(--ty-discovery-bg); }
+.tag.ty-events { color: var(--ty-events); background: var(--ty-events-bg); }
+.tag.ty-lifefact { color: var(--ty-lifefact); background: var(--ty-lifefact-bg); }
+
+/* ---------- column 2: issues ---------- */
+
+.strip {
+  border-bottom: 1px solid var(--border);
+}
+.strip > summary, .place-head, .type-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* .type-head is a label, not a control. Only the two disclosures are clickable. */
+.strip > summary, .place-head { cursor: pointer; user-select: none; }
+.strip > summary {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  background: var(--surface-2);
+  list-style: none;
+}
+.strip > summary::-webkit-details-marker { display: none; }
+.strip > summary::before, .place-head::before {
+  content: "";
+  width: 0; height: 0;
+  border: 4px solid transparent;
+  border-left: 5px solid var(--muted);
+  transition: transform var(--dur) var(--ease);
+}
+.strip[open] > summary::before, .place[open] > .place-head::before { transform: rotate(90deg); }
+.strip .count, .place .count { font-family: var(--mono); font-size: 11px; color: var(--muted); font-weight: 400; }
+.place { border-bottom: 1px solid var(--border); }
+.place-head {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  list-style: none;
+  color: var(--text);
+}
+.place-head::-webkit-details-marker { display: none; }
+.place-head .place-name { font-family: var(--mono); font-weight: 600; }
+.type-head {
+  padding: 4px 12px 4px 24px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.issue-row {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  grid-template-areas: "n title meta" "w title meta";
+  column-gap: 8px;
+  align-items: center;
+  width: 100%;
+  padding: 5px 12px 5px 24px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
+}
+.issue-row:hover { background: var(--surface-2); }
+.issue-row:active { background: var(--surface-3); }
+.issue-row.is-selected { background: var(--accent-soft); box-shadow: inset 2px 0 0 var(--accent); }
+.issue-row .n { grid-area: n; font-family: var(--mono); font-size: 11px; color: var(--accent); font-weight: 600; }
+.issue-row .w { grid-area: w; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; align-self: start; margin-top: 2px; }
+.issue-row .w i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
+.issue-row .title { grid-area: title; font-size: 12px; color: var(--text); line-height: 1.35; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.issue-row .meta { grid-area: meta; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.issue-row.is-archived .n, .issue-row.is-archived .title { color: var(--muted); }
+.unindexed-row {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  gap: 8px;
+  padding: 5px 12px 5px 24px;
+  font-size: 12px;
+  align-items: center;
+}
+.unindexed-row .n { font-family: var(--mono); font-size: 11px; color: var(--accent); font-weight: 600; }
+.unindexed-row .from { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+
+.detail-inner { padding: 12px; }
+.detail-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+.detail-head .n { font-family: var(--mono); font-weight: 600; color: var(--accent); }
+.detail-head h3 { font-size: 13px; font-weight: 600; line-height: 1.35; text-wrap: balance; }
+.kv {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px 12px;
+  font-size: 11px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  margin-bottom: 12px;
+}
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; font-family: var(--mono); color: var(--text-2); overflow-wrap: anywhere; }
+/* A link standing alone on its own line is a target, not inline text, so the
+   inline exception to the 24 px minimum does not cover it. Links inside a
+   sentence in .md are genuinely inline and stay as they are. */
+.resource-link { display: inline-block; padding: 5px 0; }
+.md { font-size: 12px; color: var(--text-2); max-width: 72ch; }
+/* h4 names an OKF section, under the pane's own h3. A memory body's headings
+   render below that as h5 and h6, at distinct sizes — h2 and h3 used to be
+   styled identically, so two of an author's levels looked like one. */
+.md h4 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin: 16px 0 4px; }
+.md > h4:first-child { margin-top: 0; }
+.md h5 { font-size: 12px; font-weight: 600; color: var(--text); margin: 12px 0 4px; }
+.md h6 { font-size: 11px; font-weight: 600; color: var(--text-2); margin: 10px 0 4px; }
+.md p { margin: 0 0 8px; }
+.md ul { padding-left: 16px; list-style: disc; margin: 0 0 8px; }
+.md li { margin: 2px 0; }
+.md blockquote { margin: 0 0 8px; padding: 4px 10px; border-left: 2px solid var(--border-strong); color: var(--muted); }
+.md pre { margin: 0 0 8px; padding: 8px; border-radius: 4px; background: var(--surface-2); border: 1px solid var(--border); overflow-x: auto; font-size: 11px; }
+.md code { font-family: var(--mono); font-size: 11px; background: var(--surface-2); padding: 0 3px; border-radius: 3px; }
+.md pre code { background: transparent; padding: 0; }
+.md hr { border: 0; border-top: 1px solid var(--border); margin: 10px 0; }
+.md strong { color: var(--text); font-weight: 600; }
+.comments { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 8px; }
+.comments h4 { margin: 0 0 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.comment { padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 6px; }
+.comment-head { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.comment-head b { color: var(--text-2); font-weight: 600; }
+.comment-head time { font-family: var(--mono); font-size: 10px; margin-left: auto; }
+.outcome { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; padding: 1px 6px; border-radius: 3px; }
+.outcome.success { color: var(--st-approve); background: var(--st-approve-bg); }
+.outcome.failure { color: var(--st-failed); background: var(--st-failed-bg); }
+.outcome.neutral { color: var(--st-queued); background: var(--st-queued-bg); }
+
+/* ---------- columns 3–5: tasks ---------- */
+
+/* The Waiting column is for watching work, not for the form that starts it.
+   Collapsed, the form costs one row; the tasks begin at the top of the column
+   instead of below a permanently open form. */
+.add-task {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px 12px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.add-task.is-collapsed { padding-bottom: 8px; }
+.add-task.is-collapsed .add-fields { display: none; }
+.add-fields { display: flex; flex-direction: column; gap: 8px; }
+.add-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  cursor: pointer;
+  text-align: left;
+}
+.add-toggle::before { content: "+"; font-family: var(--mono); font-size: 14px; color: var(--accent); width: 10px; }
+.add-task:not(.is-collapsed) .add-toggle::before { content: "\2212"; }
+.add-toggle:hover { color: var(--text); }
+.add-toggle:active { color: var(--accent); }
+
+/* A card holds three groups: who and what it is, what came back, what to do
+   about it. They used to sit 6–8 px apart with no distinction, so the card
+   read as one undifferentiated block. Tight inside a group, 12 px between. */
+.task {
+  margin: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 12px 12px 10px;
+  transition: border-color var(--dur) var(--ease);
+}
+.task.st-running, .task.st-reviewing { border-color: var(--border-strong); }
+/* The status pill cannot wrap, so in a narrow column it was taking the row and
+   leaving the title a few characters to break itself across. Given a floor to
+   stand on, the title keeps the line and the pill drops below it instead. */
+.task-head { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+.task-head .title { flex: 1 1 auto; min-width: 11ch; font-size: 13px; font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; text-wrap: pretty; }
+.task-head .pill { flex: 0 0 auto; }
+.task-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; align-items: center; }
+.task-chips .when { font-size: 11px; color: var(--muted); margin-left: auto; white-space: nowrap; }
+.task-body { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-2); }
+.task-body p { margin: 0; overflow-wrap: anywhere; }
+.task-body .desc { color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+/* Every note is a tinted block and nothing more. Summary and review used to
+   carry a border and a radius inside a card that already had both, which put
+   four competing edges around the evidence the approval decision rests on.
+   The bold lead-in tells them apart; the box does not need to. */
+.note {
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.note.blocked { color: var(--st-blocked); background: var(--st-blocked-bg); }
+.note.failed { color: var(--st-failed); background: var(--st-failed-bg); font-family: var(--mono); font-size: 11px; }
+.note.summary { color: var(--text-2); background: var(--surface-2); }
+.note.review { color: var(--text-2); background: var(--surface-2); }
+.note.rejection { color: var(--st-reject); background: var(--st-reject-bg); }
+.note.pending { color: var(--st-queued); background: var(--st-queued-bg); }
+.note b { font-weight: 600; color: var(--text); }
+.log {
+  margin: 0;
+  padding: 6px 8px;
+  height: 104px;
+  overflow: auto;
+  border-radius: 4px;
+  background: var(--terminal-bg);
+  color: var(--terminal-fg);
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.log .err { color: var(--terminal-err); }
+/* The log sits on the terminal ground, not a page surface, so its placeholder
+   needs a light-on-dark muted rather than the page's muted. */
+.log:empty::before { content: "waiting for output…"; color: var(--terminal-muted); }
+.task-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 12px; }
+.task-actions .select { width: auto; min-width: 110px; flex: 1; }
+/* History is provenance, not part of the decision. A rule sets it apart. */
+.history { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 4px; font-size: 11px; }
+/* Padding rather than a height, so the disclosure marker survives. */
+.history summary { cursor: pointer; color: var(--muted); user-select: none; padding: 5px 0; }
+.history ul { margin-top: 4px; border-left: 1px solid var(--border); padding-left: 8px; }
+.history li { display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; padding: 2px 0; color: var(--text-2); }
+.history li time { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.history li .arrow { color: var(--muted); }
+.history li .hnote { grid-column: 2; color: var(--muted); overflow-wrap: anywhere; }
+.reject-form { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.reject-form textarea { min-height: 52px; }
+
+.done-strip { border-top: 1px solid var(--border); margin-top: 8px; }
+.done-strip > summary { padding: 8px 12px; font-size: 12px; font-weight: 600; color: var(--text-2); cursor: pointer; list-style: none; display: flex; gap: 8px; align-items: center; background: var(--surface-2); }
+.done-strip > summary::-webkit-details-marker { display: none; }
+.done-strip > summary::before { content: ""; border: 4px solid transparent; border-left: 5px solid var(--muted); transition: transform var(--dur) var(--ease); }
+.done-strip[open] > summary::before { transform: rotate(90deg); }
+.done-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 6px 12px; font-size: 12px; border-bottom: 1px solid var(--border); }
+.done-row .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-2); }
+.done-row .meta { font-family: var(--mono); font-size: 10px; color: var(--muted); white-space: nowrap; }
+
+/* ---------- popover dialogs ---------- */
+
+.popover {
+  width: min(440px, calc(100vw - 32px));
+  padding: 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-pop);
+}
+.popover::backdrop { background: var(--scrim); }
+.popover form { display: flex; flex-direction: column; gap: 10px; }
+.popover h3 { font-size: 14px; font-weight: 600; }
+
+/* ---------- toast ---------- */
+
+.toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: var(--z-toast);
+  max-width: 420px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12px;
+  box-shadow: var(--shadow-pop);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.toast.is-error { border-color: var(--st-failed); color: var(--st-failed); }
+.toast-msg { min-width: 0; overflow-wrap: anywhere; }
+.toast-close {
+  flex: none;
+  width: 24px; height: 24px;
+  margin: -3px -4px 0 auto;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
+}
+.toast-close:hover { background: var(--st-failed-bg); }
+
+/* ---------- motion ---------- */
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+  .pill.is-spinning::before { background: currentColor; border: 0; width: 6px; height: 6px; }
+}
+
+/* ---------- adapting to the window ---------- */
+
+/* Five columns need 1324 px at their default floors. Rather than swapping in a
+   fixed template below that — which was both wider than the floors it replaced
+   and blind to the widths the user had dragged and saved — the floors
+   themselves come down a step at a time. The board keeps fitting to about
+   1100 px, and the inline --col-N values a drag writes to :root still win at
+   every size, because an inline style outranks these rules. */
+@media (max-width: 1340px) {
+  :root {
+    --col-1: minmax(196px, 0.8fr);
+    --col-2: minmax(268px, 1.3fr);
+    --col-3: minmax(240px, 1fr);
+    --col-4: minmax(232px, 1fr);
+    --col-5: minmax(232px, 1fr);
+  }
+}
+@media (max-width: 1180px) {
+  :root {
+    --col-1: minmax(172px, 0.8fr);
+    --col-2: minmax(244px, 1.3fr);
+    --col-3: minmax(224px, 1fr);
+    --col-4: minmax(216px, 1fr);
+    --col-5: minmax(216px, 1fr);
+  }
+  /* Less room to share, so the detail pane gives more of it back to the list. */
+  .col-split .detail { max-height: 45%; }
+}
+
+/* The gear is revealed by hover, which a touch device cannot do. */
+@media (hover: none) {
+  .project .gear { opacity: 1; }
+}
+
+/* An imprecise pointer gets a wider grab area than a mouse needs. */
+@media (pointer: coarse) {
+  .handle::after { inset: 0 -12px; }
+}

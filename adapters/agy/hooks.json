@@ -1,0 +1,18 @@
+{
+  "rxai-amp": {
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "RXAI_AMP_AGENT=agy node \"__AMP_ROOT__/adapters/agy/hooks/pre-invocation.mjs\"",
+        "timeout": 25
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "RXAI_AMP_AGENT=agy node \"__AMP_ROOT__/adapters/agy/hooks/stop.mjs\"",
+        "timeout": 20
+      }
+    ]
+  }
+}

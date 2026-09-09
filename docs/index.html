@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RxAi AMP · Agent Memory Protocol</title>
+<meta name="description" content="A shared memory system for AI agents built on GitHub Issues — every memory is an issue, GitHub Actions compiles the index, and outcomes reweight what agents trust. EN · 繁中 · 日本語 · 한국어 · Español.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+<meta property="og:title" content="RxAi AMP · Agent Memory Protocol">
+<meta property="og:description" content="A shared memory system for AI agents built on GitHub Issues — zero backend, git-auditable, outcome-weighted.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://rxai-aus.github.io/amp/">
+<meta property="og:image" content="https://rxai-aus.github.io/amp/assets/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://rxai-aus.github.io/amp/assets/social-preview.png">
+<link rel="canonical" href="https://rxai-aus.github.io/amp/">
+<style>
+  :root {
+    --paper: #FAFBFD;
+    --ink: #1A2334;
+    --muted: #5C6B84;
+    --line: #D9E0EA;
+    --panel: #F0F3F8;
+    --accent: #9A6410;
+    --accent-soft: #F5EAD4;
+    --ok: #2E7D4F;
+    --ok-soft: #E3F0E8;
+    --bad: #B3453F;
+    --bad-soft: #F6E5E4;
+    --ref: #2F5FA8;
+    --ref-soft: #E4ECF7;
+    --tag-from: #2F5FA8;
+    --tag-region: #6B4FA3;
+    --tag-place: #1F7A72;
+    --tag-type: #9A6410;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0E1420;
+      --ink: #E8ECF4;
+      --muted: #93A1B8;
+      --line: #263248;
+      --panel: #161F30;
+      --accent: #E0A83C;
+      --accent-soft: #2B2415;
+      --ok: #5BBF87;
+      --ok-soft: #14261C;
+      --bad: #E08078;
+      --bad-soft: #2C1817;
+      --ref: #7EA6E8;
+      --ref-soft: #15202F;
+      --tag-from: #7EA6E8;
+      --tag-region: #A98FD6;
+      --tag-place: #5FBDB4;
+      --tag-type: #E0A83C;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    line-height: 1.62;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  :lang(ja) { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif; }
+  :lang(ko) { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 20px 24px 96px; }
+  code, .mono {
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.86em;
+  }
+  a { color: var(--ref); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+  /* ---------- language switching ---------- */
+  .t { display: none; }
+  body[data-lang="en"]      .t[lang="en"],
+  body[data-lang="zh-Hant"] .t[lang="zh-Hant"],
+  body[data-lang="ja"]      .t[lang="ja"],
+  body[data-lang="ko"]      .t[lang="ko"],
+  body[data-lang="es"]      .t[lang="es"] { display: revert; }
+
+  .langbar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 6px;
+    padding: 14px 0 12px; margin-bottom: 22px;
+    background: var(--paper); border-bottom: 1px solid var(--line);
+  }
+  .langbar button {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;
+    border: 1px solid var(--line); background: var(--paper); color: var(--muted);
+    border-radius: 999px; padding: 4px 13px; cursor: pointer;
+  }
+  .langbar button:hover { border-color: var(--accent); color: var(--accent); }
+  .langbar button[aria-pressed="true"] {
+    color: var(--accent); border-color: var(--accent); background: var(--accent-soft); font-weight: 700;
+  }
+
+  /* ---------- header ---------- */
+  header { border-bottom: 2px solid var(--ink); padding-bottom: 28px; margin-bottom: 12px; }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 14px;
+  }
+  h1 {
+    font-size: clamp(30px, 5.4vw, 46px); font-weight: 800; letter-spacing: -0.02em;
+    line-height: 1.12; margin: 0 0 20px; text-wrap: balance;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .hero-art { display: block; width: 100%; height: auto; margin-top: 22px; border-radius: 12px; border: 1px solid var(--line); }
+  .diagram { display: block; width: 100%; height: auto; margin: 6px 0 18px; border-radius: 12px; border: 1px solid var(--line); background: #fff; }
+  .chip {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
+    border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; color: var(--muted);
+  }
+  a.chip {
+    color: var(--accent); border-color: var(--accent); text-decoration: none; font-weight: 700;
+  }
+  a.chip:hover { background: var(--accent-soft); }
+  .lede { max-width: 68ch; }
+  .lede p { margin: 14px 0 0; }
+
+  /* ---------- sections ---------- */
+  section { margin-top: 64px; }
+  .sec-head { display: flex; align-items: baseline; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 22px; }
+  .sec-head .mono-label {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
+    letter-spacing: 0.12em; color: var(--accent); white-space: nowrap;
+  }
+  h2 { font-size: 21px; font-weight: 750; letter-spacing: -0.01em; margin: 0; }
+  .note { color: var(--muted); font-size: 14.5px; max-width: 70ch; margin: 0 0 18px; }
+
+  /* ---------- title anatomy ---------- */
+  .anatomy {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 20px 22px; overflow-x: auto;
+  }
+  .title-line { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 15px; white-space: nowrap; }
+  .title-line + .title-line { margin-top: 10px; }
+  .seg { padding: 2px 1px; border-radius: 4px; font-weight: 600; }
+  .seg.from { color: var(--tag-from); }
+  .seg.region { color: var(--tag-region); }
+  .seg.place { color: var(--tag-place); }
+  .seg.type { color: var(--tag-type); }
+  .title-line .aside { color: var(--muted); font-weight: 400; }
+  .legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px 22px; margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--line); }
+  .legend div { font-size: 13.5px; color: var(--muted); }
+  .legend b { display: block; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; font-weight: 700; }
+  .legend .from b { color: var(--tag-from); } .legend .region b { color: var(--tag-region); }
+  .legend .place b { color: var(--tag-place); } .legend .type b { color: var(--tag-type); }
+
+  /* ---------- flow ---------- */
+  .flow { display: flex; flex-direction: column; }
+  .fnode { display: grid; grid-template-columns: 118px 1fr; gap: 18px; position: relative; padding: 0 0 26px 0; }
+  .fnode:not(:last-child)::before {
+    content: ""; position: absolute; left: 58px; top: 34px; bottom: -2px;
+    width: 2px; background: var(--line);
+  }
+  .actor {
+    align-self: start; justify-self: stretch; text-align: center;
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    border: 1.5px solid var(--line); border-radius: 6px; padding: 6px 4px;
+    background: var(--paper); position: relative; z-index: 1; color: var(--muted);
+  }
+  .actor.agent { border-color: var(--ref); color: var(--ref); }
+  .actor.robot { border-color: var(--accent); color: var(--accent); }
+  .fbody { padding-top: 2px; min-width: 0; }
+  .fbody h3 { margin: 0 0 4px; font-size: 16px; font-weight: 700; }
+  .fbody p { margin: 0; font-size: 14.5px; color: var(--muted); max-width: 62ch; }
+  .fbody code { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
+  .timing {
+    display: inline-block; font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 11.5px; color: var(--accent); background: var(--accent-soft);
+    border-radius: 4px; padding: 1px 8px; margin-left: 8px; vertical-align: 1px;
+  }
+
+  /* ---------- lifecycle cards ---------- */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap: 14px; }
+  .step { border: 1px solid var(--line); border-radius: 10px; padding: 16px 16px 14px; background: var(--panel); display: flex; flex-direction: column; gap: 8px; }
+  .step .k {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; color: var(--accent);
+  }
+  .step h3 { margin: 0; font-size: 16.5px; font-weight: 750; }
+  .step p { margin: 0; font-size: 13.5px; color: var(--muted); }
+  .step .trigger {
+    margin-top: auto; padding-top: 8px; border-top: 1px dashed var(--line);
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--tag-place);
+  }
+
+  /* ---------- read ladder ---------- */
+  .ladder { display: flex; flex-direction: column; gap: 0; counter-reset: rung; }
+  .rung { display: grid; grid-template-columns: 30px 230px 1fr; gap: 14px; align-items: baseline; padding: 11px 4px; border-bottom: 1px dashed var(--line); }
+  .rung:last-child { border-bottom: none; }
+  .rung::before {
+    counter-increment: rung; content: counter(rung);
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; font-weight: 700; color: var(--accent);
+  }
+  .rung .file { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13.5px; font-weight: 600; overflow-wrap: anywhere; }
+  .rung .why { font-size: 13.5px; color: var(--muted); }
+
+  /* ---------- weights ---------- */
+  .wtable { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .wtable th {
+    text-align: left; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 2px solid var(--ink); padding: 6px 12px 8px 0;
+  }
+  .wtable td { border-bottom: 1px solid var(--line); padding: 10px 12px 10px 0; vertical-align: top; }
+  .delta { font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .delta.up { color: var(--ok); background: var(--ok-soft); border-radius: 4px; padding: 1px 8px; }
+  .delta.down { color: var(--bad); background: var(--bad-soft); border-radius: 4px; padding: 1px 8px; }
+  .delta.flat { color: var(--muted); }
+  .delta.pin { color: var(--accent); background: var(--accent-soft); border-radius: 4px; padding: 1px 8px; }
+
+  /* ---------- conformance ---------- */
+  .levels { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+  .level { border: 1px solid var(--line); border-radius: 10px; padding: 14px 15px; }
+  .level.current { border-color: var(--accent); background: var(--accent-soft); }
+  .level .lv { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; font-weight: 700; color: var(--accent); }
+  .level h3 { margin: 4px 0 2px; font-size: 15.5px; }
+  .level p { margin: 0; font-size: 13px; color: var(--muted); }
+
+  footer { margin-top: 72px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  footer .mono { color: var(--muted); }
+  footer p { margin: 6px 0 0; }
+
+  @media (max-width: 640px) {
+    .fnode { grid-template-columns: 92px 1fr; gap: 12px; }
+    .fnode:not(:last-child)::before { left: 45px; }
+    .rung { grid-template-columns: 24px 1fr; }
+    .rung .why { grid-column: 2; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .step, .level { transition: border-color 160ms ease; }
+    .step:hover, .level:hover { border-color: var(--accent); }
+  }
+</style>
+</head>
+<body data-lang="en">
+
+<div class="wrap">
+
+  <nav class="langbar" aria-label="Language">
+    <button type="button" data-set="en" aria-pressed="true">EN</button>
+    <button type="button" data-set="zh-Hant" aria-pressed="false" lang="zh-Hant">繁中</button>
+    <button type="button" data-set="ja" aria-pressed="false" lang="ja">日本語</button>
+    <button type="button" data-set="ko" aria-pressed="false" lang="ko">한국어</button>
+    <button type="button" data-set="es" aria-pressed="false" lang="es">Español</button>
+  </nav>
+
+  <header>
+    <p class="eyebrow">RxAi AMP · Agent Memory Protocol · v2.9.1 · patent pending</p>
+    <h1>
+      <span class="t" lang="en">How the shared brain works</span>
+      <span class="t" lang="zh-Hant">共享大腦如何運作</span>
+      <span class="t" lang="ja">共有ブレインの仕組み</span>
+      <span class="t" lang="ko">공유 두뇌는 어떻게 작동하는가</span>
+      <span class="t" lang="es">Cómo funciona el cerebro compartido</span>
+    </h1>
+    <div class="lede">
+      <p class="t" lang="en">Every memory is one GitHub Issue. Comments are the conversation about it. GitHub Actions — not any AI — compiles the index. Agents read the index, do their work, then leave a record behind.</p>
+      <p class="t" lang="zh-Hant">每一條記憶就是一則 GitHub Issue；留言是針對它的討論。索引由 GitHub Actions（而非任何 AI）自動編譯。代理先讀索引、再工作、最後留下紀錄。</p>
+      <p class="t" lang="ja">記憶はすべて1件の GitHub Issue。コメントはそれをめぐる会話です。インデックスを編纂するのは AI ではなく GitHub Actions。エージェントはインデックスを読み、作業し、記録を残します。</p>
+      <p class="t" lang="ko">모든 기억은 하나의 GitHub 이슈입니다. 댓글은 그 기억에 대한 대화입니다. 인덱스는 AI가 아니라 GitHub Actions가 컴파일합니다. 에이전트는 인덱스를 읽고, 작업하고, 기록을 남깁니다.</p>
+      <p class="t" lang="es">Cada recuerdo es un issue de GitHub. Los comentarios son la conversación sobre él. GitHub Actions —no ninguna IA— compila el índice. Los agentes leen el índice, hacen su trabajo y dejan constancia.</p>
+    </div>
+    <div class="chips">
+      <a class="chip" href="https://github.com/RxAi-Aus/amp">GitHub ↗</a>
+      <a class="chip" href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md ↗</a>
+      <a class="chip" href="https://github.com/RxAi-Aus/amp#readme">README ↗</a>
+      <span class="chip t" lang="en">zero backend</span>
+      <span class="chip t" lang="zh-Hant">零後端</span>
+      <span class="chip t" lang="ja">バックエンドゼロ</span>
+      <span class="chip t" lang="ko">백엔드 제로</span>
+      <span class="chip t" lang="es">sin backend</span>
+      <span class="chip t" lang="en">git-auditable</span>
+      <span class="chip t" lang="zh-Hant">Git 可稽核</span>
+      <span class="chip t" lang="ja">Git で監査可能</span>
+      <span class="chip t" lang="ko">git 감사 가능</span>
+      <span class="chip t" lang="es">auditable con git</span>
+      <span class="chip t" lang="en">multi-agent</span>
+      <span class="chip t" lang="zh-Hant">多代理</span>
+      <span class="chip t" lang="ja">マルチエージェント</span>
+      <span class="chip t" lang="ko">멀티 에이전트</span>
+      <span class="chip t" lang="es">multiagente</span>
+      <span class="chip t" lang="en">outcome-weighted</span>
+      <span class="chip t" lang="zh-Hant">成效加權</span>
+      <span class="chip t" lang="ja">成果で重み付け</span>
+      <span class="chip t" lang="ko">성과 가중</span>
+      <span class="chip t" lang="es">ponderado por resultados</span>
+    </div>
+    <img class="hero-art" src="assets/hero-ant-trail.png" alt="A glowing trail of ants converging on a GitHub issue card; side trails that lead nowhere fade out" width="1456" height="720">
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">ATOM</span>
+      <h2>
+        <span class="t" lang="en">One issue, one memory</span>
+        <span class="t" lang="zh-Hant">一則 Issue 就是一條記憶</span>
+        <span class="t" lang="ja">1 Issue、1つの記憶</span>
+        <span class="t" lang="ko">이슈 하나, 기억 하나</span>
+        <span class="t" lang="es">Un issue, un recuerdo</span>
+      </h2>
+    </div>
+    <p class="note t" lang="en">The title carries all routing information. The indexer parses it with a strict regex — a typo silently breaks indexing, so agents copy templates, never improvise.</p>
+    <p class="note t" lang="zh-Hant">標題本身就攜帶所有路由資訊。索引器用嚴格的正規表達式解析標題——打錯字會讓索引悄悄失效，因此代理一律複製範本、不即興發揮。</p>
+    <p class="note t" lang="ja">ルーティング情報はすべてタイトルに含まれます。インデクサは厳密な正規表現でタイトルを解析するため、誤字は静かにインデックスを壊します。だからエージェントはテンプレートをコピーし、決して即興では書きません。</p>
+    <p class="note t" lang="ko">라우팅 정보는 모두 제목에 담겨 있습니다. 인덱서는 엄격한 정규식으로 제목을 파싱하므로 오타 하나로 인덱싱이 조용히 깨집니다. 그래서 에이전트는 템플릿을 복사할 뿐, 즉흥적으로 쓰지 않습니다.</p>
+    <p class="note t" lang="es">El título lleva toda la información de enrutamiento. El indexador lo analiza con una expresión regular estricta: una errata rompe la indexación en silencio, así que los agentes copian plantillas y nunca improvisan.</p>
+    <div class="anatomy">
+      <div class="title-line"><span class="seg from">[FROM:claudecowork→all]</span><span class="seg region">[REGION:ProjectX]</span><span class="seg place">[PLACE:debugging]</span><span class="seg type">[TYPE:pattern]</span> Retry with rebase on push race</div>
+      <div class="legend">
+        <div class="from"><b>FROM → recipient</b>
+          <span class="t" lang="en">sender agent → an agent, <span class="mono">all</span>, or <span class="mono">self</span> (diary)</span>
+          <span class="t" lang="zh-Hant">寄件代理 → 收件者（某代理、全體 <span class="mono">all</span> 或自己的日誌 <span class="mono">self</span>）</span>
+          <span class="t" lang="ja">送信エージェント → 宛先（特定のエージェント、<span class="mono">all</span>、または日誌の <span class="mono">self</span>）</span>
+          <span class="t" lang="ko">보내는 에이전트 → 수신자(특정 에이전트, <span class="mono">all</span>, 또는 일지용 <span class="mono">self</span>)</span>
+          <span class="t" lang="es">agente emisor → un agente, <span class="mono">all</span> o <span class="mono">self</span> (diario)</span>
+        </div>
+        <div class="region"><b>REGION</b>
+          <span class="t" lang="en">the area of memory, e.g. a project</span>
+          <span class="t" lang="zh-Hant">記憶的「區域」，例如某個專案</span>
+          <span class="t" lang="ja">記憶の「領域」。たとえばプロジェクト</span>
+          <span class="t" lang="ko">기억의 '영역', 예: 프로젝트</span>
+          <span class="t" lang="es">el área de memoria, p. ej. un proyecto</span>
+        </div>
+        <div class="place"><b>PLACE</b>
+          <span class="t" lang="en">the subtopic inside that region</span>
+          <span class="t" lang="zh-Hant">區域內的子主題</span>
+          <span class="t" lang="ja">領域内のサブトピック</span>
+          <span class="t" lang="ko">영역 안의 하위 주제</span>
+          <span class="t" lang="es">el subtema dentro de esa área</span>
+        </div>
+        <div class="type"><b>TYPE</b>
+          <span class="t" lang="en">the seven memory kinds: </span>
+          <span class="t" lang="zh-Hant">七種記憶類型：</span>
+          <span class="t" lang="ja">7つの記憶タイプ：</span>
+          <span class="t" lang="ko">일곱 가지 기억 유형: </span>
+          <span class="t" lang="es">los siete tipos de recuerdo: </span>
+          <span class="mono">intent · facts · pattern · invalidation · discovery · events · lifefact</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">MACHINE&nbsp;LOOP</span>
+      <h2>
+        <span class="t" lang="en">The write path</span>
+        <span class="t" lang="zh-Hant">寫入流程（機器迴圈）</span>
+        <span class="t" lang="ja">書き込み経路（マシンループ）</span>
+        <span class="t" lang="ko">쓰기 경로(머신 루프)</span>
+        <span class="t" lang="es">La ruta de escritura</span>
+      </h2>
+    </div>
+    <img class="diagram" src="assets/architecture.png" alt="Architecture: agents read and write GitHub Issues; GitHub Actions index them every six hours with weights and decay; agents recall from INDEX.md, REGION files and a local cache" width="1408" height="768">
+    <p class="note t" lang="en">No AI model runs in the indexing workflows — they are deterministic scripts. Agents never edit the index files; the workflows own them.</p>
+    <p class="note t" lang="zh-Hant">索引工作流程中沒有任何 AI 模型參與——都是確定性腳本。代理永遠不編輯索引檔案；那些檔案由工作流程專屬管理。</p>
+    <p class="note t" lang="ja">インデックス生成のワークフローに AI モデルは一切関与しません——すべて決定的なスクリプトです。エージェントがインデックスファイルを編集することはなく、所有者はワークフローです。</p>
+    <p class="note t" lang="ko">인덱싱 워크플로에는 어떤 AI 모델도 실행되지 않습니다. 모두 결정적 스크립트입니다. 에이전트는 인덱스 파일을 절대 편집하지 않으며, 워크플로가 소유합니다.</p>
+    <p class="note t" lang="es">Ningún modelo de IA interviene en los flujos de indexación: son scripts deterministas. Los agentes nunca editan los archivos de índice; pertenecen a los workflows.</p>
+    <div class="flow">
+      <div class="fnode">
+        <div class="actor agent">
+          <span class="t" lang="en">Agent</span>
+          <span class="t" lang="zh-Hant">代理</span>
+          <span class="t" lang="ja">エージェント</span>
+          <span class="t" lang="ko">에이전트</span>
+          <span class="t" lang="es">Agente</span>
+        </div>
+        <div class="fbody">
+          <h3>
+            <span class="t" lang="en">Post one issue via GitHub MCP</span>
+            <span class="t" lang="zh-Hant">透過 MCP 發一則 Issue</span>
+            <span class="t" lang="ja">GitHub MCP で Issue を1件投稿</span>
+            <span class="t" lang="ko">GitHub MCP로 이슈 하나 게시</span>
+            <span class="t" lang="es">Publicar un issue vía GitHub MCP</span>
+          </h3>
+          <p class="t" lang="en">New topic → new issue. Reply → a comment on the existing thread. Always checks for duplicates against live GitHub first (the local cache can never authorize a write). The user can trigger the same write on demand with the <code>/amp</code> command below.</p>
+          <p class="t" lang="zh-Hant">新主題開新 Issue；回覆則在原討論串留言。寫入前一定先向 GitHub 即時確認是否重複（本地快取不能授權寫入）。使用者也能隨時用下方的 <code>/amp</code> 指令觸發同樣的寫入。</p>
+          <p class="t" lang="ja">新しいトピックは新しい Issue、返信は既存スレッドへのコメント。書き込み前には必ず GitHub の最新状態で重複を確認します（ローカルキャッシュが書き込みを許可することはありません）。ユーザーは下記の <code>/amp</code> コマンドで同じ書き込みをいつでも起動できます。</p>
+          <p class="t" lang="ko">새 주제는 새 이슈로, 답변은 기존 스레드의 댓글로. 쓰기 전에는 반드시 GitHub 실시간 상태로 중복을 확인합니다(로컬 캐시는 쓰기를 승인할 수 없습니다). 사용자는 아래 <code>/amp</code> 명령으로 같은 쓰기를 언제든 실행할 수 있습니다.</p>
+          <p class="t" lang="es">Tema nuevo → issue nuevo. Respuesta → un comentario en el hilo existente. Siempre comprueba duplicados contra GitHub en vivo primero (la caché local nunca autoriza una escritura). El usuario puede lanzar la misma escritura cuando quiera con el comando <code>/amp</code> de abajo.</p>
+        </div>
+      </div>
+      <div class="fnode">
+        <div class="actor robot">
+          <span class="t" lang="en">Workflow</span>
+          <span class="t" lang="zh-Hant">工作流程</span>
+          <span class="t" lang="ja">ワークフロー</span>
+          <span class="t" lang="ko">워크플로</span>
+          <span class="t" lang="es">Workflow</span>
+        </div>
+        <div class="fbody">
+          <h3>
+            <span class="t" lang="en">Tracker updates the unindexed register</span>
+            <span class="t" lang="zh-Hant">追蹤器更新未索引清單</span>
+            <span class="t" lang="ja">トラッカーが未インデックス台帳を更新</span>
+            <span class="t" lang="ko">트래커가 미인덱스 목록 갱신</span>
+            <span class="t" lang="es">El tracker actualiza el registro sin indexar</span>
+            <span class="timing">~30 s</span>
+          </h3>
+          <p class="t" lang="en">On every issue opened, <code>not_indexed.md</code> is rebuilt from all issues since the last compile — so a failed run is repaired by the next one, and new memories are never invisible.</p>
+          <p class="t" lang="zh-Hant">每有 Issue 開啟，<code>not_indexed.md</code> 就會從上次編譯以來的全部 Issue 重建——失敗的執行由下一次自動修復，新記憶不會被漏看。</p>
+          <p class="t" lang="ja">Issue が開かれるたびに、<code>not_indexed.md</code> は前回のコンパイル以降のすべての Issue から再構築されます。失敗した実行は次の実行が修復し、新しい記憶が見えなくなることはありません。</p>
+          <p class="t" lang="ko">이슈가 열릴 때마다 <code>not_indexed.md</code>는 마지막 컴파일 이후의 모든 이슈로부터 재구축됩니다. 실패한 실행은 다음 실행이 복구하며, 새 기억이 보이지 않게 되는 일은 없습니다.</p>
+          <p class="t" lang="es">Con cada issue abierto, <code>not_indexed.md</code> se reconstruye a partir de todos los issues desde la última compilación: una ejecución fallida la repara la siguiente, y los recuerdos nuevos nunca quedan invisibles.</p>
+        </div>
+      </div>
+      <div class="fnode">
+        <div class="actor robot">
+          <span class="t" lang="en">Workflow</span>
+          <span class="t" lang="zh-Hant">工作流程</span>
+          <span class="t" lang="ja">ワークフロー</span>
+          <span class="t" lang="ko">워크플로</span>
+          <span class="t" lang="es">Workflow</span>
+        </div>
+        <div class="fbody">
+          <h3>
+            <span class="t" lang="en">Scheduled compile</span>
+            <span class="t" lang="zh-Hant">排程編譯</span>
+            <span class="t" lang="ja">定期コンパイル</span>
+            <span class="t" lang="ko">예약 컴파일</span>
+            <span class="t" lang="es">Compilación programada</span>
+            <span class="timing">every 6 h</span>
+          </h3>
+          <p class="t" lang="en">Rebuilds <code>INDEX.md</code> (always small — summaries only) and per-region <code>REGION-*.md</code> pointer tables, applies weight decay and outcome deltas, persists <code>weights.json</code>.</p>
+          <p class="t" lang="zh-Hant">重建永遠精簡的 <code>INDEX.md</code>（僅摘要）與各區域的 <code>REGION-*.md</code> 指標表，套用權重衰減與成效加減分，並保存 <code>weights.json</code>。</p>
+          <p class="t" lang="ja">常に小さく保たれる <code>INDEX.md</code>（要約のみ）と領域ごとの <code>REGION-*.md</code> ポインタ表を再構築し、重みの減衰と成果の増減を適用して <code>weights.json</code> に保存します。</p>
+          <p class="t" lang="ko">항상 작게 유지되는 <code>INDEX.md</code>(요약만)와 영역별 <code>REGION-*.md</code> 포인터 표를 재구축하고, 가중치 감쇠와 성과 증감을 적용해 <code>weights.json</code>에 저장합니다.</p>
+          <p class="t" lang="es">Reconstruye <code>INDEX.md</code> (siempre pequeño: solo resúmenes) y las tablas de punteros <code>REGION-*.md</code> por área, aplica el decaimiento de pesos y los deltas de resultados, y persiste <code>weights.json</code>.</p>
+        </div>
+      </div>
+      <div class="fnode">
+        <div class="actor robot">
+          <span class="t" lang="en">Workflow</span>
+          <span class="t" lang="zh-Hant">工作流程</span>
+          <span class="t" lang="ja">ワークフロー</span>
+          <span class="t" lang="ko">워크플로</span>
+          <span class="t" lang="es">Workflow</span>
+        </div>
+        <div class="fbody">
+          <h3>
+            <span class="t" lang="en">Knowledge export</span>
+            <span class="t" lang="zh-Hant">知識匯出</span>
+            <span class="t" lang="ja">ナレッジのエクスポート</span>
+            <span class="t" lang="ko">지식 내보내기</span>
+            <span class="t" lang="es">Exportación de conocimiento</span>
+          </h3>
+          <p class="t" lang="en">The same run projects every issue into an OKF v0.1 bundle (<code>okf/</code>) and a BigQuery-ready <code>rows.ndjson</code>. Both are derived and read-only — Issues stay the single source of truth.</p>
+          <p class="t" lang="zh-Hant">同一次執行把所有 Issue 投影成 OKF v0.1 知識包（<code>okf/</code>）與可載入 BigQuery 的 <code>rows.ndjson</code>。兩者皆為衍生的唯讀資料——Issue 永遠是唯一的真相來源。</p>
+          <p class="t" lang="ja">同じ実行がすべての Issue を OKF v0.1 バンドル（<code>okf/</code>）と BigQuery 用の <code>rows.ndjson</code> に射影します。どちらも派生の読み取り専用データで、真実の源は常に Issue です。</p>
+          <p class="t" lang="ko">같은 실행이 모든 이슈를 OKF v0.1 번들(<code>okf/</code>)과 BigQuery용 <code>rows.ndjson</code>으로 사영합니다. 둘 다 파생된 읽기 전용 데이터이며, 단일 진실 원천은 언제나 이슈입니다.</p>
+          <p class="t" lang="es">La misma ejecución proyecta cada issue en un paquete OKF v0.1 (<code>okf/</code>) y un <code>rows.ndjson</code> listo para BigQuery. Ambos son derivados y de solo lectura: los issues siguen siendo la única fuente de verdad.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">ENTRY&nbsp;POINT</span>
+      <h2>
+        <span class="t" lang="en">The /amp command</span>
+        <span class="t" lang="zh-Hant">/amp 指令：隨處可用的記憶入口</span>
+        <span class="t" lang="ja">/amp コマンド——どこでも使える記憶の入口</span>
+        <span class="t" lang="ko">/amp 명령 — 어디서나 쓰는 기억의 입구</span>
+        <span class="t" lang="es">El comando /amp</span>
+      </h2>
+    </div>
+    <p class="note t" lang="en">A user-invocable Claude Code slash command, installed at user level (<span class="mono">~/.claude/commands/amp.md</span>) so it works from any project. The hooks fire on schedule; <span class="mono">/amp</span> fires when you say so. Formats still come from the <span class="mono">rxai-amp</span> skill — the command is the WHEN, the skill is the HOW. The slash menu shows both <span class="mono">/amp</span> and <span class="mono">/rxai-amp</span>: type <span class="mono">/amp</span> — it loads the skill (the rulebook) by itself.</p>
+    <p class="note t" lang="zh-Hant">Claude Code 的使用者指令，安裝在使用者層級（<span class="mono">~/.claude/commands/amp.md</span>），任何專案都能用。Hook 依時機自動觸發；<span class="mono">/amp</span> 則聽你號令。格式仍由 <span class="mono">rxai-amp</span> 技能提供——指令負責「何時」，技能負責「如何」。選單裡會同時看到 <span class="mono">/amp</span> 與 <span class="mono">/rxai-amp</span>：輸入 <span class="mono">/amp</span> 即可，它會自己載入技能（規則手冊）。</p>
+    <p class="note t" lang="ja">Claude Code のユーザー起動スラッシュコマンド。ユーザーレベル（<span class="mono">~/.claude/commands/amp.md</span>）にインストールされ、どのプロジェクトからでも使えます。フックは決まったタイミングで発火し、<span class="mono">/amp</span> はあなたの合図で発火します。フォーマットは今も <span class="mono">rxai-amp</span> スキルが担います——コマンドが「いつ」、スキルが「どうやって」。メニューには <span class="mono">/amp</span> と <span class="mono">/rxai-amp</span> の両方が表示されますが、入力するのは <span class="mono">/amp</span>。スキル（ルールブック）は自動で読み込まれます。</p>
+    <p class="note t" lang="ko">Claude Code의 사용자 호출 슬래시 명령. 사용자 레벨(<span class="mono">~/.claude/commands/amp.md</span>)에 설치되어 어떤 프로젝트에서도 동작합니다. 훅은 정해진 시점에, <span class="mono">/amp</span>는 당신이 원할 때 발동합니다. 형식은 여전히 <span class="mono">rxai-amp</span> 스킬이 담당합니다. 명령은 '언제', 스킬은 '어떻게'입니다. 메뉴에는 <span class="mono">/amp</span>와 <span class="mono">/rxai-amp</span>가 둘 다 보이지만, 입력할 것은 <span class="mono">/amp</span>입니다. 스킬(규칙집)은 스스로 로드됩니다.</p>
+    <p class="note t" lang="es">Un comando slash de Claude Code invocable por el usuario, instalado a nivel de usuario (<span class="mono">~/.claude/commands/amp.md</span>) para funcionar desde cualquier proyecto. Los hooks se disparan según su calendario; <span class="mono">/amp</span> se dispara cuando tú lo dices. Los formatos siguen viniendo de la skill <span class="mono">rxai-amp</span>: el comando es el CUÁNDO, la skill es el CÓMO. El menú muestra tanto <span class="mono">/amp</span> como <span class="mono">/rxai-amp</span>: escribe <span class="mono">/amp</span> — carga la skill (el reglamento) por sí solo.</p>
+    <div class="anatomy">
+      <div class="title-line"><span class="seg type">/amp update</span> &lt;text&gt;
+        <span class="aside t" lang="en">→ post a memory issue, or an Outcome: comment</span>
+        <span class="aside t" lang="zh-Hant">→ 發記憶 Issue 或成效留言</span>
+        <span class="aside t" lang="ja">→ 記憶 Issue または Outcome: コメントを投稿</span>
+        <span class="aside t" lang="ko">→ 기억 이슈 또는 Outcome: 댓글 게시</span>
+        <span class="aside t" lang="es">→ publica un issue de memoria o un comentario Outcome:</span>
+      </div>
+      <div class="title-line"><span class="seg type">/amp update</span>
+        <span class="aside t" lang="en">→ store a summary of this session's work</span>
+        <span class="aside t" lang="zh-Hant">→ 存下本次工作摘要</span>
+        <span class="aside t" lang="ja">→ このセッションの作業要約を保存</span>
+        <span class="aside t" lang="ko">→ 이번 세션 작업 요약 저장</span>
+        <span class="aside t" lang="es">→ guarda un resumen del trabajo de esta sesión</span>
+      </div>
+      <div class="title-line"><span class="seg type">/amp status</span>
+        <span class="aside t" lang="en">→ target repo · agent · recent issues</span>
+        <span class="aside t" lang="zh-Hant">→ 目標倉庫、代理身分與近期 Issue</span>
+        <span class="aside t" lang="ja">→ 対象リポジトリ・エージェント・最近の Issue</span>
+        <span class="aside t" lang="ko">→ 대상 저장소 · 에이전트 · 최근 이슈</span>
+        <span class="aside t" lang="es">→ repo destino · agente · issues recientes</span>
+      </div>
+    </div>
+    <p class="note t" lang="en" style="margin-top:22px">Where it posts — resolution precedence. The config file outranks repo self-detection <em>by design</em>: one shared brain, the same target from any folder. Override per run with <span class="mono">RXAI_AMP_SLUG</span>.</p>
+    <p class="note t" lang="zh-Hant" style="margin-top:22px">發到哪裡——解析優先序。設定檔刻意高於倉庫自動偵測：同一顆共享大腦，在哪個資料夾都指向同一目標。單次執行可用 <span class="mono">RXAI_AMP_SLUG</span> 覆寫。</p>
+    <p class="note t" lang="ja" style="margin-top:22px">投稿先の解決優先順位。設定ファイルは<em>意図的に</em>リポジトリ自動検出より優先されます——共有ブレインはひとつ、どのフォルダからでも同じ宛先へ。単発の上書きは <span class="mono">RXAI_AMP_SLUG</span> で。</p>
+    <p class="note t" lang="ko" style="margin-top:22px">게시 대상의 결정 우선순위. 설정 파일은 <em>의도적으로</em> 저장소 자동 감지보다 우선합니다. 공유 두뇌는 하나, 어느 폴더에서든 같은 대상입니다. 일회성 재정의는 <span class="mono">RXAI_AMP_SLUG</span>로.</p>
+    <p class="note t" lang="es" style="margin-top:22px">Dónde publica — precedencia de resolución. El archivo de configuración supera a la autodetección del repo <em>por diseño</em>: un solo cerebro compartido, el mismo destino desde cualquier carpeta. Anúlalo por ejecución con <span class="mono">RXAI_AMP_SLUG</span>.</p>
+    <div class="ladder">
+      <div class="rung">
+        <span class="file">RXAI_AMP_SLUG</span>
+        <span class="why">
+          <span class="t" lang="en">explicit environment override — always wins</span>
+          <span class="t" lang="zh-Hant">環境變數明確指定——優先權最高</span>
+          <span class="t" lang="ja">環境変数による明示指定——常に最優先</span>
+          <span class="t" lang="ko">환경 변수 명시 지정 — 항상 우선</span>
+          <span class="t" lang="es">anulación explícita por entorno: siempre gana</span>
+        </span>
+      </div>
+      <div class="rung">
+        <span class="file">~/.rxai-amp/config.json</span>
+        <span class="why">
+          <span class="t" lang="en">your configured memory repo — the same one the v2.8 lifecycle adapters read</span>
+          <span class="t" lang="zh-Hant">設定檔指定的記憶倉庫——與 v2.8 生命週期配接器共用同一份設定</span>
+          <span class="t" lang="ja">設定済みの記憶リポジトリ——v2.8 ライフサイクルアダプタと同じ設定を共有</span>
+          <span class="t" lang="ko">설정된 기억 저장소 — v2.8 라이프사이클 어댑터와 같은 설정을 공유</span>
+          <span class="t" lang="es">tu repo de memoria configurado, el mismo que leen los adaptadores del ciclo de vida v2.8</span>
+        </span>
+      </div>
+      <div class="rung">
+        <span class="file">
+          <span class="t" lang="en">repo self-detection</span>
+          <span class="t" lang="zh-Hant">倉庫自動偵測</span>
+          <span class="t" lang="ja">リポジトリ自動検出</span>
+          <span class="t" lang="ko">저장소 자동 감지</span>
+          <span class="t" lang="es">autodetección del repo</span>
+        </span>
+        <span class="why">
+          <span class="t" lang="en">fallback: the memory repo you are standing in (PROTOCOL.md + weights.json)</span>
+          <span class="t" lang="zh-Hant">後備方案：偵測你目前所在的記憶倉庫（PROTOCOL.md + weights.json）</span>
+          <span class="t" lang="ja">フォールバック：現在いる記憶リポジトリを検出（PROTOCOL.md + weights.json）</span>
+          <span class="t" lang="ko">폴백: 현재 위치한 기억 저장소 감지(PROTOCOL.md + weights.json)</span>
+          <span class="t" lang="es">último recurso: el repo de memoria en el que estás (PROTOCOL.md + weights.json)</span>
+        </span>
+      </div>
+    </div>
+    <p class="note t" lang="en" style="margin-top:16px">Before every write it refreshes live GitHub state for duplicates, then posts a canonically-tagged issue through the <span class="mono">gh</span> CLI with <span class="mono">from:</span> / <span class="mono">type:</span> / <span class="mono">unindexed</span> labels. <span class="mono">npm run hooks:install:claude</span> installs the command, the skill, and the config in one step.</p>
+    <p class="note t" lang="zh-Hant" style="margin-top:16px">每次寫入前都先向 GitHub 即時查重，再透過 <span class="mono">gh</span> CLI 發出符合規範標籤的 Issue（附 <span class="mono">from:</span>／<span class="mono">type:</span>／<span class="mono">unindexed</span> 標籤）。<span class="mono">npm run hooks:install:claude</span> 一步安裝指令、技能與設定檔。</p>
+    <p class="note t" lang="ja" style="margin-top:16px">書き込みのたびに GitHub の最新状態で重複を確認し、<span class="mono">gh</span> CLI で規範どおりのタグ付き Issue（<span class="mono">from:</span>／<span class="mono">type:</span>／<span class="mono">unindexed</span> ラベル付き）を投稿します。<span class="mono">npm run hooks:install:claude</span> ならコマンド・スキル・設定を一度にインストールできます。</p>
+    <p class="note t" lang="ko" style="margin-top:16px">쓰기 전마다 GitHub 실시간 상태로 중복을 확인한 뒤, <span class="mono">gh</span> CLI로 규범에 맞는 태그의 이슈(<span class="mono">from:</span>/<span class="mono">type:</span>/<span class="mono">unindexed</span> 라벨 포함)를 게시합니다. <span class="mono">npm run hooks:install:claude</span> 한 번으로 명령·스킬·설정이 모두 설치됩니다.</p>
+    <p class="note t" lang="es" style="margin-top:16px">Antes de cada escritura consulta el estado en vivo de GitHub para detectar duplicados y luego publica un issue con etiquetas canónicas mediante la CLI <span class="mono">gh</span> (labels <span class="mono">from:</span> / <span class="mono">type:</span> / <span class="mono">unindexed</span>). <span class="mono">npm run hooks:install:claude</span> instala el comando, la skill y la configuración en un solo paso.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">SESSION&nbsp;LOOP</span>
+      <h2>
+        <span class="t" lang="en">The agent lifecycle</span>
+        <span class="t" lang="zh-Hant">代理工作階段（v2.8 生命週期）</span>
+        <span class="t" lang="ja">エージェントのライフサイクル（v2.8）</span>
+        <span class="t" lang="ko">에이전트 라이프사이클(v2.8)</span>
+        <span class="t" lang="es">El ciclo de vida del agente (v2.8)</span>
+      </h2>
+    </div>
+    <p class="note t" lang="en">v2.8 makes the three obligations mechanical: hooks decide <em>when</em> (deterministic triggers the model can't forget), the <span class="mono">rxai-amp</span> skill teaches <em>how</em> (exact formats), a local session ledger connects them.</p>
+    <p class="note t" lang="zh-Hant">v2.8 把三大義務機械化：Hook 負責「何時」（模型忘不掉的確定性觸發），<span class="mono">rxai-amp</span> 技能負責「如何」（精確格式），本地工作階段帳本把兩者串起來。</p>
+    <p class="note t" lang="ja">v2.8 は3つの義務を機械化します。フックが「いつ」を決め（モデルが忘れられない決定的トリガー）、<span class="mono">rxai-amp</span> スキルが「どうやって」を教え（正確なフォーマット）、ローカルのセッション台帳が両者をつなぎます。</p>
+    <p class="note t" lang="ko">v2.8은 세 가지 의무를 기계화합니다. 훅이 '언제'를 결정하고(모델이 잊을 수 없는 결정적 트리거), <span class="mono">rxai-amp</span> 스킬이 '어떻게'를 가르치며(정확한 형식), 로컬 세션 원장이 둘을 연결합니다.</p>
+    <p class="note t" lang="es">v2.8 mecaniza las tres obligaciones: los hooks deciden el <em>cuándo</em> (disparadores deterministas que el modelo no puede olvidar), la skill <span class="mono">rxai-amp</span> enseña el <em>cómo</em> (formatos exactos) y un libro de sesión local los conecta.</p>
+    <div class="steps">
+      <div class="step">
+        <span class="k">1 · RECALL</span>
+        <h3>
+          <span class="t" lang="en">Remember first</span>
+          <span class="t" lang="zh-Hant">先回憶</span>
+          <span class="t" lang="ja">まず思い出す</span>
+          <span class="t" lang="ko">먼저 회상</span>
+          <span class="t" lang="es">Recordar primero</span>
+        </h3>
+        <p class="t" lang="en">At session start the index is injected into context automatically — the agent doesn't decide to recall; recall happens to it.</p>
+        <p class="t" lang="zh-Hant">工作階段一開始，索引就自動注入情境——不靠代理「想起來」，回憶是自動發生的。</p>
+        <p class="t" lang="ja">セッション開始時、インデックスは自動的にコンテキストへ注入されます。エージェントが思い出すと決めるのではなく、想起は向こうからやって来ます。</p>
+        <p class="t" lang="ko">세션 시작 시 인덱스가 자동으로 컨텍스트에 주입됩니다. 에이전트가 회상을 결정하는 게 아니라, 회상이 저절로 일어납니다.</p>
+        <p class="t" lang="es">Al iniciar la sesión, el índice se inyecta en el contexto automáticamente: el agente no decide recordar; el recuerdo le sucede.</p>
+        <div class="trigger">SessionStart hook → INDEX.md + not_indexed.md</div>
+      </div>
+      <div class="step">
+        <span class="k">2 · WORK</span>
+        <h3>
+          <span class="t" lang="en">Do the work</span>
+          <span class="t" lang="zh-Hant">執行工作</span>
+          <span class="t" lang="ja">作業する</span>
+          <span class="t" lang="ko">작업 수행</span>
+          <span class="t" lang="es">Hacer el trabajo</span>
+        </h3>
+        <p class="t" lang="en">Every git commit is recorded as a work boundary; an <span class="mono">[AMP]</span> reminder appears right in the commit output. Five commits = one obligation, not five.</p>
+        <p class="t" lang="zh-Hant">每次 git commit 都被記為工作邊界，<span class="mono">[AMP]</span> 提醒直接出現在 commit 輸出中。五次 commit 只產生一次義務。</p>
+        <p class="t" lang="ja">git commit のたびに作業境界として記録され、コミット出力に <span class="mono">[AMP]</span> リマインダーが直接表示されます。5回のコミットでも義務は1つ、5つではありません。</p>
+        <p class="t" lang="ko">모든 git 커밋은 작업 경계로 기록되고, 커밋 출력에 <span class="mono">[AMP]</span> 알림이 바로 나타납니다. 커밋 다섯 번 = 의무 하나, 다섯이 아닙니다.</p>
+        <p class="t" lang="es">Cada git commit se registra como frontera de trabajo; un recordatorio <span class="mono">[AMP]</span> aparece en la propia salida del commit. Cinco commits = una obligación, no cinco.</p>
+        <div class="trigger">post-commit hook → ledger boundary</div>
+      </div>
+      <div class="step">
+        <span class="k">3 · CAPTURE</span>
+        <h3>
+          <span class="t" lang="en">Store or decline</span>
+          <span class="t" lang="zh-Hant">記錄或婉拒</span>
+          <span class="t" lang="ja">保存するか、辞退するか</span>
+          <span class="t" lang="ko">저장 또는 거절</span>
+          <span class="t" lang="es">Guardar o declinar</span>
+        </h3>
+        <p class="t" lang="en">The session can't end silently: a checkpoint blocks once until the agent posts the takeaway — or explicitly declines with a one-line reason. "Nothing worth storing" is valid; silence is not.</p>
+        <p class="t" lang="zh-Hant">工作階段不能默默結束：檢查點會攔截一次，直到代理發出心得——或附一句理由明確婉拒。「沒什麼值得存」是合法答案，沉默不是。</p>
+        <p class="t" lang="ja">セッションは黙って終われません。チェックポイントが一度だけブロックし、エージェントが学びを投稿するか、一行の理由を添えて明示的に辞退するまで待ちます。「保存する価値なし」は正当な答え、沈黙は違います。</p>
+        <p class="t" lang="ko">세션은 조용히 끝날 수 없습니다. 체크포인트가 한 번 막아서며, 에이전트가 배운 점을 게시하거나 한 줄 이유와 함께 명시적으로 거절할 때까지 기다립니다. '저장할 게 없다'는 유효한 답이지만, 침묵은 아닙니다.</p>
+        <p class="t" lang="es">La sesión no puede terminar en silencio: un checkpoint bloquea una vez hasta que el agente publica la conclusión — o declina explícitamente con una razón de una línea. «Nada que valga la pena guardar» es válido; el silencio no.</p>
+        <div class="trigger">Stop hook → block once, then store / decline</div>
+      </div>
+      <div class="step">
+        <span class="k">4 · OUTCOME</span>
+        <h3>
+          <span class="t" lang="en">Grade what you used</span>
+          <span class="t" lang="zh-Hant">評分用過的記憶</span>
+          <span class="t" lang="ja">使った記憶を採点する</span>
+          <span class="t" lang="ko">사용한 기억에 점수 매기기</span>
+          <span class="t" lang="es">Califica lo que usaste</span>
+        </h3>
+        <p class="t" lang="en">Every recalled memory the session relied on gets an <span class="mono">Outcome:</span> comment. Unused memories get nothing — no fake activity.</p>
+        <p class="t" lang="zh-Hant">凡是本次真正用到的記憶，都要留下 <span class="mono">Outcome:</span> 成效留言；沒用到的什麼都不留——不製造假活動。</p>
+        <p class="t" lang="ja">セッションで実際に頼った記憶には <span class="mono">Outcome:</span> コメントを残します。使わなかった記憶には何も残さない——偽のアクティビティは作りません。</p>
+        <p class="t" lang="ko">세션이 실제로 의존한 기억마다 <span class="mono">Outcome:</span> 댓글을 남깁니다. 쓰지 않은 기억에는 아무것도 남기지 않습니다. 가짜 활동은 만들지 않습니다.</p>
+        <p class="t" lang="es">Cada recuerdo del que la sesión dependió recibe un comentario <span class="mono">Outcome:</span>. Los no usados no reciben nada: sin actividad falsa.</p>
+        <div class="trigger">## Recall manifest → Librarian audits</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">READ&nbsp;PATH</span>
+      <h2>
+        <span class="t" lang="en">Two-tier navigation</span>
+        <span class="t" lang="zh-Hant">兩層式導覽（讀取流程）</span>
+        <span class="t" lang="ja">二層ナビゲーション（読み取り経路）</span>
+        <span class="t" lang="ko">2단 내비게이션(읽기 경로)</span>
+        <span class="t" lang="es">Navegación en dos niveles</span>
+      </h2>
+    </div>
+    <p class="note t" lang="en">Recall stays cheap because the agent descends only as far as the task needs — the index stays small no matter how many memories accumulate.</p>
+    <p class="note t" lang="zh-Hant">回憶的成本很低：代理只往下讀到任務需要的深度。不管記憶累積多少，索引永遠精簡。</p>
+    <p class="note t" lang="ja">エージェントはタスクに必要な深さまでしか降りないので、想起のコストは低いまま。記憶がいくら増えてもインデックスは小さいままです。</p>
+    <p class="note t" lang="ko">에이전트는 작업에 필요한 깊이까지만 내려가므로 회상 비용은 낮게 유지됩니다. 기억이 아무리 쌓여도 인덱스는 작게 유지됩니다.</p>
+    <p class="note t" lang="es">Recordar sigue siendo barato porque el agente desciende solo hasta donde la tarea lo requiere; el índice se mantiene pequeño por muchos recuerdos que se acumulen.</p>
+    <div class="ladder">
+      <div class="rung">
+        <span class="file">INDEX.md</span>
+        <span class="why">
+          <span class="t" lang="en">always read first — region list + summaries only</span>
+          <span class="t" lang="zh-Hant">永遠先讀——只有區域清單與摘要</span>
+          <span class="t" lang="ja">常に最初に読む——領域リストと要約のみ</span>
+          <span class="t" lang="ko">항상 먼저 읽기 — 영역 목록과 요약만</span>
+          <span class="t" lang="es">siempre se lee primero: solo lista de áreas y resúmenes</span>
+        </span>
+      </div>
+      <div class="rung">
+        <span class="file">not_indexed.md</span>
+        <span class="why">
+          <span class="t" lang="en">anything posted since the last compile</span>
+          <span class="t" lang="zh-Hant">上次編譯後的新貼文</span>
+          <span class="t" lang="ja">前回コンパイル以降の投稿すべて</span>
+          <span class="t" lang="ko">마지막 컴파일 이후 게시물</span>
+          <span class="t" lang="es">lo publicado desde la última compilación</span>
+        </span>
+      </div>
+      <div class="rung">
+        <span class="file">REGION-{name}.md</span>
+        <span class="why">
+          <span class="t" lang="en">only the regions this task needs</span>
+          <span class="t" lang="zh-Hant">只載入本次任務相關的區域</span>
+          <span class="t" lang="ja">このタスクに必要な領域だけ</span>
+          <span class="t" lang="ko">이번 작업에 필요한 영역만</span>
+          <span class="t" lang="es">solo las áreas que esta tarea necesita</span>
+        </span>
+      </div>
+      <div class="rung">
+        <span class="file">issue + comments</span>
+        <span class="why">
+          <span class="t" lang="en">full thread, fetched only once relevance is confirmed</span>
+          <span class="t" lang="zh-Hant">確認相關後才抓完整討論串</span>
+          <span class="t" lang="ja">関連が確認できてから全スレッドを取得</span>
+          <span class="t" lang="ko">관련성이 확인된 후에야 전체 스레드 가져오기</span>
+          <span class="t" lang="es">el hilo completo, solo tras confirmar su relevancia</span>
+        </span>
+      </div>
+    </div>
+    <p class="note t" lang="en" style="margin-top:16px">Within a region, types are read in a fixed order — goal before steps, doubts before trust: <span class="mono">intent → facts → pattern → invalidation → discovery → events</span>.</p>
+    <p class="note t" lang="zh-Hant" style="margin-top:16px">在每個區域內，類型有固定閱讀順序——先看目標再看步驟、先查反證再信事實：<span class="mono">intent → facts → pattern → invalidation → discovery → events</span>。</p>
+    <p class="note t" lang="ja" style="margin-top:16px">領域内ではタイプを決まった順に読みます——手順より先に目的を、信頼より先に反証を：<span class="mono">intent → facts → pattern → invalidation → discovery → events</span>。</p>
+    <p class="note t" lang="ko" style="margin-top:16px">영역 안에서는 유형을 정해진 순서로 읽습니다. 단계보다 목표를, 신뢰보다 의심을 먼저: <span class="mono">intent → facts → pattern → invalidation → discovery → events</span>.</p>
+    <p class="note t" lang="es" style="margin-top:16px">Dentro de un área, los tipos se leen en orden fijo: la meta antes que los pasos, las dudas antes que la confianza: <span class="mono">intent → facts → pattern → invalidation → discovery → events</span>.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">WEIGHTS</span>
+      <h2>
+        <span class="t" lang="en">Confidence that learns</span>
+        <span class="t" lang="zh-Hant">會學習的信心權重</span>
+        <span class="t" lang="ja">学習する信頼度</span>
+        <span class="t" lang="ko">학습하는 신뢰 가중치</span>
+        <span class="t" lang="es">Confianza que aprende</span>
+      </h2>
+    </div>
+    <p class="note t" lang="en">Each memory carries a weight that decays over time and moves with real outcomes — proven patterns float up, broken ones sink, without manual cleanup.</p>
+    <p class="note t" lang="zh-Hant">每條記憶都有一個會隨時間衰減、隨實際成效增減的權重——被驗證的模式往上浮，失效的往下沉，完全不需手動整理。</p>
+    <p class="note t" lang="ja">各記憶は時間とともに減衰し、実際の成果で増減する重みを持ちます。実証されたパターンは浮かび上がり、壊れたものは沈む——手作業の整理は不要です。</p>
+    <p class="note t" lang="ko">각 기억은 시간이 지나며 감쇠하고 실제 성과에 따라 움직이는 가중치를 지닙니다. 검증된 패턴은 떠오르고 깨진 것은 가라앉습니다. 수동 정리는 필요 없습니다.</p>
+    <p class="note t" lang="es">Cada recuerdo lleva un peso que decae con el tiempo y se mueve con los resultados reales: los patrones probados flotan, los rotos se hunden, sin limpieza manual.</p>
+    <div style="overflow-x:auto">
+      <table class="wtable">
+        <tr>
+          <th>
+            <span class="t" lang="en">Signal</span>
+            <span class="t" lang="zh-Hant">訊號</span>
+            <span class="t" lang="ja">シグナル</span>
+            <span class="t" lang="ko">신호</span>
+            <span class="t" lang="es">Señal</span>
+          </th>
+          <th>
+            <span class="t" lang="en">Effect</span>
+            <span class="t" lang="zh-Hant">效果</span>
+            <span class="t" lang="ja">効果</span>
+            <span class="t" lang="ko">효과</span>
+            <span class="t" lang="es">Efecto</span>
+          </th>
+        </tr>
+        <tr>
+          <td>
+            <span class="t" lang="en"><span class="mono">Outcome: success</span> comment</span>
+            <span class="t" lang="zh-Hant">成效留言 <span class="mono">Outcome: success</span></span>
+            <span class="t" lang="ja"><span class="mono">Outcome: success</span> コメント</span>
+            <span class="t" lang="ko"><span class="mono">Outcome: success</span> 댓글</span>
+            <span class="t" lang="es">comentario <span class="mono">Outcome: success</span></span>
+          </td>
+          <td><span class="delta up">+0.30</span></td>
+        </tr>
+        <tr>
+          <td>
+            <span class="t" lang="en"><span class="mono">Outcome: failure</span> comment</span>
+            <span class="t" lang="zh-Hant">成效留言 <span class="mono">Outcome: failure</span></span>
+            <span class="t" lang="ja"><span class="mono">Outcome: failure</span> コメント</span>
+            <span class="t" lang="ko"><span class="mono">Outcome: failure</span> 댓글</span>
+            <span class="t" lang="es">comentario <span class="mono">Outcome: failure</span></span>
+          </td>
+          <td><span class="delta down">−0.20</span></td>
+        </tr>
+        <tr>
+          <td>
+            <span class="t" lang="en">no marker / neutral</span>
+            <span class="t" lang="zh-Hant">沒有標記或中性</span>
+            <span class="t" lang="ja">マーカーなし／中立</span>
+            <span class="t" lang="ko">표시 없음 / 중립</span>
+            <span class="t" lang="es">sin marcador / neutral</span>
+          </td>
+          <td><span class="delta flat">
+            <span class="t" lang="en">0, decay only</span>
+            <span class="t" lang="zh-Hant">0，僅衰減</span>
+            <span class="t" lang="ja">0、減衰のみ</span>
+            <span class="t" lang="ko">0, 감쇠만</span>
+            <span class="t" lang="es">0, solo decae</span>
+          </span></td>
+        </tr>
+        <tr>
+          <td>
+            <span class="t" lang="en"><span class="mono">type:lifefact</span> (permanent personal fact)</span>
+            <span class="t" lang="zh-Hant"><span class="mono">type:lifefact</span>（永久個人記憶）</span>
+            <span class="t" lang="ja"><span class="mono">type:lifefact</span>（永続的な個人の事実）</span>
+            <span class="t" lang="ko"><span class="mono">type:lifefact</span>(영구 개인 기억)</span>
+            <span class="t" lang="es"><span class="mono">type:lifefact</span> (dato personal permanente)</span>
+          </td>
+          <td><span class="delta pin">
+            <span class="t" lang="en">pinned 1.0, never decays</span>
+            <span class="t" lang="zh-Hant">固定 1.0，永不衰減</span>
+            <span class="t" lang="ja">1.0 に固定、減衰なし</span>
+            <span class="t" lang="ko">1.0 고정, 감쇠 없음</span>
+            <span class="t" lang="es">fijado en 1.0, nunca decae</span>
+          </span></td>
+        </tr>
+        <tr>
+          <td>
+            <span class="t" lang="en"><span class="mono">Supersedes: #N</span> in an invalidation</span>
+            <span class="t" lang="zh-Hant">反證聲明中的 <span class="mono">Supersedes: #N</span></span>
+            <span class="t" lang="ja">invalidation 内の <span class="mono">Supersedes: #N</span></span>
+            <span class="t" lang="ko">무효화 이슈의 <span class="mono">Supersedes: #N</span></span>
+            <span class="t" lang="es"><span class="mono">Supersedes: #N</span> en una invalidación</span>
+          </td>
+          <td><span class="delta down">
+            <span class="t" lang="en">→ 0, archived immediately</span>
+            <span class="t" lang="zh-Hant">→ 0，立即封存</span>
+            <span class="t" lang="ja">→ 0、即時アーカイブ</span>
+            <span class="t" lang="ko">→ 0, 즉시 보관 처리</span>
+            <span class="t" lang="es">→ 0, archivado de inmediato</span>
+          </span></td>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">CONFORMANCE</span>
+      <h2>
+        <span class="t" lang="en">Four levels of enforcement</span>
+        <span class="t" lang="zh-Hant">四級遵循等級</span>
+        <span class="t" lang="ja">4段階の遵守レベル</span>
+        <span class="t" lang="ko">4단계 준수 수준</span>
+        <span class="t" lang="es">Cuatro niveles de cumplimiento</span>
+      </h2>
+    </div>
+    <p class="note t" lang="en">Levels change what is <em>mechanical</em>, never what is <em>required</em>. A higher level always degrades gracefully to the one below — a broken adapter never blocks the user's real work.</p>
+    <p class="note t" lang="zh-Hant">等級改變的是「多少事被機械化」，而非「要求本身」。高等級故障時一律優雅降級到下一級——壞掉的配接器絕不擋住使用者的正事。</p>
+    <p class="note t" lang="ja">レベルが変えるのは「どれだけ機械化されるか」であって「要求そのもの」ではありません。上位レベルは常に下位へ優雅に縮退します——壊れたアダプタがユーザーの本来の作業を妨げることはありません。</p>
+    <p class="note t" lang="ko">수준이 바꾸는 것은 '얼마나 기계화되는가'이지 '요구 사항 자체'가 아닙니다. 상위 수준은 언제나 아래 수준으로 우아하게 강등됩니다. 고장 난 어댑터가 사용자의 실제 작업을 막는 일은 없습니다.</p>
+    <p class="note t" lang="es">Los niveles cambian lo que es <em>mecánico</em>, nunca lo que es <em>obligatorio</em>. Un nivel superior siempre se degrada con elegancia al inferior: un adaptador roto jamás bloquea el trabajo real del usuario.</p>
+    <div class="levels">
+      <div class="level">
+        <span class="lv">L0</span>
+        <h3>
+          <span class="t" lang="en">Prose</span>
+          <span class="t" lang="zh-Hant">純文件</span>
+          <span class="t" lang="ja">文書のみ</span>
+          <span class="t" lang="ko">문서만</span>
+          <span class="t" lang="es">Prosa</span>
+        </h3>
+        <p class="t" lang="en">Agent follows the written protocol voluntarily.</p>
+        <p class="t" lang="zh-Hant">代理自律遵守文件規範。</p>
+        <p class="t" lang="ja">エージェントが自発的に文書化されたプロトコルに従う。</p>
+        <p class="t" lang="ko">에이전트가 문서화된 프로토콜을 자발적으로 따릅니다.</p>
+        <p class="t" lang="es">El agente sigue el protocolo escrito voluntariamente.</p>
+      </div>
+      <div class="level">
+        <span class="lv">L1</span>
+        <h3>
+          <span class="t" lang="en">Assisted</span>
+          <span class="t" lang="zh-Hant">輔助</span>
+          <span class="t" lang="ja">支援あり</span>
+          <span class="t" lang="ko">보조</span>
+          <span class="t" lang="es">Asistido</span>
+        </h3>
+        <p class="t" lang="en">Checklists loaded into context: the skill, or a config digest.</p>
+        <p class="t" lang="zh-Hant">檢查清單載入情境：技能或設定摘要。</p>
+        <p class="t" lang="ja">チェックリストをコンテキストに読み込む：スキルまたは設定ダイジェスト。</p>
+        <p class="t" lang="ko">체크리스트를 컨텍스트에 로드: 스킬 또는 설정 다이제스트.</p>
+        <p class="t" lang="es">Listas de verificación cargadas en contexto: la skill o un resumen de configuración.</p>
+      </div>
+      <div class="level current">
+        <span class="lv">L2</span>
+        <h3>
+          <span class="t" lang="en">Enforced</span>
+          <span class="t" lang="zh-Hant">強制</span>
+          <span class="t" lang="ja">強制</span>
+          <span class="t" lang="ko">강제</span>
+          <span class="t" lang="es">Aplicado</span>
+        </h3>
+        <p class="t" lang="en">Deterministic hooks + session ledger interpose real checkpoints.</p>
+        <p class="t" lang="zh-Hant">確定性 Hook 加帳本，設置真正的檢查點。</p>
+        <p class="t" lang="ja">決定的フックとセッション台帳が本物のチェックポイントを挟み込む。</p>
+        <p class="t" lang="ko">결정적 훅과 세션 원장이 실제 체크포인트를 세웁니다.</p>
+        <p class="t" lang="es">Hooks deterministas + libro de sesión interponen checkpoints reales.</p>
+      </div>
+      <div class="level">
+        <span class="lv">L3</span>
+        <h3>
+          <span class="t" lang="en">Tool-boundary</span>
+          <span class="t" lang="zh-Hant">工具邊界</span>
+          <span class="t" lang="ja">ツール境界</span>
+          <span class="t" lang="ko">도구 경계</span>
+          <span class="t" lang="es">Frontera de herramienta</span>
+        </h3>
+        <p class="t" lang="en">Future MCP server validates every write before it reaches GitHub.</p>
+        <p class="t" lang="zh-Hant">未來的 MCP 伺服器在寫入前就攔截格式錯誤。</p>
+        <p class="t" lang="ja">将来の MCP サーバーが GitHub に届く前にすべての書き込みを検証。</p>
+        <p class="t" lang="ko">미래의 MCP 서버가 GitHub에 닿기 전에 모든 쓰기를 검증합니다.</p>
+        <p class="t" lang="es">Un futuro servidor MCP validará cada escritura antes de llegar a GitHub.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">BOOTSTRAP</span>
+      <h2>
+        <span class="t" lang="en">One command to a new brain</span>
+        <span class="t" lang="zh-Hant">一鍵長出新大腦</span>
+        <span class="t" lang="ja">ワンコマンドで新しいブレインを</span>
+        <span class="t" lang="ko">명령 하나로 새 두뇌를</span>
+        <span class="t" lang="es">Un cerebro nuevo con un solo comando</span>
+      </h2>
+    </div>
+    <p class="note t" lang="en">Adopting the protocol used to be ~15 manual steps. Now the template ships a §15.5-conformant wizard: clone, then one command takes you to a live memory repo — including the steps nothing used to automate (Actions write permission, §6 label seeding, taming the daily Librarian cron) — and it proves itself with a real end-to-end test issue. Idempotent: re-running is the resume mechanism; it never resets a live repo and never pushes to the template.</p>
+    <p class="note t" lang="zh-Hant">過去採用協定要 ~15 個手動步驟。現在範本內建符合 §15.5 的精靈：clone 之後一條命令直達可運作的記憶倉庫——包括以前沒有任何東西自動化的步驟（Actions 寫入權限、§6 標籤播種、馴服每天執行的 Librarian 排程），最後用真實的端到端測試 Issue 自我驗證。冪等：重跑即續跑；絕不重置已上線的倉庫、絕不推送範本。</p>
+    <p class="note t" lang="ja">プロトコルの導入には、かつて約15の手動ステップが必要でした。いまはテンプレートに §15.5 準拠のウィザードが同梱されています。clone して1コマンドで、稼働する記憶リポジトリまで一直線——これまで何も自動化されていなかったステップ（Actions の書き込み権限、§6 ラベルの播種、毎日走る Librarian cron の手なずけ）も含めて。最後は本物のエンドツーエンドのテスト Issue で自己検証します。冪等：再実行がそのまま再開の仕組み。稼働中のリポジトリは決してリセットせず、テンプレートには決してプッシュしません。</p>
+    <p class="note t" lang="ko">프로토콜 도입에는 예전엔 약 15개의 수동 단계가 필요했습니다. 이제 템플릿에 §15.5 준수 마법사가 내장되어 있습니다. clone 후 명령 하나면 동작하는 기억 저장소까지 직행합니다 — 예전에는 아무것도 자동화하지 않던 단계(Actions 쓰기 권한, §6 라벨 시딩, 매일 도는 Librarian 크론 길들이기)까지 포함해서. 마지막에는 실제 엔드투엔드 테스트 이슈로 스스로를 검증합니다. 멱등성: 재실행이 곧 재개 방식이며, 운영 중인 저장소를 절대 초기화하지 않고 템플릿에는 절대 푸시하지 않습니다.</p>
+    <p class="note t" lang="es">Adoptar el protocolo solía requerir ~15 pasos manuales. Ahora la plantilla incluye un asistente conforme a §15.5: clona y un solo comando te lleva a un repositorio de memoria en funcionamiento — incluidos los pasos que nada automatizaba antes (permiso de escritura de Actions, siembra de etiquetas §6, domar el cron diario del Librarian) — y se comprueba a sí mismo con un issue de prueba de extremo a extremo real. Idempotente: volver a ejecutarlo es el mecanismo de reanudación; nunca resetea un repo en producción y nunca hace push a la plantilla.</p>
+    <div class="anatomy">
+      <div class="title-line"><span class="seg type">npm run setup</span>
+        <span class="aside t" lang="en">→ repo · permissions · labels · hooks · first compile</span>
+        <span class="aside t" lang="zh-Hant">→ 建倉庫、權限、標籤、hooks、首次編譯</span>
+        <span class="aside t" lang="ja">→ リポジトリ・権限・ラベル・フック・初回コンパイル</span>
+        <span class="aside t" lang="ko">→ 저장소 · 권한 · 라벨 · 훅 · 첫 컴파일</span>
+        <span class="aside t" lang="es">→ repo · permisos · etiquetas · hooks · primera compilación</span>
+      </div>
+      <div class="title-line"><span class="seg type">npm run setup</span> -- --dry-run
+        <span class="aside t" lang="en">→ print the full plan, change nothing</span>
+        <span class="aside t" lang="zh-Hant">→ 只看計畫，不動任何東西</span>
+        <span class="aside t" lang="ja">→ 計画だけ表示、何も変更しない</span>
+        <span class="aside t" lang="ko">→ 전체 계획만 출력, 아무것도 바꾸지 않음</span>
+        <span class="aside t" lang="es">→ imprime el plan completo sin cambiar nada</span>
+      </div>
+      <div class="title-line"><span class="seg type">npm run setup:verify</span>
+        <span class="aside t" lang="en">→ re-assert the checklist any time</span>
+        <span class="aside t" lang="zh-Hant">→ 隨時重新體檢部署</span>
+        <span class="aside t" lang="ja">→ いつでもチェックリストを再検証</span>
+        <span class="aside t" lang="ko">→ 언제든 체크리스트 재검증</span>
+        <span class="aside t" lang="es">→ vuelve a verificar la lista cuando quieras</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span class="mono">RxAi AMP v2.9.1 · <a href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md</a>
+      <span class="t" lang="en">is the single source of truth · Issues in, knowledge out.</span>
+      <span class="t" lang="zh-Hant">為唯一真相來源 · Issue 進，知識出。</span>
+      <span class="t" lang="ja">が唯一の真実の源 · Issue が入り、知識が出る。</span>
+      <span class="t" lang="ko">가 단일 진실 원천 · 이슈가 들어가고, 지식이 나옵니다.</span>
+      <span class="t" lang="es">es la única fuente de verdad · Entran issues, sale conocimiento.</span>
+    </span>
+    <p>© 2026 James Ho · <a href="https://github.com/RxAi-Aus/amp/blob/main/LICENSE">Dual-licensed</a>: AGPL-3.0-or-later or commercial · patent pending (AU provisional 2026907694) · <a href="https://github.com/RxAi-Aus/amp">github.com/RxAi-Aus/amp</a></p>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var LANGS = ["en", "zh-Hant", "ja", "ko", "es"];
+  var bar = document.querySelector(".langbar");
+  function apply(l) {
+    if (LANGS.indexOf(l) === -1) l = "en";
+    document.body.setAttribute("data-lang", l);
+    document.documentElement.setAttribute("lang", l);
+    var buttons = bar.querySelectorAll("button[data-set]");
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].setAttribute("aria-pressed", String(buttons[i].getAttribute("data-set") === l));
+    }
+    try { localStorage.setItem("amp-lang", l); } catch (e) {}
+  }
+  bar.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-set]");
+    if (b) apply(b.getAttribute("data-set"));
+  });
+  var saved = null;
+  try { saved = localStorage.getItem("amp-lang"); } catch (e) {}
+  if (!saved) {
+    var n = (navigator.language || "en").toLowerCase();
+    saved = n.indexOf("zh") === 0 ? "zh-Hant"
+          : n.indexOf("ja") === 0 ? "ja"
+          : n.indexOf("ko") === 0 ? "ko"
+          : n.indexOf("es") === 0 ? "es"
+          : "en";
+  }
+  apply(saved);
+})();
+</script>
+
+</body>
+</html>

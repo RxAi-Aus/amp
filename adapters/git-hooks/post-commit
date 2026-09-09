@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# rxai-amp-capture — Protocol v2.9.1 §15 CAPTURE boundary (agent-agnostic floor)
+#
+# Installed into a working repo's .git/hooks/ by:
+#   bash <memory-repo>/scripts/install-agent-hooks.sh --capture [repo-path]
+#
+# When any shell-driving agent (Claude, Codex, OpenClaw, ...) runs
+# `git commit`, this hook's stderr lands inside that agent's tool result —
+# a deterministic, agent-agnostic context injection. It records the commit
+# as a capture boundary in the session-day ledger and prints a reminder.
+# It NEVER blocks (§15.5 fail-soft): every path exits 0.
+#
+# AMP_LIB is rewritten to an absolute path by the installer.
+AMP_LIB="__AMP_LIB__"
+
+set +e
+
+[ "${AMP_DISABLE:-0}" = "1" ] && exit 0
+command -v node >/dev/null 2>&1 || exit 0
+[ -f "$AMP_LIB/amp-ledger.mjs" ] || exit 0
+
+repo_name="$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null)"
+sha="$(git rev-parse --short HEAD 2>/dev/null)"
+subject="$(git log -1 --pretty=%s 2>/dev/null)"
+[ -n "$sha" ] || exit 0
+
+# Shell-driving agents have no per-session id here; a per-day key keeps
+# "five commits = one obligation" true across one working day. Claude Code
+# sessions use their own session_id ledger via the PostToolUse hook instead.
+session_key="git-${RXAI_AMP_AGENT:-shell}-$(date -u +%Y%m%d)"
+
+node "$AMP_LIB/amp-ledger.mjs" boundary "$session_key" "$repo_name" "$sha" "$subject" 2>/dev/null
+
+pending="$(node -e '
+  import("'"$AMP_LIB"'/amp-ledger.mjs").then((m) => {
+    const l = m.loadLedger(process.argv[1]);
+    process.stdout.write(String(l ? l.capture.boundaries.length : 1));
+  }).catch(() => process.stdout.write("1"));
+' "$session_key" 2>/dev/null)"
+
+echo "[AMP] commit ${sha} logged for memory capture (${pending:-1} pending today)." >&2
+echo "[AMP] If this completes a unit of work, store the takeaway as a memory issue:" >&2
+echo "[AMP]   [FROM:<agent>->all][REGION:<area>][PLACE:<topic>][TYPE:events|pattern|facts] short intent" >&2
+echo "[AMP] (PROTOCOL.md §15 CAPTURE — or an explicit decline in your Rule 10 summary.)" >&2
+
+exit 0

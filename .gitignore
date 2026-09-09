@@ -1,0 +1,53 @@
+node_modules/
+dist/
+.rxai-cache/
+.env
+.env.*
+*.local
+lobsterExamples/
+
+# Build artifacts
+.agentloop-dist/
+
+# Personal memory data (lifefacts, real agent memories)
+permanent_memory.json
+
+# Agent test output
+nanobanana-output/
+
+# Secret keys / tokens
+*.key
+*.pem
+*.token
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.mobileprovision
+*.sqlite
+*.sqlite3
+*.db
+*.log
+credentials.json
+service-account*.json
+secrets/
+
+# Patent filing drafts — confidential IP, must never be committed or pushed
+patent-draft/
+
+# macOS
+.DS_Store
+
+# OKF/BigQuery export artifacts (rows.ndjson etc.)
+artifacts/
+
+# AMP Board local planning note (bilingual, personal)
+board/board.md
+board/design/
+
+# spec-kit scaffolding — local developer tooling, kept out of the template
+/.specify/
+/.claude/skills/speckit-*/
+/.agents/skills/speckit-*/
+/.github/agents/speckit.*
+/.github/prompts/speckit.*

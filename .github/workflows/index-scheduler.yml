@@ -1,0 +1,126 @@
+name: Index Scheduler
+
+on:
+  schedule:
+    # Every 6 hours: 00:00, 06:00, 12:00, 18:00 UTC
+    - cron: '0 0,6,12,18 * * *'
+  workflow_dispatch:   # allow manual run from Actions tab
+
+# Serialise so a manual run never races a scheduled run
+concurrency:
+  group: index-compile
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # commit INDEX.md, REGION-*.md, weights.json
+      issues: write     # read issues + comments
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Compile index files
+        env:
+          GH_TOKEN:    ${{ secrets.GITHUB_TOKEN }}
+          REPO_OWNER:  ${{ github.repository_owner }}
+          REPO_NAME:   ${{ github.event.repository.name }}
+        run: node --experimental-strip-types compile_index.ts
+
+      - name: Export OKF bundle + rows.ndjson
+        env:
+          GH_TOKEN:    ${{ secrets.GITHUB_TOKEN }}
+          REPO_OWNER:  ${{ github.repository_owner }}
+          REPO_NAME:   ${{ github.event.repository.name }}
+        run: node --experimental-strip-types okf_export.ts
+
+      - name: Commit changes
+        run: |
+          git config user.name  "index-bot"
+          git config user.email "bot@repo"
+          # Everything the compile/export scripts touch, including REGION-*.md
+          # deletions. Non-generated paths (artifacts/, node_modules/) are
+          # gitignored and the CI checkout is otherwise clean.
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "sync: index compile & okf export $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          # Retry the push after rebasing onto whatever landed mid-compile.
+          # A mid-compile not-indexed-tracker commit always conflicts on
+          # not_indexed.md (both jobs rewrite its header lines), so resolve
+          # that one known conflict by keeping the remote (tracker) copy —
+          # it records issues opened after our fetch, and the next tracker
+          # run or compile re-derives the file anyway. Exit 0 only if a push
+          # actually succeeded; otherwise fail the run loudly.
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            echo "push failed (attempt ${attempt}/3) — rebasing onto latest remote"
+            if ! git pull --rebase; then
+              # During a rebase, --ours is the remote branch we rebase onto.
+              if git checkout --ours -- not_indexed.md 2>/dev/null; then
+                git add not_indexed.md
+                GIT_EDITOR=true git rebase --continue || { git rebase --abort || true; }
+              else
+                git rebase --abort || true
+              fi
+            fi
+            sleep 5
+          done
+          echo "::error::git push failed after 3 attempts — compile output was not published"
+          exit 1
+
+      # ---- BigQuery load (skipped automatically until secrets/vars are set) ----
+      - name: Check BigQuery config
+        id: bq
+        env:
+          # Passed via env, never inlined into the script: a raw multi-line
+          # JSON key inlined by ${{ }} would break the shell and could leak
+          # unmasked fragments into the run log.
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+          BQ_DATASET: ${{ vars.BQ_DATASET }}
+        run: |
+          if [ -n "$GCP_SA_KEY" ] && [ -n "$BQ_DATASET" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::BigQuery load skipped — set secret GCP_SA_KEY and variables BQ_PROJECT/BQ_DATASET to enable."
+          fi
+
+      - name: Authenticate to Google Cloud
+        if: steps.bq.outputs.enabled == 'true'
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        if: steps.bq.outputs.enabled == 'true'
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Load into BigQuery
+        if: steps.bq.outputs.enabled == 'true'
+        env:
+          BQ_PROJECT: ${{ vars.BQ_PROJECT }}
+          BQ_DATASET: ${{ vars.BQ_DATASET }}
+        run: |
+          if [ ! -s artifacts/okf/rows.ndjson ]; then
+            echo "::notice::No rows to load (0 concepts) — skipping bq load."
+            exit 0
+          fi
+          bq --project_id="$BQ_PROJECT" load \
+            --source_format=NEWLINE_DELIMITED_JSON \
+            --replace \
+            --autodetect \
+            "${BQ_DATASET}.concepts" \
+            artifacts/okf/rows.ndjson
+          echo "::notice::Loaded $(wc -l < artifacts/okf/rows.ndjson) concepts into ${BQ_DATASET}.concepts"

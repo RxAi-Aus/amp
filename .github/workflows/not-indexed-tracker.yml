@@ -1,0 +1,71 @@
+name: Not Indexed Tracker
+
+on:
+  issues:
+    types: [opened]
+
+# Serialise runs so concurrent issue creations don't race on not_indexed.md.
+# GitHub keeps at most one pending run per group and cancels older pending
+# runs — safe here only because every run reconciles ALL issues opened since
+# the last compile (not just its own trigger event), so a surviving run
+# repairs anything a cancelled run would have written.
+concurrency:
+  group: not-indexed-update
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # commit not_indexed.md
+      issues: read      # list issues for reconciliation
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Rebuild not_indexed.md and push
+        env:
+          GH_TOKEN:       ${{ secrets.GITHUB_TOKEN }}
+          REPO_OWNER:     ${{ github.repository_owner }}
+          REPO_NAME:      ${{ github.event.repository.name }}
+          ISSUE_TITLE:    ${{ github.event.issue.title }}
+          ISSUE_NUMBER:   ${{ github.event.issue.number }}
+          ISSUE_CREATED:  ${{ github.event.issue.created_at }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          git config user.name  "index-bot"
+          git config user.email "bot@repo"
+          # The script is a deterministic projection of GitHub state, so on a
+          # push race we rebuild on top of the freshest remote state instead
+          # of rebasing. Exit 0 only when the remote already matches or a
+          # push succeeded; otherwise fail the run loudly.
+          for attempt in 1 2 3; do
+            git fetch origin "$DEFAULT_BRANCH"
+            git reset --hard "origin/$DEFAULT_BRANCH"
+            # A transient API failure spends a retry attempt instead of
+            # aborting the whole bash -e step on the first hiccup.
+            if ! node --experimental-strip-types track_not_indexed.ts; then
+              echo "reconcile failed (attempt ${attempt}/3) — retrying"
+              sleep 5
+              continue
+            fi
+            git add not_indexed.md
+            if git diff --cached --quiet; then
+              echo "not_indexed.md already up to date"
+              exit 0
+            fi
+            git commit -m "track: issue #${ISSUE_NUMBER} (reconciled)"
+            if git push origin "HEAD:$DEFAULT_BRANCH"; then
+              exit 0
+            fi
+            echo "push failed (attempt ${attempt}/3) — rebuilding against fresh remote state"
+            sleep 5
+          done
+          echo "::error::Failed to update not_indexed.md after 3 attempts"
+          exit 1
