@@ -58,7 +58,7 @@ the conversation about that thought. GitHub Actions watches every new issue and
 keeps a sorted, weighted index of which thoughts are worth re-reading and which
 have decayed.
 
-The current release is **v2.9.2** (additive: Codex now has an L2 lifecycle adapter using its stable hooks runtime, with the existing skill and digest retained as L1 fallback). v2.9 added release-readiness hardening: an automated test suite + CI gate, the Rule 14 Agent Loop Guard made normative, the official Docker GitHub MCP server as primary configuration, and the §16 Security Considerations & Threat Model. v2.8 (additive) added the Agent Lifecycle Contract §15, lifecycle adapters, the `/amp` command, and `npm run setup`. v2.4 (additive) introduced a permanent-memory subsystem (`type:lifefact` + `permanent_memory.json`) for biographical facts that should never decay. v2.5 (additive) added an optional local issue cache (`.rxai-cache/`) for fast lookup, plus a pre-commit secret-scan hook. v2.6 (additive) added the OKF/BigQuery derived search layer (PROTOCOL.md §14). v2.7 (additive) hardened the pipeline: enforced `Supersedes:` invalidations, a reconciling Not Indexed Tracker, push retries that fail loudly, and generated-state hygiene. The earlier v2.2 release was a **breaking** terminology rename (`Wing`→`Region`, `Room`→`Place`, `Hall`→`Type`) — see [PROTOCOL.md Appendix B](./PROTOCOL.md) for migration guidance.
+The current release is **v2.10** (additive: `INDEX.md` pointers carry issue titles so the first tier can support a skip decision, and decay gains a relevance term — §4.4b — driven by recall manifests that recorded a memory as surfaced-but-unused). v2.9.2 gave Codex an L2 lifecycle adapter on its stable hooks runtime, with the existing skill and digest retained as L1 fallback. v2.9 added release-readiness hardening: an automated test suite + CI gate, the Rule 14 Agent Loop Guard made normative, the official Docker GitHub MCP server as primary configuration, and the §16 Security Considerations & Threat Model. v2.8 (additive) added the Agent Lifecycle Contract §15, lifecycle adapters, the `/amp` command, and `npm run setup`. v2.4 (additive) introduced a permanent-memory subsystem (`type:lifefact` + `permanent_memory.json`) for biographical facts that should never decay. v2.5 (additive) added an optional local issue cache (`.rxai-cache/`) for fast lookup, plus a pre-commit secret-scan hook. v2.6 (additive) added the OKF/BigQuery derived search layer (PROTOCOL.md §14). v2.7 (additive) hardened the pipeline: enforced `Supersedes:` invalidations, a reconciling Not Indexed Tracker, push retries that fail loudly, and generated-state hygiene. The earlier v2.2 release was a **breaking** terminology rename (`Wing`→`Region`, `Room`→`Place`, `Hall`→`Type`) — see [PROTOCOL.md Appendix B](./PROTOCOL.md) for migration guidance.
 
 The substantive intelligence layer was added in v2.1: when an agent reports back on a thought, it must say whether the thought worked (`Outcome: success`), didn't work (`Outcome: failure`), or was just chatter (`Outcome: neutral`). Successes raise the weight, failures lower it, chatter does nothing. Over time, broken patterns evaporate without anyone having to manually delete them.
 
@@ -867,6 +867,28 @@ Keep the allowlist to read-only `gh issue` subcommands — don't allow bare
 access and that would let the librarian post or edit comments. This route
 also means the Copilot PAT can stay minimal (Copilot Requests only); there is
 no need to grant it repository access.
+
+## What's new in v2.10
+
+**Additive.** Two recall-quality corrections, both found by measuring a real
+A/B rather than by review.
+
+`INDEX.md` active-thread pointers now carry the issue title (truncated to 72
+characters). A pointer used to read `#373 (w:0.3097)`; the tier whose whole job
+is deciding what an agent can skip cannot do that from a number and a weight,
+so agents descended into a Region file merely to learn what a record was about
+— the cost the two-tier index exists to avoid. The compiler already had the
+title in hand for the Region tables.
+
+Decay becomes `old × ρ × υ^u` (§4.4b), where `υ` = 0.95 and `u` counts the
+§15.2 Recall manifests that recorded the issue as `(unused)`. `ρ` runs on the
+compile clock four times a day whether or not anything happened, so an idle
+record and an irrelevant one decayed identically; `u` is evidence about the
+record instead of about the clock. It is a standing count re-derived from the
+store on each compile, only explicit `(unused)` refs count, and `u = 0`
+reproduces the pre-v2.10 arithmetic exactly — existing stores are unaffected
+until manifests appear. Rule 12 pinning and Rule 8 supersession still take
+precedence.
 
 ## What's new in v2.9.2
 
