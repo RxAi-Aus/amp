@@ -13,12 +13,13 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (file) => readFileSync(join(repoRoot, file), "utf8");
+const exists = (file) => existsSync(join(repoRoot, file));
 
 /**
  * package.json is semver; the protocol drops a zero patch. Observed across the
@@ -33,6 +34,12 @@ export function protocolVersion(packageVersion) {
 
 // Every place that asserts "this is the current version". Add a row when a new
 // one appears; the capture group must be the version and nothing else.
+//
+// A file marked optional may be absent -- a private fork of this template does
+// not necessarily publish a landing page. Absent is fine; present and stale is
+// not, so if the file exists its claims are checked like any other.
+const OPTIONAL_FILES = new Set(["docs/index.html"]);
+
 const CLAIMS = [
   ["PROTOCOL.md", "spec header", /^\*\*RxAi AMP (v[\d.]+)\*\*/m],
   ["README.md", "title", /^# RxAi AMP · Agent Memory Protocol (v[\d.]+)/m],
@@ -50,6 +57,9 @@ test("every current-version claim matches package.json", () => {
   const wrong = [];
   const missing = [];
   for (const [file, what, pattern] of CLAIMS) {
+    if (OPTIONAL_FILES.has(file) && !exists(file)) {
+      continue;
+    }
     const found = pattern.exec(read(file))?.[1];
     if (found === undefined) {
       missing.push(`${file} (${what}) — pattern no longer matches; the wording changed`);
@@ -93,4 +103,19 @@ test("the version helper follows the observed convention", () => {
   assert.equal(protocolVersion("2.9.1"), "v2.9.1");
   assert.equal(protocolVersion("2.9.2"), "v2.9.2");
   assert.equal(protocolVersion("3.0.0"), "v3.0");
+});
+
+test("an optional file that is present is still held to the version", () => {
+  // Guards the escape hatch above: absent is a fork's choice, stale is a bug.
+  for (const file of OPTIONAL_FILES) {
+    if (!exists(file)) {
+      continue;
+    }
+    const claims = CLAIMS.filter(([f]) => f === file);
+    assert.ok(claims.length > 0, `${file} is listed optional but has no claims to check`);
+    for (const [, what, pattern] of claims) {
+      const found = pattern.exec(read(file))?.[1];
+      assert.equal(found, expected, `${file} (${what}) is present, so it must say ${expected}`);
+    }
+  }
 });
