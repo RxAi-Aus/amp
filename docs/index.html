@@ -269,6 +269,16 @@
   .levels { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
   .level { border: 1px solid var(--line); border-radius: 10px; padding: 14px 15px; }
   .level.current { border-color: var(--accent); background: var(--accent-soft); }
+  /* The highlight marks what the reader opened, so it has to be somewhere, not
+     everywhere. Steps take the border only: --tag-place on the tint is 4.31:1. */
+  .level[data-open="true"] { border-color: var(--accent); background: var(--accent-soft); }
+  .step[data-open="true"] { border-color: var(--accent); }
+  /* L2's standing tint yields as soon as something is open; the badge keeps
+     carrying "where AMP is today" on its own. */
+  .levels[data-any-open="true"] .level.current:not([data-open="true"]) {
+    border-color: var(--line);
+    background: transparent;
+  }
   .level .lv { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; font-weight: 700; color: var(--accent); }
   .level h3 { margin: 4px 0 2px; font-size: 15.5px; }
   .level p { margin: 0; font-size: 13px; color: var(--muted); }
@@ -1182,27 +1192,47 @@
   // The lifecycle and conformance cards hover like controls, so they have to
   // behave like controls. The .more panel sits above the button's stretched hit
   // area, which keeps the file paths inside it selectable.
-  document.addEventListener("click", function (e) {
-    var b = e.target.closest(".disclose");
-    if (!b) return;
-    var card = b.closest(".step, .level");
-    if (!card) return;
+  function setOpen(card, open) {
+    var btn = card.querySelector(".disclose");
     var panel = card.querySelector(".more");
-    var open = b.getAttribute("aria-expanded") !== "true";
-    b.setAttribute("aria-expanded", String(open));
-    card.setAttribute("data-open", String(open));
+    if (!btn || !panel) return;
 
     // Commit the end state first: a paused or cancelled animation must never be
     // what decides whether the panel is open. The animation only shows the move.
     var from = panel.getBoundingClientRect().height;
+    btn.setAttribute("aria-expanded", String(open));
+    card.setAttribute("data-open", String(open));
     panel.style.height = open ? "auto" : "0px";
+
+    var group = card.parentElement;
+    group.setAttribute("data-any-open", String(!!group.querySelector('[data-open="true"]')));
+
     if (reduce.matches || !panel.animate) return;
     var to = panel.getBoundingClientRect().height;
+    if (from === to) return;
     if (panel.rxAnim) panel.rxAnim.cancel();
     panel.rxAnim = panel.animate(
       [{ height: from + "px" }, { height: to + "px" }],
       { duration: open ? 320 : 240, easing: "cubic-bezier(0.25, 1, 0.5, 1)" }
     );
+  }
+
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest(".disclose");
+    if (!b) return;
+    var card = b.closest(".step, .level");
+    if (!card) return;
+    var open = b.getAttribute("aria-expanded") !== "true";
+
+    // One card open per group. The highlight follows what you are reading, and
+    // two highlighted cards would say two different things at once.
+    if (open) {
+      var siblings = card.parentElement.querySelectorAll('[data-open="true"]');
+      for (var i = 0; i < siblings.length; i++) {
+        if (siblings[i] !== card) setOpen(siblings[i], false);
+      }
+    }
+    setOpen(card, open);
   });
   var saved = null;
   try { saved = localStorage.getItem("amp-lang"); } catch (e) {}
