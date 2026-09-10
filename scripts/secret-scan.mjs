@@ -163,6 +163,35 @@ function safeEmail(localPart, domain) {
     host === "users.noreply.github.com";
 }
 
+/**
+ * Private project names are the one class of leak this scanner cannot ship a
+ * pattern for: the denylist *is* the secret. It therefore lives outside version
+ * control, in `.rxai-private-names` at the repo root (gitignored), one entry
+ * per line, `#` for comments. Absent means nothing to protect -- a fresh clone
+ * or the public snapshot scans clean -- so this never blocks anyone else.
+ *
+ * Added after a private substrate name reached a tracked benchmark report
+ * twice: credential and path patterns both passed it, because a project name
+ * looks like ordinary prose.
+ */
+function loadPrivateNames() {
+  let file;
+  try {
+    file = `${git(["rev-parse", "--show-toplevel"]).trim()}/.rxai-private-names`;
+  } catch {
+    return [];
+  }
+  if (!existsSync(file)) {
+    return [];
+  }
+  return readFileSync(file, "utf8")
+    .split(/\r?\n/)
+    .map((line) => line.replace(/#.*$/, "").trim())
+    .filter(Boolean);
+}
+
+const privateNames = loadPrivateNames();
+
 function lineNumber(content, index) {
   return content.slice(0, index).split("\n").length;
 }
@@ -265,6 +294,15 @@ export function scanContent(file, content) {
     pattern.lastIndex = 0;
     for (const match of content.matchAll(pattern)) {
       findings.push(finding(file, content, match.index ?? 0, name));
+    }
+  }
+
+  for (const name of privateNames) {
+    const pattern = new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+    for (const match of content.matchAll(pattern)) {
+      // The category is reported; the value is not echoed, per the same rule
+      // the rest of this scanner follows.
+      findings.push(finding(file, content, match.index ?? 0, "private project name"));
     }
   }
 
