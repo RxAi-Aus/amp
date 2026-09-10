@@ -216,6 +216,10 @@ posting a clarifying comment — never by penalising the original record.
    - **Surfaced:** #47 (used → success), #52 (unused)
    - **Capture:** stored #91
    ```
+   Since v2.10 the `(unused)` marks carry weight: each one decays that issue by
+   an extra ×0.95 (§4.4b), on top of its age decay. So mark honestly — an
+   `(unused)` on a memory you actually relied on quietly buries it, and
+   omitting one you ignored leaves a stale record looking fresh.
 3. Nothing worth storing? **Decline explicitly** — never silently: use
    `- **Capture:** declined — "one-line reason"` in the manifest (and the
    ledger `decline` command if a checkpoint asked for it). A decline is a

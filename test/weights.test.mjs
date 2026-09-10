@@ -7,8 +7,10 @@ import assert from "node:assert/strict";
 import {
   ARCHIVE_THRESHOLD,
   DECAY,
+  UNUSED_DECAY,
   computeCommentDelta,
   computeIssueWeight,
+  parseRecallUnused,
   resolveInvalidations,
 } from "../dist/compile_index.js";
 
@@ -96,4 +98,66 @@ test("resolveInvalidations: retracting the retraction re-arms the original", () 
   assert.ok(retracted.has(20));
   assert.equal(supersededBy.get(3), 10);
   assert.equal(supersededBy.get(20), 30);
+});
+
+// --- §4.4b unused-recall decay ------------------------------------------
+
+test("§4.4b: a record no manifest mentions keeps the pre-4.4b arithmetic", () => {
+  for (const kind of ["intent", "facts", "pattern", "events", "unknown-kind"]) {
+    assert.equal(
+      computeIssueWeight(kind, 0.5, 0, false, 0),
+      computeIssueWeight(kind, 0.5, 0, false),
+      `${kind} must be unchanged when nothing recorded it as unused`,
+    );
+  }
+});
+
+test("§4.4b: each recorded unused recall compounds on top of age decay", () => {
+  assert.equal(UNUSED_DECAY, 0.95);
+  const idle = computeIssueWeight("pattern", 0.5, 0, false, 0);
+  const once = computeIssueWeight("pattern", 0.5, 0, false, 1);
+  const twice = computeIssueWeight("pattern", 0.5, 0, false, 2);
+  assert.ok(once < idle, "being ignored must cost more than merely ageing");
+  assert.ok(twice < once, "repeated ignoring must compound");
+  assert.equal(once, Math.round(0.5 * DECAY.pattern * UNUSED_DECAY * 10000) / 10000);
+  assert.equal(twice, Math.round(0.5 * DECAY.pattern * UNUSED_DECAY ** 2 * 10000) / 10000);
+});
+
+test("§4.4b: a negative or absent count never raises a weight", () => {
+  const base = computeIssueWeight("facts", 0.5, 0, false, 0);
+  assert.equal(computeIssueWeight("facts", 0.5, 0, false, -5), base);
+  assert.equal(computeIssueWeight("facts", 0.5, 0, false, undefined), base);
+});
+
+test("§4.4b: Rule 12 and Rule 8 still win over unused decay", () => {
+  assert.equal(computeIssueWeight("lifefact", 0.5, 0, false, 25), 1.0);
+  assert.equal(computeIssueWeight("pattern", 0.9, 0, true, 25), 0);
+});
+
+test("§4.4b: an outcome comment still outweighs being ignored", () => {
+  // one success (+0.30) on a record ignored three times still rises
+  const ignored = computeIssueWeight("pattern", 0.5, 0, false, 3);
+  const reinforced = computeIssueWeight("pattern", 0.5, 0.3, false, 3);
+  assert.ok(reinforced > ignored + 0.25);
+});
+
+test("parseRecallUnused reads only (unused) refs from the Recall manifest", () => {
+  const body = [
+    "## Recall",
+    "",
+    "- **Surfaced:** #47 (used → success), #12 (used → success), #52 (unused), #61 (unused)",
+    "- **Capture:** stored #91",
+    "",
+    "## Detail",
+    "- #99 (unused) outside the manifest must not count",
+  ].join("\n");
+  assert.deepEqual(parseRecallUnused(body), [52, 61]);
+});
+
+test("parseRecallUnused is quiet on absent, empty or malformed manifests", () => {
+  assert.deepEqual(parseRecallUnused(null), []);
+  assert.deepEqual(parseRecallUnused(""), []);
+  assert.deepEqual(parseRecallUnused("## Recall\n\n- **Capture:** declined"), []);
+  // bare refs and used refs cost a record nothing
+  assert.deepEqual(parseRecallUnused("## Recall\n- **Surfaced:** #47, #52 (used → success)"), []);
 });

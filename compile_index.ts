@@ -79,6 +79,15 @@ const DECAY: Record<string, number> = {
 const REINFORCE_SUCCESS = 0.30;
 const PENALTY_FAILURE = 0.20;
 const ARCHIVE_THRESHOLD = 0.10;
+/**
+ * §4.4b — decay per recorded surfaced-but-unused recall. Time decay answers
+ * "how old is this?"; this answers "was it offered to an agent that then did
+ * not rely on it?", which is evidence about relevance rather than about age.
+ * Applied multiplicatively alongside the per-type rate, so an ignored record
+ * sinks faster than a merely idle one. A record no manifest mentions keeps
+ * exactly its previous arithmetic.
+ */
+const UNUSED_DECAY = 0.95;
 const LIFEFACT_TYPE = "lifefact";
 
 const TYPE_ORDER = [
@@ -114,6 +123,19 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+/**
+ * Titles carried in the master index. The first tier exists so an agent can
+ * decide what to skip; issue numbers and weights alone cannot support that
+ * decision, so the title travels with the pointer. Bounded so the master
+ * index stays small no matter how many Regions accumulate.
+ */
+const INDEX_TITLE_MAX = 72;
+
+function indexTitle(value: unknown): string {
+  const text = String(value ?? "").replace(/\s+/g, " ").trim();
+  return text.length > INDEX_TITLE_MAX ? `${text.slice(0, INDEX_TITLE_MAX - 1)}\u2026` : text;
+}
+
 function tableCell(value: unknown): string {
   if (value === null || value === undefined) {
     return "";
@@ -132,6 +154,33 @@ function getTag(title: string, tag: string): string | undefined {
  * comma-separated refs count — prose after them (`#12 — replaced by #45`)
  * must not archive the mentioned replacement.
  */
+/**
+ * §15.2 Recall manifest: `- **Surfaced:** #47 (used -> success), #52 (unused)`.
+ * Returns the records this manifest recorded as surfaced but not relied upon.
+ * Only refs carrying an explicit `(unused)` marker count; `(used -> ...)` and
+ * bare refs do not, so a malformed manifest costs a record nothing.
+ */
+function parseRecallUnused(body: string | null | undefined): number[] {
+  if (!body) {
+    return [];
+  }
+  const section = body.match(/^\s*#{1,6}\s*Recall\b[^\n]*\n([\s\S]*?)(?=^\s*#{1,6}\s|\Z)/im);
+  if (!section) {
+    return [];
+  }
+  const unused: number[] = [];
+  for (const line of section[1].split(/\r?\n/)) {
+    const match = line.match(/^\s*-?\s*(?:\*\*)?Surfaced:(?:\*\*)?\s*(.+)$/i);
+    if (!match) {
+      continue;
+    }
+    for (const ref of match[1].matchAll(/#(\d+)\s*\(\s*unused\s*\)/gi)) {
+      unused.push(Number(ref[1]));
+    }
+  }
+  return unused;
+}
+
 function parseSupersededTargets(body: string | null | undefined): number[] {
   if (!body) {
     return [];
@@ -179,14 +228,15 @@ function computeCommentDelta(comments: GitHubComment[]): number {
 
 /**
  * Pure §4.4 weight arithmetic for one issue: lifefacts pin at 1.0 (Rule 12),
- * a superseded issue floors to 0 (Rule 8), everything else decays then takes
- * the outcome delta; the result is clamped to [0, 1] and rounded to 4 dp.
+ * a superseded issue floors to 0 (Rule 8), everything else decays by age and by
+ * recorded unused recalls (§4.4b) then takes the outcome delta; the result is clamped to [0, 1] and rounded to 4 dp.
  */
 function computeIssueWeight(
   kind: string,
   oldWeight: number,
   delta: number,
   superseded: boolean,
+  unusedCount = 0,
 ): number {
   let weight: number;
   if (kind === LIFEFACT_TYPE) {
@@ -194,7 +244,9 @@ function computeIssueWeight(
   } else if (superseded) {
     weight = 0;
   } else {
-    weight = oldWeight * (DECAY[kind] ?? 0.85) + delta;
+    const idle = DECAY[kind] ?? 0.85;
+    const ignored = UNUSED_DECAY ** Math.max(0, unusedCount);
+    weight = oldWeight * idle * ignored + delta;
   }
   return Math.round(Math.max(0, Math.min(1, weight)) * 10000) / 10000;
 }
@@ -441,6 +493,21 @@ async function main(): Promise<void> {
 
   const { supersededBy } = resolveInvalidations(invalidationTargets);
 
+  // §4.4b — tally surfaced-but-unused recalls across every Rule 10 manifest.
+  // Standing count, like outcome comments: it is re-derived from the store on
+  // each compile rather than accumulated in weights.json, so the arithmetic
+  // stays a pure function of issue state and a deleted manifest undoes itself.
+  const unusedRecalls = new Map<string, number>();
+  for (const issue of issues) {
+    for (const target of parseRecallUnused(issue.body)) {
+      if (target === issue.number) {
+        continue;
+      }
+      const key = String(target);
+      unusedRecalls.set(key, (unusedRecalls.get(key) ?? 0) + 1);
+    }
+  }
+
   const structured: StructuredIndex = {};
   const archived: ArchivedIndex = {};
   let skippedForNoOutcome = 0;
@@ -498,6 +565,7 @@ async function main(): Promise<void> {
       priorWeights[n] ?? 1.0,
       delta,
       supersededByIssue !== undefined,
+      unusedRecalls.get(n) ?? 0,
     );
     weights[n] = newWeight;
 
@@ -637,7 +705,9 @@ async function main(): Promise<void> {
       Object.values(types).flat(),
     );
     allEntries.sort((a, b) => b.weight - a.weight || entryNumber(a) - entryNumber(b));
-    const top3 = allEntries.slice(0, 3).map((entry) => `#${entry.number} (w:${entry.weight})`);
+    const top3 = allEntries
+      .slice(0, 3)
+      .map((entry) => `#${entry.number} ${indexTitle(entry.summary)} (w:${entry.weight})`);
     const archivedCount = Object.values(archived[region] ?? {}).reduce(
       (total, entries) => total + entries.length,
       0,
@@ -710,6 +780,8 @@ export {
   DECAY,
   computeCommentDelta,
   computeIssueWeight,
+  parseRecallUnused,
+  UNUSED_DECAY,
   getTag,
   parseOutcome,
   parseSupersededTargets,

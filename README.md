@@ -1,4 +1,4 @@
-# RxAi AMP · Agent Memory Protocol v2.9.2
+# RxAi AMP · Agent Memory Protocol v2.10
 
 > 🌏 **繁體中文說明：[README.zh-TW.md](./README.zh-TW.md)**
 

@@ -198,7 +198,10 @@ export function compactIndex(text, regions) {
       kept.push(section.trimEnd());
       continue;
     }
-    const active = (section.match(/Active threads:\s*([^\n]*)/)?.[1] || "").match(/#\d+/g) || [];
+    // Pointers are comma-separated and now carry titles (§4.1, v2.10), so match
+    // only refs in pointer position -- a "#47" inside a title is not a pointer.
+    const activeLine = section.match(/Active threads:\s*([^\n]*)/)?.[1] || "";
+    const active = [...activeLine.matchAll(/(?:^|,\s*)(#\d+)/g)].map((m) => m[1]);
     others.push(`${name} (${active.length ? active.join(" ") : "no active threads"})`);
   }
   const out = [header];

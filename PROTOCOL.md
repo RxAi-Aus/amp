@@ -1,6 +1,6 @@
 # RxAi AMP — Agent Memory Protocol
 
-**RxAi AMP v2.9.2**
+**RxAi AMP v2.10**
 
 **Purpose:** This document defines the complete communication and shared memory protocol for AI agents operating on a shared GitHub repository. Any agent that reads this file and can reach GitHub Issues for this repository — through the GitHub MCP server or an authenticated `gh` CLI — can participate in the protocol.
 
@@ -345,17 +345,27 @@ Rebuilt every 6 hours. Contains Summary blurbs only — one paragraph per Region
 
 ## Region: ProjectX
 > **Summary:** Memory sync confirmed. Protocol v2.1 operational since 2026-04-26.
-> Active threads: #11 (w:0.94), #14 (w:0.87), #22 (w:0.71).
+> Active threads: #11 Retry with rebase on push race (w:0.94), #14 Cache the
+> resolved slug per run (w:0.87), #22 Seed §6 labels before first compile (w:0.71).
 > Archived: 3 issues. See REGION-ProjectX.md for full pointer table.
 
 ## Region: openclaw-diary
 > **Summary:** 12 session logs. Last: debugging token auth 2026-04-26.
-> Active threads: #31 (w:0.88). See REGION-openclaw-diary.md.
-
-## Region: claudecowork-diary
-> **Summary:** 8 session logs. Last: INDEX.md layered read test 2026-04-26.
-> Active threads: #38 (w:0.91). See REGION-claudecowork-diary.md.
+> Active threads: #31 Session summary 2026-04-26 — token auth (w:0.88).
+> See REGION-openclaw-diary.md.
 ```
+
+**Active-thread pointers carry the issue title (v2.10).** The master index is
+the tier that decides what an agent *skips*; a bare `#11 (w:0.94)` cannot
+support that decision, so the agent must descend into a Region file merely to
+learn what the record is about — which defeats the two-tier design. Titles are
+truncated to 72 characters so the file stays bounded as Regions accumulate.
+
+> **Implementation note.** The `Summary:` blurb above is specified but not yet
+> generated: the compiler emits the literal placeholder
+> `Summary not yet generated for this Region.` for every Region. Until that is
+> implemented, the titles on the Active-threads line are the only semantic
+> content in this tier.
 
 ### 4.2 REGION-{name}.md — Per-Region Pointer Tables
 
@@ -430,8 +440,11 @@ Every issue in a Region file carries a weight between 0.0 and 1.0.
 **Decay** — applied every 6 hours to every issue:
 
 ```
-new_weight = old_weight × ρ
+new_weight = old_weight × ρ × υ^u
 ```
+
+where `ρ` is the per-type age decay of §4.3, `υ` = **0.95**, and `u` is the
+number of surfaced-but-unused recalls recorded against the issue (§4.4b).
 
 **Reinforcement / Penalty** — applied per new comment since last compile, based on the comment's `Outcome` marker:
 
@@ -443,6 +456,35 @@ new_weight = old_weight × ρ
 | no marker | treated as neutral (backward compatible) |
 
 After all per-comment deltas are summed, the result is **clamped to [0.0, 1.0]**.
+
+#### 4.4b Unused-recall decay (v2.10)
+
+`ρ` answers *how old is this?*. It cannot answer *is this still relevant?*,
+because it runs on the compile schedule whether or not anything happened —
+four times a day, forever. A record that no agent ever needed and a record
+that is simply young both decay at the same rate.
+
+`υ^u` adds the second question. `u` counts the times a §15.2 Recall manifest
+recorded the issue as **surfaced but not relied upon**:
+
+```
+- **Surfaced:** #47 (used → success), #52 (unused)
+```
+
+Only refs carrying an explicit `(unused)` marker count. A bare ref, a
+`(used → …)` ref, a malformed manifest, and a manifest that never mentions the
+issue all contribute nothing, so `u = 0` reproduces the pre-v2.10 arithmetic
+exactly. An issue never counts its own manifest against itself.
+
+`u` is a **standing count re-derived from the store on every compile**, exactly
+like the outcome deltas above — it is not accumulated in `weights.json`. A
+deleted or corrected manifest therefore undoes its own effect on the next
+compile, and the arithmetic stays a pure function of issue state.
+
+The distinction this draws is the one that matters for recall quality: an
+agent was shown the record, judged it, and moved on. That is evidence about
+the record, not about the clock. Rule 12 (`lifefact` pinned at 1.0) and Rule 8
+(supersession floors to 0) both still take precedence.
 
 **Why failures decrease weight:** A high-confidence memory that fails in a changed environment must lose confidence so the system stops recommending it. Without negative reinforcement, repeated failure comments would still count as activity (any comment = +0.30 in v2.0), which would actively poison the memory by inflating the weight of broken patterns. The arithmetic is simple by design: each comment contributes a small fixed delta, and the running total is clamped to [0.0, 1.0].
 
@@ -1861,6 +1903,7 @@ cannot stop a poisoned memory from being *stored*, so it must never be
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.10 | 2026-09-10 | **ADDITIVE:** Two recall-quality corrections found by the Codex L1/L2 A/B. (a) §4.1 Active-thread pointers in `INDEX.md` now carry the issue title (truncated to 72 chars). The master index is the tier that decides what to skip, and `#373 (w:0.31)` cannot support that decision — the compiler already had the title in hand for the Region tables and simply was not printing it in the master index, so agents descended a tier merely to learn what a record was about. The specified per-Region `Summary:` blurb remains unimplemented and is now documented as such rather than reading as a transient state. (b) New §4.4b: decay becomes `old × ρ × υ^u`, where `u` is the number of §15.2 Recall manifests recording the issue as surfaced-but-unused and `υ` = 0.95. `ρ` runs on the compile clock four times a day whether or not anything happened; `υ^u` adds evidence about relevance rather than age. `u` is a standing count re-derived from the store each compile (never accumulated in `weights.json`), only explicit `(unused)` refs count, and `u = 0` reproduces the pre-v2.10 arithmetic exactly, so existing stores are unaffected until manifests appear. Rule 12 pinning and Rule 8 supersession still take precedence. No title format, label, type, decay rate, index-file set, or memory-write rule changed. |
 | 2.9.2 | 2026-09-10 | **ADDITIVE:** Codex moves from L1 to L2 now that its stable hooks runtime exposes `SessionStart`, `PostToolUse`, `Stop`, and `SessionEnd`. `npm run hooks:install:codex` installs a self-contained hook runtime under `~/.codex/rxai-amp`, merges those hooks into `~/.codex/hooks.json` without replacing foreign hooks, keeps the skill and `AGENTS.md` digest as fail-soft L1 fallback, injects compact repo-aware recall as developer context, observes memory reads/writes and commit boundaries, interposes the capture checkpoint at most once per turn/session ledger, and closes the ledger at session end. Existing v2.9.1 installations remain valid at L1 until the installer is rerun and the hook definitions are trusted in Codex. No title, label, type, decay, index, or memory-write rule changed. |
 | 1.0 | 2026-04-09 | Initial protocol definition |
 | 2.0 | 2026-04-14 | Two-tier index (INDEX.md + REGION files); confidence weight decay; `type:intent`, `type:pattern`, `type:invalidation` types; 4-layer progressive loading; session diary rule (Rule 10); per-session diary Region convention; future extensions section |

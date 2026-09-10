@@ -518,3 +518,24 @@ test("claude-code session-start compacts the navigation layer and ledgers inject
   assert.equal(stop, "");
   assert.equal(JSON.parse(readFileSync(ledgerFile, "utf8")).status, "closed");
 });
+
+test("amp-recall compactIndex keeps v2.10 titles and ignores refs inside them", () => {
+  const index = [
+    "# Agent Memory Index",
+    "",
+    "---",
+    "",
+    "## Region: Acme",
+    "  > Active threads: #10 Retry with rebase on push race (w:0.5).  ",
+    "",
+    "## Region: Other",
+    "  > Active threads: #99 Fix #47 regression (w:1), #98 Seed labels (w:0.4).  ",
+    "",
+  ].join("\n");
+  const out = compactIndex(index, ["acme"]);
+  // the matched Region keeps its title verbatim -- that is the whole point
+  assert.match(out, /#10 Retry with rebase on push race \(w:0\.5\)/);
+  // the collapsed Region lists only the two pointers, not the #47 inside a title
+  assert.match(out, /Other \(#99 #98\)/);
+  assert.doesNotMatch(out, /#47/);
+});
