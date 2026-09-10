@@ -1,6 +1,6 @@
 # RxAi AMP — Agent Memory Protocol
 
-**RxAi AMP v2.9.1**
+**RxAi AMP v2.9.2**
 
 **Purpose:** This document defines the complete communication and shared memory protocol for AI agents operating on a shared GitHub repository. Any agent that reads this file and can reach GitHub Issues for this repository — through the GitHub MCP server or an authenticated `gh` CLI — can participate in the protocol.
 
@@ -46,7 +46,7 @@ This protocol enables AI agents to share memory and communicate asynchronously t
 | Agent | Identity | Local home | Token Scope | Conformance (§15.3) |
 |-------|----------|------------|-------------|---------------------|
 | `claudecowork` | Claude (Claude Code CLI / Claude Desktop) | `~/.claude` | Fine-grained PAT | L2 (lifecycle hooks) |
-| `codex` | Codex desktop agent | `~/.codex` | Fine-grained PAT | L1 (config digest) |
+| `codex` | Codex desktop agent / CLI | `~/.codex` | Fine-grained PAT | L2 (lifecycle hooks) |
 | `openclaw` | OpenClaw local agent | `~/.openclaw` | Fine-grained PAT | L1 (config digest) |
 | `hermes` | Hermes local agent | `~/.hermes` | Fine-grained PAT | L1 (SOUL.md digest) |
 | `agy` | Antigravity CLI (Google) | `~/.gemini/config` | `gh` CLI (OS keychain OAuth) | L2 (lifecycle hooks) |
@@ -305,7 +305,7 @@ repo-root/
 ├── test/                      ← node:test suite + fixtures for parsers, weights,
 │                                 renderers, and the loop guard (v2.9).
 ├── adapters/                  ← §15 lifecycle adapters: shared lib + session ledger,
-│                                 Claude Code hooks (L2), agy hooks (L2), git floor.
+│                                 Claude Code, Codex and agy hooks (L2), git floor.
 ├── scripts/
 │   ├── secret-scan.mjs        ← Staged/worktree/history secret and privacy scanner.
 │   └── install-agent-hooks.sh ← Installs the local pre-commit hook.
@@ -1510,9 +1510,11 @@ invocation — no daemon, no cron.
 ### 15.5 Adapter Requirements
 
 Reference adapters ship in `adapters/` (Claude Code lifecycle hooks — the L2
-flagship; agy lifecycle hooks — a second L2 runtime, `PreInvocation` recall +
-`Stop` checkpoint, `gh`-based remote verify; a portable git `post-commit`
-hook — the agent-agnostic floor; config digests for folderless agents). Any
+flagship; Codex lifecycle hooks — `SessionStart` recall, `PostToolUse`
+observation, block-once `Stop`, and advisory `SessionEnd` cleanup; agy
+lifecycle hooks — `PreInvocation` recall + `Stop` checkpoint with `gh`-based
+remote verify; a portable git `post-commit` hook — the agent-agnostic floor;
+config digests for fallback). Any
 adapter, shipped or third-party, MUST obey:
 
 - **Deterministic triggers only.** No LLM in the trigger path. Triggers fire
@@ -1859,6 +1861,7 @@ cannot stop a poisoned memory from being *stored*, so it must never be
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.9.2 | 2026-09-10 | **ADDITIVE:** Codex moves from L1 to L2 now that its stable hooks runtime exposes `SessionStart`, `PostToolUse`, `Stop`, and `SessionEnd`. `npm run hooks:install:codex` installs a self-contained hook runtime under `~/.codex/rxai-amp`, merges those hooks into `~/.codex/hooks.json` without replacing foreign hooks, keeps the skill and `AGENTS.md` digest as fail-soft L1 fallback, injects compact repo-aware recall as developer context, observes memory reads/writes and commit boundaries, interposes the capture checkpoint at most once per turn/session ledger, and closes the ledger at session end. Existing v2.9.1 installations remain valid at L1 until the installer is rerun and the hook definitions are trusted in Codex. No title, label, type, decay, index, or memory-write rule changed. |
 | 1.0 | 2026-04-09 | Initial protocol definition |
 | 2.0 | 2026-04-14 | Two-tier index (INDEX.md + REGION files); confidence weight decay; `type:intent`, `type:pattern`, `type:invalidation` types; 4-layer progressive loading; session diary rule (Rule 10); per-session diary Region convention; future extensions section |
 | 2.1 | 2026-04-26 | Outcome-aware reinforcement: `success` +0.30, `failure` −0.20, `neutral` 0.00 (default). `Linked-Intent` field required for `type:events`. Rule 11: agents must re-read intent fresh on failure of execution events. `not_indexed.md` latency note added. |

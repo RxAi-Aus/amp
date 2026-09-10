@@ -3,17 +3,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later OR LicenseRef-Commercial
 
 /**
- * install-codex.mjs — Protocol v2.9.1 (adapters/codex, L1)
+ * install-codex.mjs — Protocol v2.9.2 (adapters/codex, L2)
  *
- * Codex has no lifecycle-hook runtime, so there is nothing to enforce with:
- * L1 means the obligations are carried into context by a skill plus a config
- * digest, and work boundaries come from the agent-agnostic git floor.
- *
- * This installer does the three pieces of that:
+ * This installer does the four pieces of the L2 adapter:
  *   1. Writes/merges ~/.rxai-amp/config.json (creates missing keys only;
  *      agent_name_default is left to whichever agent installed first).
- *   2. Copies the codex-flavoured rxai-amp skill to ~/.codex/skills/rxai-amp.
- *   3. Appends the §15 digest to ~/.codex/AGENTS.md between sentinel
+ *   2. Copies the zero-dependency hook runtime under ~/.codex/rxai-amp.
+ *   3. Merges SessionStart/PostToolUse/Stop/SessionEnd into hooks.json.
+ *   4. Copies the codex-flavoured rxai-amp skill to ~/.codex/skills/rxai-amp.
+ *   5. Appends the §15 digest to ~/.codex/AGENTS.md between sentinel
  *      comments — replacing only a previous block of ours, never foreign
  *      content (§15.5 chain-never-clobber). A backup is written first.
  * and then makes sure the `from:codex` label exists on the memory repo,
@@ -65,6 +63,10 @@ function apply(description, fn) {
   if (!DRY) fn();
 }
 
+function shellArg(value) {
+  return `'${String(value).replaceAll("'", `'"'"'`)}'`;
+}
+
 // ---- 1. ~/.rxai-amp/config.json --------------------------------------
 const ampHome = process.env.RXAI_AMP_HOME || path.join(homedir(), ".rxai-amp");
 const configFile = path.join(ampHome, "config.json");
@@ -90,7 +92,57 @@ apply(`write ${configFile} (merge, existing keys win)`, () => {
   writeFileSync(configFile, JSON.stringify(mergedConfig, null, 2) + "\n", { mode: 0o600 });
 });
 
-// ---- 2. skill mirror --------------------------------------------------
+// ---- 2. self-contained hook runtime ----------------------------------
+const runtimeRoot = path.join(codexHome, "rxai-amp");
+apply(`copy hook runtime into ${runtimeRoot}`, () => {
+  mkdirSync(runtimeRoot, { recursive: true });
+  cpSync(path.join(memoryRoot, "adapters"), path.join(runtimeRoot, "adapters"), { recursive: true });
+});
+
+// ---- 3. ~/.codex/hooks.json ------------------------------------------
+const hooksFile = path.join(codexHome, "hooks.json");
+let hooksConfig = {};
+if (existsSync(hooksFile)) {
+  // Malformed hook config must fail loudly rather than be clobbered.
+  hooksConfig = JSON.parse(readFileSync(hooksFile, "utf8"));
+}
+hooksConfig.hooks = hooksConfig.hooks && typeof hooksConfig.hooks === "object" ? hooksConfig.hooks : {};
+
+const hookCmd = (file) =>
+  `/usr/bin/env RXAI_AMP_AGENT=${shellArg(agent)} node ${shellArg(path.join(runtimeRoot, "adapters", "codex", "hooks", file))}`;
+const OURS = /adapters[/\\]codex[/\\]hooks[/\\]/;
+const desiredHooks = {
+  SessionStart: {
+    matcher: "startup|resume|clear|compact",
+    hooks: [{ type: "command", command: hookCmd("session-start.mjs"), timeout: 30, statusMessage: "Loading AMP memory", additionalContextLimit: 2500 }],
+  },
+  PostToolUse: {
+    matcher: "Bash|mcp__.*issue.*",
+    hooks: [{ type: "command", command: hookCmd("post-tool-use.mjs"), timeout: 15 }],
+  },
+  Stop: {
+    hooks: [{ type: "command", command: hookCmd("stop.mjs"), timeout: 30 }],
+  },
+  SessionEnd: {
+    hooks: [{ type: "command", command: hookCmd("session-end.mjs"), timeout: 3 }],
+  },
+};
+
+for (const [event, entry] of Object.entries(desiredHooks)) {
+  const existingHooks = Array.isArray(hooksConfig.hooks[event]) ? hooksConfig.hooks[event] : [];
+  const foreign = existingHooks.filter(
+    (group) => !group?.hooks?.some((hook) => typeof hook?.command === "string" && OURS.test(hook.command))
+  );
+  hooksConfig.hooks[event] = [...foreign, entry];
+}
+
+apply(`merge AMP lifecycle hooks into ${hooksFile} (backup first)`, () => {
+  mkdirSync(codexHome, { recursive: true });
+  if (existsSync(hooksFile)) cpSync(hooksFile, `${hooksFile}.amp-bak`);
+  writeFileSync(hooksFile, JSON.stringify(hooksConfig, null, 2) + "\n");
+});
+
+// ---- 4. skill mirror --------------------------------------------------
 const skillSrc = path.join(memoryRoot, "adapters", "codex", "skills", "rxai-amp");
 const skillDst = path.join(codexHome, "skills", "rxai-amp");
 if (existsSync(skillSrc)) {
@@ -100,7 +152,7 @@ if (existsSync(skillSrc)) {
   });
 }
 
-// ---- 3. AGENTS.md digest ---------------------------------------------
+// ---- 5. AGENTS.md digest ---------------------------------------------
 const OPEN = "<!-- rxai-amp-digest v1";
 const CLOSE = "<!-- /rxai-amp-digest -->";
 const digest = readFileSync(path.join(memoryRoot, "adapters", "codex", "digest.md"), "utf8").trim();
@@ -127,7 +179,7 @@ if (merged !== existing) {
   notes.push(`digest in ${agentsFile} already current`);
 }
 
-// ---- 4. from:<agent> label -------------------------------------------
+// ---- 6. from:<agent> label -------------------------------------------
 if (!process.argv.includes("--no-label") && repoSlug) {
   let labels = null;
   try {
@@ -164,7 +216,7 @@ if (!repoSlug) {
   process.stdout.write("note: no repo slug resolved — set RXAI_AMP_SLUG or config.json memory_repo.owner/name\n");
 }
 process.stdout.write(
-  `next: export RXAI_AMP_AGENT=${agent} in the environment Codex runs under (identity + ledger day key; do NOT set it globally — other agents share this shell)\n` +
+  "next: open /hooks in Codex and trust the new or changed AMP definitions; Codex will skip non-managed hooks until reviewed.\n" +
     "      install the commit floor in each repo Codex works in — npm run hooks:install:capture -- /path/to/repo\n" +
-    "Codex is L1: no hooks fire. The skill + digest are what carry the obligations; AMP_DISABLE=1 switches them off.\n"
+    "Codex is L2 after hook trust; the skill + digest remain the L1 fallback. AMP_DISABLE=1 switches AMP off.\n"
 );

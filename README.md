@@ -1,4 +1,4 @@
-# RxAi AMP · Agent Memory Protocol v2.9.1
+# RxAi AMP · Agent Memory Protocol v2.9.2
 
 > 🌏 **繁體中文說明：[README.zh-TW.md](./README.zh-TW.md)**
 
@@ -58,7 +58,7 @@ the conversation about that thought. GitHub Actions watches every new issue and
 keeps a sorted, weighted index of which thoughts are worth re-reading and which
 have decayed.
 
-The current release is **v2.9** (additive, release-readiness hardening: an automated test suite + CI gate, the Rule 14 Agent Loop Guard made normative, the official Docker GitHub MCP server as primary configuration, and the §16 Security Considerations & Threat Model). v2.8 (additive) added the Agent Lifecycle Contract §15, lifecycle adapters, the `/amp` command, and `npm run setup`. v2.4 (additive) introduced a permanent-memory subsystem (`type:lifefact` + `permanent_memory.json`) for biographical facts that should never decay. v2.5 (additive) added an optional local issue cache (`.rxai-cache/`) for fast lookup, plus a pre-commit secret-scan hook. v2.6 (additive) added the OKF/BigQuery derived search layer (PROTOCOL.md §14). v2.7 (additive) hardened the pipeline: enforced `Supersedes:` invalidations, a reconciling Not Indexed Tracker, push retries that fail loudly, and generated-state hygiene. The earlier v2.2 release was a **breaking** terminology rename (`Wing`→`Region`, `Room`→`Place`, `Hall`→`Type`) — see [PROTOCOL.md Appendix B](./PROTOCOL.md) for migration guidance.
+The current release is **v2.9.2** (additive: Codex now has an L2 lifecycle adapter using its stable hooks runtime, with the existing skill and digest retained as L1 fallback). v2.9 added release-readiness hardening: an automated test suite + CI gate, the Rule 14 Agent Loop Guard made normative, the official Docker GitHub MCP server as primary configuration, and the §16 Security Considerations & Threat Model. v2.8 (additive) added the Agent Lifecycle Contract §15, lifecycle adapters, the `/amp` command, and `npm run setup`. v2.4 (additive) introduced a permanent-memory subsystem (`type:lifefact` + `permanent_memory.json`) for biographical facts that should never decay. v2.5 (additive) added an optional local issue cache (`.rxai-cache/`) for fast lookup, plus a pre-commit secret-scan hook. v2.6 (additive) added the OKF/BigQuery derived search layer (PROTOCOL.md §14). v2.7 (additive) hardened the pipeline: enforced `Supersedes:` invalidations, a reconciling Not Indexed Tracker, push retries that fail loudly, and generated-state hygiene. The earlier v2.2 release was a **breaking** terminology rename (`Wing`→`Region`, `Room`→`Place`, `Hall`→`Type`) — see [PROTOCOL.md Appendix B](./PROTOCOL.md) for migration guidance.
 
 The substantive intelligence layer was added in v2.1: when an agent reports back on a thought, it must say whether the thought worked (`Outcome: success`), didn't work (`Outcome: failure`), or was just chatter (`Outcome: neutral`). Successes raise the weight, failures lower it, chatter does nothing. Over time, broken patterns evaporate without anyone having to manually delete them.
 
@@ -868,6 +868,17 @@ access and that would let the librarian post or edit comments. This route
 also means the Copilot PAT can stay minimal (Copilot Requests only); there is
 no need to grant it repository access.
 
+## What's new in v2.9.2
+
+**Additive.** Codex now installs an L2 lifecycle adapter through its stable
+hooks runtime. `SessionStart` injects compact repo-aware recall,
+`PostToolUse` observes work and memory access, `Stop` interposes the
+capture-or-decline checkpoint once, and `SessionEnd` closes the ledger. The
+installer copies a self-contained runtime under `~/.codex/rxai-amp`, merges
+into `~/.codex/hooks.json`, preserves foreign hooks, and keeps the skill and
+`AGENTS.md` digest as an L1 fallback. After installation,
+review and trust the definitions with `/hooks` in Codex.
+
 ## What's new in v2.9.1
 
 **Additive.** No title format, label, type, decay rate, or index-format
@@ -892,10 +903,9 @@ change. One new agent, one new adapter, and a local task board:
   normative is the write path: GitHub Issues on the memory repo, canonical
   title/body, credential in the OS keychain (Rule 3A unchanged). The agy
   skill mirror restates the MCP tool tables as `gh` commands.
-- **Codex onboarding is one command too** — `npm run hooks:install:codex`
-  installs its L1 pieces (skill mirror into `~/.codex/skills`, the §15 digest
-  into `~/.codex/AGENTS.md` between sentinels, `from:codex` label), replacing
-  the copy-paste steps the adapter README used to list.
+- **Codex onboarding became one command** — in v2.9.1,
+  `npm run hooks:install:codex` installed the L1 skill mirror, §15 digest, and
+  `from:codex` label. v2.9.2 extends that same command with lifecycle hooks.
 - **Agent detection instead of typing** — `npm run setup` probes the config
   roots (`~/.claude`, `~/.gemini/config`, `~/.codex`, `~/.openclaw`,
   `~/.hermes`) and offers each detected agent's installer, and `npm install`

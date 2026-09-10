@@ -49,7 +49,9 @@ if (trivial) {
   // nothing owed (§15.2), close quietly. Memories auto-injected at session
   // start do not count: surfaced-but-unused memories get nothing (§15.1),
   // and only the agent can tell whether it relied on one.
-  closeLedger(sessionId);
+  // Codex Stop fires at the end of every turn, not only when the session is
+  // ending. Keep its ledger open for a later turn; SessionEnd closes it.
+  if (process.env.RXAI_AMP_RUNTIME !== "codex") closeLedger(sessionId);
   process.exit(0);
 }
 
@@ -87,7 +89,7 @@ if (!discharged && config.repoSlug && githubToken()) {
 
 if (discharged) {
   // OUTCOME reminders ride along in the manifest; capture is satisfied.
-  closeLedger(sessionId);
+  if (process.env.RXAI_AMP_RUNTIME !== "codex") closeLedger(sessionId);
   process.exit(0);
 }
 

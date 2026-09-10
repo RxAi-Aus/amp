@@ -76,11 +76,87 @@ test("codex skill mirror keeps the rxai-amp identity and posts as codex", () => 
   const skill = readFileSync(path.join(root, "adapters/codex/skills/rxai-amp/SKILL.md"), "utf8");
   assert.match(skill, /^---\nname: rxai-amp\n/);
   assert.match(skill, /## Codex specifics/);
-  // L1 has no trigger: the skill must say so, or Codex waits for a checkpoint
-  // that can never arrive.
-  assert.match(skill, /nothing will trigger you/i);
+  assert.match(skill, /Conformance L2 when hooks are trusted; L1 fallback otherwise/i);
   const summary = readFileSync(path.join(root, "adapters/codex/skills/rxai-amp/examples/session-summary.md"), "utf8");
   assert.match(summary, /\[FROM:codex→self\]\[REGION:codex-diary\]/);
+});
+
+test("codex installer merges L2 hooks without replacing foreign hooks", (t) => {
+  const home = mkdtempSync(path.join(tmpdir(), "amp-codex-install-"));
+  const codexHome = path.join(home, "codex");
+  const ampHome = path.join(home, "amp");
+  mkdirSync(codexHome, { recursive: true });
+  writeFileSync(
+    path.join(codexHome, "hooks.json"),
+    JSON.stringify({ hooks: { Stop: [{ hooks: [{ type: "command", command: "foreign-stop" }] }] } })
+  );
+  t.after(() => rmSync(home, { recursive: true, force: true }));
+
+  const args = [
+    path.join(root, "scripts/install-codex.mjs"),
+    "--repo-path", root,
+    "--repo-slug", "test-owner/test-memory",
+    "--codex-home", codexHome,
+    "--no-label",
+  ];
+  const env = { ...process.env, RXAI_AMP_HOME: ampHome };
+  execFileSync("node", args, { env, encoding: "utf8" });
+  execFileSync("node", args, { env, encoding: "utf8" }); // idempotent
+
+  const installed = JSON.parse(readFileSync(path.join(codexHome, "hooks.json"), "utf8"));
+  assert.deepEqual(Object.keys(installed.hooks).sort(), ["PostToolUse", "SessionEnd", "SessionStart", "Stop"]);
+  assert.equal(installed.hooks.Stop.length, 2);
+  assert.equal(installed.hooks.Stop[0].hooks[0].command, "foreign-stop");
+  for (const event of ["SessionStart", "PostToolUse", "SessionEnd"]) {
+    assert.equal(installed.hooks[event].length, 1, `${event} duplicated on reinstall`);
+  }
+  for (const groups of Object.values(installed.hooks)) {
+    for (const group of groups) {
+      for (const hook of group.hooks) {
+        if (hook.command === "foreign-stop") continue;
+        assert.match(hook.command, /RXAI_AMP_AGENT='codex'/);
+        const script = hook.command.match(/'([^']*adapters\/codex\/hooks\/[^']+)'$/)?.[1];
+        assert.ok(script && existsSync(script), `missing installed hook target: ${hook.command}`);
+      }
+    }
+  }
+});
+
+for (const hook of ["session-start", "post-tool-use", "stop", "session-end"]) {
+  test(`codex ${hook} hook is fail-soft when AMP is disabled`, () => {
+    const out = execFileSync("node", [path.join(root, "adapters/codex/hooks", `${hook}.mjs`)], {
+      input: JSON.stringify({ session_id: "disabled", cwd: root, hook_event_name: "test" }),
+      encoding: "utf8",
+      env: { ...process.env, AMP_DISABLE: "1" },
+      timeout: 20_000,
+    });
+    assert.equal(out, "");
+  });
+}
+
+test("codex keeps a trivial turn ledger open until SessionEnd", (t) => {
+  const home = mkdtempSync(path.join(tmpdir(), "amp-codex-lifecycle-"));
+  t.after(() => rmSync(home, { recursive: true, force: true }));
+  const { AMP_DISABLE: _d, RXAI_AMP_REPO: _r, GH_TOKEN: _g, GITHUB_TOKEN: _gt, GITHUB_PERSONAL_ACCESS_TOKEN: _gp, ...baseEnv } =
+    process.env;
+  const env = { ...baseEnv, RXAI_AMP_HOME: home, RXAI_AMP_SLUG: "test-owner/test-memory", RXAI_AMP_AGENT: "codex" };
+  const sessionId = "codex-multiturn";
+  const ledgerCli = path.join(root, "adapters/lib/amp-ledger.mjs");
+  execFileSync("node", [ledgerCli, "open", sessionId, "--agent", "codex"], { env, encoding: "utf8" });
+
+  const run = (hook, extra = {}) => execFileSync("node", [path.join(root, "adapters/codex/hooks", `${hook}.mjs`)], {
+    input: JSON.stringify({ session_id: sessionId, cwd: root, ...extra }),
+    env,
+    encoding: "utf8",
+    timeout: 20_000,
+  });
+  assert.equal(run("stop", { stop_hook_active: false }), "");
+  let ledger = JSON.parse(readFileSync(path.join(home, "sessions", `${sessionId}.json`), "utf8"));
+  assert.equal(ledger.status, "open");
+
+  run("session-end", { reason: "other" });
+  ledger = JSON.parse(readFileSync(path.join(home, "sessions", `${sessionId}.json`), "utf8"));
+  assert.equal(ledger.status, "closed");
 });
 
 // Every L1 digest must carry the three obligations, the sentinels the

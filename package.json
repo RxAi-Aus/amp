@@ -1,6 +1,6 @@
 {
   "name": "github-memory-agent",
-  "version": "2.9.1",
+  "version": "2.9.2",
   "private": true,
   "license": "(AGPL-3.0-or-later OR LicenseRef-RxAi-Commercial)",
   "type": "module",

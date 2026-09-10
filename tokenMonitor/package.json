@@ -10,6 +10,7 @@
     "scan": "npm run -s build && node dist/src/cli.js scan",
     "report": "npm run -s build && node dist/src/cli.js report",
     "sessions": "npm run -s build && node dist/src/cli.js sessions",
+    "benchmark:codex": "npm run -s build && node dist/src/codex_benchmark.js",
     "backfill": "npm run -s build && node dist/src/cli.js backfill",
     "serve": "npm run -s build && node dist/src/cli.js serve"
   },

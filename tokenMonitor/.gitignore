@@ -2,3 +2,4 @@ node_modules/
 dist/
 data/
 tokmon.config.json
+config/tasks.json

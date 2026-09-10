@@ -146,5 +146,5 @@ process.stdout.write((DRY ? "[dry-run] planned:\n" : "done:\n") + plan.map((p) =
 if (!repoSlug) {
   process.stdout.write("note: no repo slug resolved — Stop-hook remote verify disabled until RXAI_AMP_SLUG or config.json memory_repo.owner/name is set\n");
 }
-process.stdout.write("Other agents: npm run hooks:install:agy (L2) · npm run hooks:install:codex (L1) — see adapters/*/README.md\n");
+process.stdout.write("Other agents: npm run hooks:install:agy (L2) · npm run hooks:install:codex (L2) — see adapters/*/README.md\n");
 process.stdout.write("Disable everything anytime with AMP_DISABLE=1; uninstall by removing the three hook entries and rerunning nothing.\n");

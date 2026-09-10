@@ -52,7 +52,7 @@ suggestions):**
 ## Project Structure & Module Organization
 - `PROTOCOL.md` is the source of truth for the communication protocol. It currently describes RxAi AMP v2.9.1, including `type:lifefact`, optional `permanent_memory.json` support, optional `.rxai-cache/` local issue caching, the OKF/BigQuery projection (§14), enforced `Supersedes:` invalidations, the Agent Lifecycle Contract (§15), the normative Agent Loop Guard (Rule 14), and the Security Considerations & Threat Model (§16).
 - `agent_loop_guard.ts` (repo root, v2.9) is the Rule 14 deterministic loop guard. `test/` holds the `node:test` fixture/golden suite covering parsers, weight arithmetic, rendering, and guard decisions.
-- `adapters/` holds the lifecycle adapters: shared zero-dep lib (`adapters/lib/amp-config.mjs`, `amp-ledger.mjs`), Claude Code hooks (`adapters/claude-code/hooks/`), agy hooks + skill mirror (`adapters/agy/`, v2.9.1 — `gh` instead of MCP), the Codex L1 pieces (`adapters/codex/` — skill mirror + `digest.md`), the OpenClaw/Hermes L1 digests (`adapters/openclaw/`, `adapters/hermes/` — installed by the shared `scripts/install-digest.mjs`), the portable git `post-commit` capture hook (`adapters/git-hooks/`), and per-agent READMEs. `adapters/README.md` carries the ledger/config schemas and conformance matrix.
+- `adapters/` holds the lifecycle adapters: shared zero-dep lib (`adapters/lib/amp-config.mjs`, `amp-ledger.mjs`), Claude Code hooks (`adapters/claude-code/hooks/`), agy hooks + skill mirror (`adapters/agy/`, v2.9.1 — `gh` instead of MCP), the Codex L2 hooks (`adapters/codex/hooks/` — v2.9.2 shims that set the agent identity and delegate to the Claude Code implementation, so recall stays single-sourced) plus its skill mirror + `digest.md` as fail-soft L1 fallback, the OpenClaw/Hermes L1 digests (`adapters/openclaw/`, `adapters/hermes/` — installed by the shared `scripts/install-digest.mjs`), the portable git `post-commit` capture hook (`adapters/git-hooks/`), and per-agent READMEs. `adapters/README.md` carries the ledger/config schemas and conformance matrix.
 - `README.md` is the quickstart and may lag behind `PROTOCOL.md`; resolve conflicts in favor of `PROTOCOL.md`.
 - `compile_index.ts` rebuilds `INDEX.md`, creates `REGION-*.md` pointer tables, applies decay/outcome weight changes, persists weight state, and resets `not_indexed.md`.
 - `track_not_indexed.ts` rebuilds `not_indexed.md` from every issue created since the last compile (reconciliation — a cancelled or failed tracker run is repaired by the next one).
@@ -111,7 +111,7 @@ suggestions):**
   ```bash
   npm run hooks:install:claude              # Claude Code hooks + user-level skill (add -- --dry-run to preview)
   npm run hooks:install:agy                 # agy PreInvocation/Stop hooks + global skill into ~/.gemini/config
-  npm run hooks:install:codex               # Codex L1: skill into ~/.codex/skills + §15 digest into ~/.codex/AGENTS.md
+  npm run hooks:install:codex               # Codex L2 (v2.9.2): hook runtime + ~/.codex/hooks.json merge; skill + digest stay as L1 fallback
   npm run hooks:install:openclaw            # OpenClaw L1: §15 digest into its workspace AGENTS.md
   npm run hooks:install:hermes              # Hermes L1: §15 digest into ~/.hermes/SOUL.md
   npm run hooks:install:capture -- <repo>   # AMP post-commit capture hook into any working repo

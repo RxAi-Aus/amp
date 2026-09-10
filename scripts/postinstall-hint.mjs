@@ -35,7 +35,7 @@ try {
   if (has(".gemini", "config") && !contains([".gemini", "config", "hooks.json"], "adapters/agy"))
     missing.push(["agy / Antigravity CLI (L2)", "npm run hooks:install:agy"]);
   if (has(".codex") && !(has(".codex", "skills", "rxai-amp", "SKILL.md") && contains([".codex", "AGENTS.md"], "rxai-amp-digest")))
-    missing.push(["Codex (L1)", "npm run hooks:install:codex"]);
+    missing.push(["Codex (L2 hooks + L1 fallback)", "npm run hooks:install:codex"]);
   if (has(".openclaw")) {
     // Workspace path may be customized in openclaw.json; conventional default otherwise.
     let ws = [".openclaw", "workspace"];

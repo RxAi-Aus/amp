@@ -1,0 +1,26 @@
+[
+  {
+    "id": "t1_derive",
+    "expectedIssue": 101,
+    "signals": ["onAssetUploaded", "sourcePath", "originalPath", "job_worker"],
+    "question": "When a user uploads an original asset, how does the backend decide which stored file becomes the source for derived versions, and what happens when derivation fails or the input format is unsupported? Name the files and functions involved and say where you would add a retry."
+  },
+  {
+    "id": "t2_email",
+    "expectedIssue": 102,
+    "signals": ["nodemailer", "SMTP_USER", "SMTP_PASS", "SMTP_FROM", "enqueueOutboundEmail"],
+    "question": "How are invitation emails sent? Identify the transport library, which credentials or secrets are used and where they are configured, the serverless runtime settings, and the exact files. What would need to change to send from a different sender address?"
+  },
+  {
+    "id": "t3_spec",
+    "expectedIssue": 103,
+    "signals": ["specs/001-example-mvp", "specs/002-example-theme", "specs/003-example-feature", "functions/"],
+    "question": "What MVP scope do the spec documents under specs/ define, which spec folders exist, and which spec-defined features are not yet implemented? Name the spec files you relied on."
+  },
+  {
+    "id": "t4_control",
+    "expectedIssue": null,
+    "signals": ["billing_provider", "checkout", "functions/src/payments", "functions/src/plan.ts"],
+    "question": "How are subscription plans and payments implemented? Cover the data model, the serverless handlers, and the client side. Name exact files and functions."
+  }
+]

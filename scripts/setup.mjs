@@ -487,7 +487,7 @@ const stepMcp = {
     if (others.includes("agy")) info("agy: run `npm run hooks:install:agy` (offered in the lifecycle step) — no MCP registration needed, it uses the gh CLI");
     if (others.includes("codex")) {
       // Delegated installer (L1: skill mirror + AGENTS.md digest + label).
-      const args = ["scripts/install-codex.mjs", "--repo-path", ROOT, "--repo-slug", ctx.slug];
+      const args = ["scripts/install-codex.mjs", "--repo-path", ROOT, "--repo-slug", ctx.slug, "--agent", "codex"];
       if (DRY) args.push("--dry-run");
       run("node", args, { inherit: true, allowFail: true });
       info("still yours to do: export RXAI_AMP_AGENT=codex in the environment Codex runs under, and keep the github MCP entry in ~/.codex/config.toml");
@@ -508,7 +508,7 @@ function detectAgents() {
   return [
     { id: "claudecowork", label: "Claude Code", root: path.join(home, ".claude"), installer: "scripts/install-claude-hooks.mjs", level: "L2" },
     { id: "agy", label: "agy / Antigravity CLI", root: path.join(home, ".gemini", "config"), installer: "scripts/install-agy-hooks.mjs", level: "L2" },
-    { id: "codex", label: "Codex", root: path.join(home, ".codex"), installer: "scripts/install-codex.mjs", level: "L1" },
+    { id: "codex", label: "Codex", root: path.join(home, ".codex"), installer: "scripts/install-codex.mjs", level: "L2" },
     { id: "openclaw", label: "OpenClaw", root: path.join(home, ".openclaw"), installer: "scripts/install-digest.mjs --agent openclaw", level: "L1" },
     { id: "hermes", label: "Hermes", root: path.join(home, ".hermes"), installer: "scripts/install-digest.mjs --agent hermes", level: "L1" },
   ].filter((a) => existsSync(a.root));
@@ -631,11 +631,11 @@ const stepLifecycle = {
       if (DRY) args.push("--dry-run");
       run("node", args, { inherit: true, allowFail: true });
     }
-    if (existsSync(path.join(homedir(), ".codex")) && (await confirm("Install Codex L1 pieces (skill + AGENTS.md digest + label)?", true))) {
+    if (existsSync(path.join(homedir(), ".codex")) && (await confirm("Install Codex L2 hooks with skill/digest fallback?", true))) {
       const args = ["scripts/install-codex.mjs", "--repo-path", ROOT, "--repo-slug", ctx.slug];
       if (DRY) args.push("--dry-run");
       run("node", args, { inherit: true, allowFail: true });
-      info("Codex is L1 — also export RXAI_AMP_AGENT=codex in the environment Codex runs under (never globally)");
+      info("Review and trust the installed AMP definitions with /hooks in Codex; untrusted hooks are skipped");
     }
     for (const [id, root, what] of [
       ["openclaw", path.join(homedir(), ".openclaw"), "digest into its workspace AGENTS.md"],
@@ -762,12 +762,14 @@ function printChecklist() {
       const f = path.join(homedir(), ".gemini", "config", "hooks.json");
       return existsSync(f) && readFileSync(f, "utf8").includes("adapters/agy");
     }],
-    ["codex L1 pieces (skill + AGENTS.md digest)", () => {
+    ["codex L2 hooks + skill/digest fallback", () => {
       const home = path.join(homedir(), ".codex");
       if (!existsSync(home)) return true; // Codex not installed → not owed
       const md = path.join(home, "AGENTS.md");
+      const hooks = path.join(home, "hooks.json");
       return existsSync(path.join(home, "skills", "rxai-amp", "SKILL.md")) &&
-        existsSync(md) && readFileSync(md, "utf8").includes("rxai-amp-digest");
+        existsSync(md) && readFileSync(md, "utf8").includes("rxai-amp-digest") &&
+        existsSync(hooks) && readFileSync(hooks, "utf8").includes("adapters/codex/hooks");
     }],
     ["openclaw L1 digest (workspace AGENTS.md)", () => {
       const home = path.join(homedir(), ".openclaw");

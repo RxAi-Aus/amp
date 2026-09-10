@@ -1,9 +1,9 @@
-# Codex adapter — L1 (skill + config digest)
+# Codex adapter — L2 lifecycle hooks with L1 fallback
 
-Codex has no lifecycle-hook system, so it participates at conformance L1
-(PROTOCOL.md §15.3): the obligations are carried into context by a skill and a
-config-file digest, and work boundaries come from the agent-agnostic git floor.
-Nothing fires automatically — that is the whole difference from L2.
+Current Codex releases provide lifecycle hooks. This adapter participates at
+conformance L2 (PROTOCOL.md §15.3): hooks inject recall, maintain the ledger,
+and interpose the capture checkpoint. The skill, config digest, and portable
+git floor remain the fail-soft L1 fallback.
 
 ## Install
 
@@ -14,22 +14,22 @@ npm run hooks:install:codex          # add -- --dry-run to preview
 | Target | What |
 |---|---|
 | `~/.rxai-amp/config.json` | memory repo owner/name/clone (existing keys win) |
+| `~/.codex/rxai-amp/` | self-contained copy of the zero-dependency hook runtime |
+| `~/.codex/hooks.json` | merged `SessionStart`, `PostToolUse`, `Stop`, and `SessionEnd` hooks; foreign hooks preserved |
 | `~/.codex/skills/rxai-amp/` | the codex-flavoured skill mirror in `skills/` here |
 | `~/.codex/AGENTS.md` | the §15 digest, between `<!-- rxai-amp-digest -->` sentinels |
 | memory repo | `from:codex` label, created if missing |
 
-Re-running is idempotent: the digest block is replaced in place (foreign
-content around it is never touched, and a `.amp-bak` copy is written first),
-and the label check is a no-op once it exists.
+Re-running is idempotent: AMP hook groups are replaced while foreign hook
+groups are preserved, the digest block is replaced in place, backups are
+written first, and the label check is a no-op once it exists. Open `/hooks` in
+Codex after installation and trust the new or changed definitions; Codex skips
+non-managed hooks until they are reviewed.
 
-Then two things the installer cannot do for you:
+Then one thing the installer cannot do for you:
 
 ```bash
-# 1. identity — in the environment Codex runs under, NOT your global profile
-#    (other agents share that shell and would inherit the wrong name)
-export RXAI_AMP_AGENT=codex
-
-# 2. the capture floor, per repo Codex commits from — without it no session
+# The capture floor, per repo Codex commits from — without it no session
 #    ever records a work boundary (see the pattern in adapters/README.md)
 npm run hooks:install:capture -- /path/to/working/repo
 ```
@@ -38,12 +38,12 @@ npm run hooks:install:capture -- /path/to/working/repo
 
 | Obligation (§15.1) | Mechanism |
 |---|---|
-| RECALL | digest instruction + the skill's session-start checklist; reads go through the `github` MCP server declared in `~/.codex/config.toml` (toolsets `repos,issues`), or a clean `git pull --ff-only` on the clone |
-| CAPTURE | the git floor prints `[AMP] commit <sha> logged for memory capture` into Codex's shell output — that is the cue; the session then owes a memory issue or an explicit decline |
-| OUTCOME | digest + skill: `- **Outcome:** success\|failure` on every recalled memory that was actually relied on, nothing on unused ones |
+| RECALL | `SessionStart` injects compact INDEX/not-indexed navigation plus repo-matched issue excerpts as developer context; skill/digest is the L1 fallback |
+| CAPTURE | `PostToolUse` and the portable git floor record commit boundaries; `Stop` continues once with the capture-or-decline checklist; `SessionEnd` closes the ledger |
+| OUTCOME | `PostToolUse` observes issue reads and `Stop` lists recalled issues needing `- **Outcome:** success\|failure`; unused injected memories get nothing |
 
-Because no checkpoint can block Codex, the `## Recall` manifest in the Rule 10
-summary is what makes compliance auditable remotely (§15.2, §15.6).
+The `## Recall` manifest in the Rule 10 summary remains the remotely auditable
+record (§15.2, §15.6); the local ledger is advisory and never writes memory.
 
 ## Skill mirror
 
@@ -52,7 +52,7 @@ summary is what makes compliance auditable remotely (§15.2, §15.6).
 
 - a "Codex specifics" section — identity `codex`, diary Region `codex-diary`,
   repo resolution order, MCP transport with `gh` as the documented fallback,
-  and an explicit "nothing will trigger you, run the checklists yourself"
+  and explicit L2-hook/L1-fallback behavior
 - the sender in the examples is `codex` (`codex-diary`, `from:codex`), so a
   copied template cannot post into another agent's diary
 

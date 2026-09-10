@@ -1,4 +1,4 @@
-# AMP Lifecycle Adapters (Protocol v2.9.1, §15)
+# AMP Lifecycle Adapters (Protocol v2.9.2, §15)
 
 Reference implementations of the Agent Lifecycle Contract. `PROTOCOL.md` §15
 is the normative spec; this file holds the operational detail deliberately
@@ -10,11 +10,11 @@ checks, read order). The session ledger is the connective state between them.
 
 ## Contract → mechanism map
 
-| Obligation (§15.1) | Claude Code (L2) | agy (L2) | Git floor (any shell agent) | Folderless (L0/L1) |
-|---|---|---|---|---|
-| RECALL | `SessionStart` hook injects INDEX.md + not_indexed.md, then the bodies of the top open issues whose Region matches the cwd repo (`lib/amp-recall.mjs`, #442), ledgered as surfaced `via: "inject"`. With a matched Region, INDEX.md is rendered around it (matched Regions verbatim, every other Region as one item with its active thread numbers) and an empty not_indexed.md collapses to one line — the block is re-read on every turn, so it is kept near 4–5 KB | `PreInvocation` injects the same, once per conversation (ledger-gated) | — (pair with an L1 digest) | read via MCP per digest |
-| CAPTURE | `Stop` hook blocks once with checklist; decline always offered | `Stop` hook returns `decision: "continue"` once, same checklist | `post-commit` prints reminder into the agent's tool output + records boundary | Rule 10 summary or decline |
-| OUTCOME | `Stop` checklist lists unmarked recalled issues; `PostToolUse` auto-records | `Stop` checklist lists them with the `gh issue comment` form (no tool-arg observer available) | manifest audited remotely by Librarian | manifest in summary |
+| Obligation (§15.1) | Claude Code (L2) | agy (L2) | Codex (L2) | Git floor (any shell agent) | Folderless (L0/L1) |
+|---|---|---|---|---|---|
+| RECALL | `SessionStart` hook injects INDEX.md + not_indexed.md, then the bodies of the top open issues whose Region matches the cwd repo (`lib/amp-recall.mjs`, #442), ledgered as surfaced `via: "inject"`. With a matched Region, INDEX.md is rendered around it (matched Regions verbatim, every other Region as one item with its active thread numbers) and an empty not_indexed.md collapses to one line — the block is re-read on every turn, so it is kept near 4–5 KB | `PreInvocation` injects the same, once per conversation (ledger-gated) | `SessionStart` injects the same compact block as developer context; `SessionEnd` closes the ledger | — (pair with an L1 digest) | read via MCP per digest |
+| CAPTURE | `Stop` hook blocks once with checklist; decline always offered | `Stop` hook returns `decision: "continue"` once, same checklist | `PostToolUse` + git floor record boundaries; `Stop` returns `decision: "block"` once with the checklist | `post-commit` records a boundary and prints a reminder | Rule 10 summary or decline |
+| OUTCOME | `Stop` checklist lists unmarked recalled issues; `PostToolUse` auto-records | `Stop` checklist lists them with the `gh issue comment` form (no tool-arg observer available) | `PostToolUse` observes issue reads; `Stop` lists unmarked recalls | manifest audited remotely by Librarian | manifest in summary |
 
 ## Conformance matrix (declared in PROTOCOL.md §2)
 
@@ -22,7 +22,7 @@ checks, read order). The session ledger is the connective state between them.
 |---|---|---|
 | claudecowork | L2 | user-level hooks (`session-start`, `stop`, `post-tool-use`) + user-level skill + git floor |
 | agy | L2 | global hooks (`pre-invocation`, `stop`) + global skill mirror + git floor (`adapters/agy/README.md`) |
-| codex | L1 | skill mirror + `AGENTS.md` digest + git floor, installed by `npm run hooks:install:codex` (`adapters/codex/README.md`) |
+| codex | L2 | `SessionStart`/`PostToolUse`/`Stop`/`SessionEnd` + skill mirror + `AGENTS.md` digest + git floor, installed by `npm run hooks:install:codex` (`adapters/codex/README.md`) |
 | openclaw | L1 | workspace `AGENTS.md` digest + git floor, installed by `npm run hooks:install:openclaw` (`adapters/openclaw/README.md`) |
 | hermes | L1 | `~/.hermes/SOUL.md` digest (always loaded from HERMES_HOME), manifest-as-ledger, installed by `npm run hooks:install:hermes` (`adapters/hermes/README.md`) |
 
@@ -37,7 +37,7 @@ npm run hooks:install:claude          # add -- --dry-run to preview
 # agy / Antigravity CLI (hooks + skill into ~/.gemini/config/):
 npm run hooks:install:agy             # add -- --dry-run to preview
 
-# Codex (L1: skill into ~/.codex/skills + §15 digest into ~/.codex/AGENTS.md):
+# Codex (L2 hooks + skill/digest L1 fallback):
 npm run hooks:install:codex           # add -- --dry-run to preview
 
 # OpenClaw (L1: §15 digest into its workspace AGENTS.md):

@@ -45,10 +45,12 @@ Nothing resolves → stop and say so. `AMP_DISABLE=1` means: do nothing.
 that server is down, an authenticated `gh` CLI is an accepted fallback
 (PROTOCOL.md §2), always with an explicit `-R <owner>/<repo>`.
 
-**Conformance L1 — nothing will trigger you.** Codex has no lifecycle-hook
-runtime: no session-start injection, no capture checkpoint at session end. Run
-the session-start and session-end checklists below **yourself**. The one
-deterministic signal you do get is the git floor: an
+**Conformance L2 when hooks are trusted; L1 fallback otherwise.** Current
+Codex provides `SessionStart`, `PostToolUse`, `Stop`, and `SessionEnd` hooks.
+The installer wires them to inject compact recall, maintain the session ledger,
+and interpose the capture checkpoint. If the hooks are absent, disabled,
+untrusted, or fail, run the session-start and session-end checklists below
+**yourself**. The independent git-floor signal is an
 `[AMP] commit <sha> logged for memory capture` line in your shell output means
 a work boundary was recorded — that is the cue that this session now owes a
 memory or an explicit decline. Ignore any instruction below that assumes a
@@ -263,7 +265,8 @@ posting a clarifying comment — never by penalising the original record.
 ## Lifecycle checkpoint (v2.8 hooks — ONLY if adapters are installed)
 
 **Check before expecting any of this:** these signals exist only when the
-memory repo ships `adapters/` and the hooks were installed. Some live memory
+memory repo ships `adapters/`, the hooks were installed, and Codex has trusted
+their current definitions. Some live memory
 repos still run Protocol v2.7 or earlier — no `adapters/`, no §15, no ledger.
 If `adapters/lib/amp-ledger.mjs` is absent at the memory clone, skip every
 ledger command silently and never wait for a checkpoint that cannot come; the

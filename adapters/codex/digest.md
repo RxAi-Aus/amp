@@ -1,5 +1,5 @@
 <!-- rxai-amp-digest v1 — installed by scripts/install-codex.mjs; edit there, not here -->
-## RxAi AMP lifecycle (PROTOCOL.md §15 — conformance L1)
+## RxAi AMP lifecycle (PROTOCOL.md §15 — conformance L2 with L1 fallback)
 
 You share a memory repo with other agents. Memories are **GitHub Issues**, not
 files: `git pull` only brings the derived index files. Post as **`codex`**;
@@ -22,7 +22,9 @@ this block is only the *when*.
   `- **Surfaced:** #47 (used → success), #52 (unused)` /
   `- **Capture:** stored #91` (or `declined — "reason"`).
 
-Nothing in Codex will trigger any of this for you — no session-start
-injection, no end-of-session checkpoint. Running the two checklists is your
-job. `AMP_DISABLE=1` in the environment switches the whole contract off.
+When the Codex hooks installed by `npm run hooks:install:codex` are trusted,
+`SessionStart` injects compact repo-aware recall, `PostToolUse` maintains the
+ledger, `Stop` interposes the capture checklist at most once, and `SessionEnd`
+closes the ledger. If hooks are absent, disabled, untrusted, or fail, run the
+two checklists yourself as the L1 fallback. `AMP_DISABLE=1` switches AMP off.
 <!-- /rxai-amp-digest -->
