@@ -33,6 +33,7 @@
     --tag-region: #6B4FA3;
     --tag-place: #1F7A72;
     --tag-type: #9A6410;
+    --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -199,6 +200,46 @@
     font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--tag-place);
   }
 
+  /* ---------- disclosure cards ---------- */
+  .step, .level { position: relative; }
+  .lvhead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .now {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px;
+    color: var(--accent); border: 1px solid var(--accent); border-radius: 999px;
+    padding: 0 8px; line-height: 1.75; white-space: nowrap;
+  }
+  .disclose {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    font: inherit; color: inherit; background: none; border: 0;
+    padding: 0; margin: 0; text-align: left;
+  }
+  .disclose .dl { flex: 1 1 auto; min-width: 0; }
+  .chev {
+    display: none; flex: 0 0 auto; width: 12px; height: 7px;
+    fill: none; stroke: var(--muted); stroke-width: 1.7;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .disclose:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  /* The affordance only appears once JS can honour it. */
+  html[data-js] .disclose { cursor: pointer; }
+  html[data-js] .chev { display: block; }
+  html[data-js] .disclose::after { content: ""; position: absolute; inset: 0; border-radius: 10px; }
+  html[data-js] .disclose:focus-visible { outline: none; }
+  html[data-js] .disclose:focus-visible::after { outline: 2px solid var(--accent); outline-offset: 2px; }
+  html[data-js] .step:hover .chev, html[data-js] .level:hover .chev,
+  html[data-js] .disclose:focus-visible .chev { stroke: var(--accent); }
+  [data-open="true"] .chev { transform: rotate(180deg); }
+
+  /* Open by default; JS collapses, so no-JS readers lose nothing. The panel is
+     sized in JS rather than by an fr track: these cards stretch to the grid row,
+     and a flexible track inside a stretched flex item never resolves to its
+     content height. -8px cancels the card's flex gap while collapsed. */
+  .more { overflow: hidden; position: relative; z-index: 1; }
+  .step .more { margin-top: -8px; flex: 0 0 auto; }
+  .more-in p { margin: 0; padding-top: 12px; font-size: 13px; line-height: 1.6; color: var(--muted); }
+  .level .more-in p { margin-top: 12px; border-top: 1px dashed var(--line); }
+  html[data-js] .more { height: 0; }
+
   /* ---------- read ladder ---------- */
   .ladder { display: flex; flex-direction: column; gap: 0; counter-reset: rung; }
   .rung { display: grid; grid-template-columns: 30px 230px 1fr; gap: 14px; align-items: baseline; padding: 11px 4px; border-bottom: 1px dashed var(--line); }
@@ -244,10 +285,29 @@
     .rung .why { grid-column: 2; }
   }
   @media (prefers-reduced-motion: no-preference) {
-    .step, .level { transition: border-color 160ms ease; }
+    .step, .level { transition: border-color 200ms var(--ease-out-quart); }
     .step:hover, .level:hover { border-color: var(--accent); }
+    .chev { transition: transform 260ms var(--ease-out-quart), stroke 200ms var(--ease-out-quart); }
+    .langbar button {
+      transition: color 160ms var(--ease-out-quart), border-color 160ms var(--ease-out-quart),
+                  background-color 160ms var(--ease-out-quart);
+    }
+    /* Switching language rewrites the whole page; cross-fade the swap. */
+    ::view-transition-old(root), ::view-transition-new(root) {
+      animation-duration: 220ms;
+      animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    /* One entrance, on the fold that carries the argument. Nothing below it moves. */
+    html[data-js] header > * { animation: amp-rise 640ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+    html[data-js] header > h1 { animation-delay: 70ms; }
+    html[data-js] header > .lede { animation-delay: 140ms; }
+    html[data-js] header > .chips { animation-delay: 210ms; }
+    html[data-js] header > .hero-art { animation-delay: 280ms; }
+    html[data-js] header > .proof { animation-delay: 350ms; }
   }
+  @keyframes amp-rise { from { opacity: 0; transform: translateY(12px); } }
 </style>
+<script>document.documentElement.setAttribute("data-js", "on");</script>
 </head>
 <body data-lang="en">
 
@@ -587,11 +647,16 @@
       <div class="step">
         <span class="k">1 · RECALL</span>
         <h3>
-          <span class="t" lang="en">Remember first</span>
-          <span class="t" lang="zh-Hant">先回憶</span>
-          <span class="t" lang="ja">まず思い出す</span>
-          <span class="t" lang="ko">먼저 회상</span>
-          <span class="t" lang="es">Recordar primero</span>
+          <button class="disclose" type="button" aria-expanded="false" aria-controls="lc-1">
+            <span class="dl">
+            <span class="t" lang="en">Remember first</span>
+            <span class="t" lang="zh-Hant">先回憶</span>
+            <span class="t" lang="ja">まず思い出す</span>
+            <span class="t" lang="ko">먼저 회상</span>
+            <span class="t" lang="es">Recordar primero</span>
+            </span>
+            <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
+          </button>
         </h3>
         <p class="t" lang="en">At session start the index is injected into context automatically — the agent doesn't decide to recall; recall happens to it.</p>
         <p class="t" lang="zh-Hant">工作階段一開始，索引就自動注入情境——不靠代理「想起來」，回憶是自動發生的。</p>
@@ -599,15 +664,29 @@
         <p class="t" lang="ko">세션 시작 시 인덱스가 자동으로 컨텍스트에 주입됩니다. 에이전트가 회상을 결정하는 게 아니라, 회상이 저절로 일어납니다.</p>
         <p class="t" lang="es">Al iniciar la sesión, el índice se inyecta en el contexto automáticamente: el agente no decide recordar; el recuerdo le sucede.</p>
         <div class="trigger">SessionStart hook → INDEX.md + not_indexed.md</div>
+        <div class="more" id="lc-1">
+          <div class="more-in">
+            <p class="t" lang="en"><span class="mono">adapters/claude-code/hooks/session-start.mjs</span> — pulls <span class="mono">INDEX.md</span> and <span class="mono">not_indexed.md</span> into the session before your first prompt.</p>
+            <p class="t" lang="zh-Hant"><span class="mono">adapters/claude-code/hooks/session-start.mjs</span>——在你下第一道指令之前，把 <span class="mono">INDEX.md</span> 與 <span class="mono">not_indexed.md</span> 拉進工作階段。</p>
+            <p class="t" lang="ja"><span class="mono">adapters/claude-code/hooks/session-start.mjs</span> — 最初のプロンプトの前に <span class="mono">INDEX.md</span> と <span class="mono">not_indexed.md</span> をセッションへ。</p>
+            <p class="t" lang="ko"><span class="mono">adapters/claude-code/hooks/session-start.mjs</span> — 첫 프롬프트 전에 <span class="mono">INDEX.md</span>와 <span class="mono">not_indexed.md</span>를 세션으로.</p>
+            <p class="t" lang="es"><span class="mono">adapters/claude-code/hooks/session-start.mjs</span>: trae <span class="mono">INDEX.md</span> y <span class="mono">not_indexed.md</span> a la sesión antes de tu primer prompt.</p>
+          </div>
+        </div>
       </div>
       <div class="step">
         <span class="k">2 · WORK</span>
         <h3>
-          <span class="t" lang="en">Do the work</span>
-          <span class="t" lang="zh-Hant">執行工作</span>
-          <span class="t" lang="ja">作業する</span>
-          <span class="t" lang="ko">작업 수행</span>
-          <span class="t" lang="es">Hacer el trabajo</span>
+          <button class="disclose" type="button" aria-expanded="false" aria-controls="lc-2">
+            <span class="dl">
+            <span class="t" lang="en">Do the work</span>
+            <span class="t" lang="zh-Hant">執行工作</span>
+            <span class="t" lang="ja">作業する</span>
+            <span class="t" lang="ko">작업 수행</span>
+            <span class="t" lang="es">Hacer el trabajo</span>
+            </span>
+            <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
+          </button>
         </h3>
         <p class="t" lang="en">Every git commit is recorded as a work boundary; an <span class="mono">[AMP]</span> reminder appears right in the commit output. Five commits = one obligation, not five.</p>
         <p class="t" lang="zh-Hant">每次 git commit 都被記為工作邊界，<span class="mono">[AMP]</span> 提醒直接出現在 commit 輸出中。五次 commit 只產生一次義務。</p>
@@ -615,15 +694,29 @@
         <p class="t" lang="ko">모든 git 커밋은 작업 경계로 기록되고, 커밋 출력에 <span class="mono">[AMP]</span> 알림이 바로 나타납니다. 커밋 다섯 번 = 의무 하나, 다섯이 아닙니다.</p>
         <p class="t" lang="es">Cada git commit se registra como frontera de trabajo; un recordatorio <span class="mono">[AMP]</span> aparece en la propia salida del commit. Cinco commits = una obligación, no cinco.</p>
         <div class="trigger">post-commit hook → ledger boundary</div>
+        <div class="more" id="lc-2">
+          <div class="more-in">
+            <p class="t" lang="en"><span class="mono">adapters/git-hooks/post-commit</span> prints it; <span class="mono">post-tool-use.mjs</span> logs the boundary. Only a real <span class="mono">git commit</span> counts.</p>
+            <p class="t" lang="zh-Hant"><span class="mono">adapters/git-hooks/post-commit</span> 負責印出；<span class="mono">post-tool-use.mjs</span> 記錄邊界。只有真正的 <span class="mono">git commit</span> 算數。</p>
+            <p class="t" lang="ja"><span class="mono">adapters/git-hooks/post-commit</span> が表示し、<span class="mono">post-tool-use.mjs</span> が境界を記録。本物の <span class="mono">git commit</span> だけを数えます。</p>
+            <p class="t" lang="ko"><span class="mono">adapters/git-hooks/post-commit</span>가 출력하고 <span class="mono">post-tool-use.mjs</span>가 경계를 기록합니다. 진짜 <span class="mono">git commit</span>만 셉니다.</p>
+            <p class="t" lang="es"><span class="mono">adapters/git-hooks/post-commit</span> lo imprime; <span class="mono">post-tool-use.mjs</span> registra la frontera. Solo cuenta un <span class="mono">git commit</span> real.</p>
+          </div>
+        </div>
       </div>
       <div class="step">
         <span class="k">3 · CAPTURE</span>
         <h3>
-          <span class="t" lang="en">Store or decline</span>
-          <span class="t" lang="zh-Hant">記錄或婉拒</span>
-          <span class="t" lang="ja">保存するか、辞退するか</span>
-          <span class="t" lang="ko">저장 또는 거절</span>
-          <span class="t" lang="es">Guardar o declinar</span>
+          <button class="disclose" type="button" aria-expanded="false" aria-controls="lc-3">
+            <span class="dl">
+            <span class="t" lang="en">Store or decline</span>
+            <span class="t" lang="zh-Hant">記錄或婉拒</span>
+            <span class="t" lang="ja">保存するか、辞退するか</span>
+            <span class="t" lang="ko">저장 또는 거절</span>
+            <span class="t" lang="es">Guardar o declinar</span>
+            </span>
+            <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
+          </button>
         </h3>
         <p class="t" lang="en">The session can't end silently: a checkpoint blocks once until the agent posts the takeaway — or explicitly declines with a one-line reason. "Nothing worth storing" is valid; silence is not.</p>
         <p class="t" lang="zh-Hant">工作階段不能默默結束：檢查點會攔截一次，直到代理發出心得——或附一句理由明確婉拒。「沒什麼值得存」是合法答案，沉默不是。</p>
@@ -631,15 +724,29 @@
         <p class="t" lang="ko">세션은 조용히 끝날 수 없습니다. 체크포인트가 한 번 막아서며, 에이전트가 배운 점을 게시하거나 한 줄 이유와 함께 명시적으로 거절할 때까지 기다립니다. '저장할 게 없다'는 유효한 답이지만, 침묵은 아닙니다.</p>
         <p class="t" lang="es">La sesión no puede terminar en silencio: un checkpoint bloquea una vez hasta que el agente publica la conclusión — o declina explícitamente con una razón de una línea. «Nada que valga la pena guardar» es válido; el silencio no.</p>
         <div class="trigger">Stop hook → block once, then store / decline</div>
+        <div class="more" id="lc-3">
+          <div class="more-in">
+            <p class="t" lang="en"><span class="mono">adapters/claude-code/hooks/stop.mjs</span> blocks once. Post the takeaway or decline with a reason — the ledger remembers which.</p>
+            <p class="t" lang="zh-Hant"><span class="mono">adapters/claude-code/hooks/stop.mjs</span> 只攔一次。發出心得或附理由婉拒——帳本記得你選了哪個。</p>
+            <p class="t" lang="ja"><span class="mono">adapters/claude-code/hooks/stop.mjs</span> は一度だけブロック。学びを投稿するか理由を添えて辞退するか——台帳が記憶します。</p>
+            <p class="t" lang="ko"><span class="mono">adapters/claude-code/hooks/stop.mjs</span>는 한 번만 막습니다. 배운 점을 올리거나 이유와 함께 거절하거나 — 원장이 기억합니다.</p>
+            <p class="t" lang="es"><span class="mono">adapters/claude-code/hooks/stop.mjs</span> bloquea una vez. Publica la conclusión o declina con una razón: el libro recuerda cuál.</p>
+          </div>
+        </div>
       </div>
       <div class="step">
         <span class="k">4 · OUTCOME</span>
         <h3>
-          <span class="t" lang="en">Grade what you used</span>
-          <span class="t" lang="zh-Hant">評分用過的記憶</span>
-          <span class="t" lang="ja">使った記憶を採点する</span>
-          <span class="t" lang="ko">사용한 기억에 점수 매기기</span>
-          <span class="t" lang="es">Califica lo que usaste</span>
+          <button class="disclose" type="button" aria-expanded="false" aria-controls="lc-4">
+            <span class="dl">
+            <span class="t" lang="en">Grade what you used</span>
+            <span class="t" lang="zh-Hant">評分用過的記憶</span>
+            <span class="t" lang="ja">使った記憶を採点する</span>
+            <span class="t" lang="ko">사용한 기억에 점수 매기기</span>
+            <span class="t" lang="es">Califica lo que usaste</span>
+            </span>
+            <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
+          </button>
         </h3>
         <p class="t" lang="en">Every recalled memory the session relied on gets an <span class="mono">Outcome:</span> comment. Unused memories get nothing — no fake activity.</p>
         <p class="t" lang="zh-Hant">凡是本次真正用到的記憶，都要留下 <span class="mono">Outcome:</span> 成效留言；沒用到的什麼都不留——不製造假活動。</p>
@@ -647,6 +754,15 @@
         <p class="t" lang="ko">세션이 실제로 의존한 기억마다 <span class="mono">Outcome:</span> 댓글을 남깁니다. 쓰지 않은 기억에는 아무것도 남기지 않습니다. 가짜 활동은 만들지 않습니다.</p>
         <p class="t" lang="es">Cada recuerdo del que la sesión dependió recibe un comentario <span class="mono">Outcome:</span>. Los no usados no reciben nada: sin actividad falsa.</p>
         <div class="trigger">## Recall manifest → Librarian audits</div>
+        <div class="more" id="lc-4">
+          <div class="more-in">
+            <p class="t" lang="en">The summary’s <span class="mono">## Recall</span> manifest lists what the session used; <span class="mono">amp-librarian.yml</span> audits it daily.</p>
+            <p class="t" lang="zh-Hant">摘要中的 <span class="mono">## Recall</span> 清單列出本次用過的記憶；<span class="mono">amp-librarian.yml</span> 每天稽核。</p>
+            <p class="t" lang="ja">要約の <span class="mono">## Recall</span> マニフェストが使った記憶を列挙し、<span class="mono">amp-librarian.yml</span> が毎日監査します。</p>
+            <p class="t" lang="ko">요약의 <span class="mono">## Recall</span> 매니페스트가 사용한 기억을 나열하고, <span class="mono">amp-librarian.yml</span>이 매일 감사합니다.</p>
+            <p class="t" lang="es">El manifiesto <span class="mono">## Recall</span> del resumen lista lo usado; <span class="mono">amp-librarian.yml</span> lo audita a diario.</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -840,64 +956,135 @@
     <p class="note t" lang="es">Los niveles cambian lo que es <em>mecánico</em>, nunca lo que es <em>obligatorio</em>. Un nivel superior siempre se degrada con elegancia al inferior: un adaptador roto jamás bloquea el trabajo real del usuario.</p>
     <div class="levels">
       <div class="level">
-        <span class="lv">L0</span>
+        <div class="lvhead">
+          <span class="lv">L0</span>
+        </div>
         <h3>
-          <span class="t" lang="en">Prose</span>
-          <span class="t" lang="zh-Hant">純文件</span>
-          <span class="t" lang="ja">文書のみ</span>
-          <span class="t" lang="ko">문서만</span>
-          <span class="t" lang="es">Prosa</span>
+          <button class="disclose" type="button" aria-expanded="false" aria-controls="cf-0">
+            <span class="dl">
+            <span class="t" lang="en">Prose</span>
+            <span class="t" lang="zh-Hant">純文件</span>
+            <span class="t" lang="ja">文書のみ</span>
+            <span class="t" lang="ko">문서만</span>
+            <span class="t" lang="es">Prosa</span>
+            </span>
+            <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
+          </button>
         </h3>
         <p class="t" lang="en">Agent follows the written protocol voluntarily.</p>
         <p class="t" lang="zh-Hant">代理自律遵守文件規範。</p>
         <p class="t" lang="ja">エージェントが自発的に文書化されたプロトコルに従う。</p>
         <p class="t" lang="ko">에이전트가 문서화된 프로토콜을 자발적으로 따릅니다.</p>
         <p class="t" lang="es">El agente sigue el protocolo escrito voluntariamente.</p>
+        <div class="more" id="cf-0">
+          <div class="more-in">
+            <p class="t" lang="en">No install. The agent reads <span class="mono">PROTOCOL.md</span> and complies because it was asked to. Every agent starts here.</p>
+            <p class="t" lang="zh-Hant">不用安裝。代理讀 <span class="mono">PROTOCOL.md</span>，因為被要求所以遵守。所有代理都從這裡開始。</p>
+            <p class="t" lang="ja">インストール不要。エージェントは <span class="mono">PROTOCOL.md</span> を読み、頼まれたから従います。全員がここから始まります。</p>
+            <p class="t" lang="ko">설치 불필요. 에이전트는 <span class="mono">PROTOCOL.md</span>를 읽고, 요청받았기에 따릅니다. 모두 여기서 시작합니다.</p>
+            <p class="t" lang="es">Sin instalación. El agente lee <span class="mono">PROTOCOL.md</span> y cumple porque se lo pidieron. Todos empiezan aquí.</p>
+          </div>
+        </div>
       </div>
       <div class="level">
-        <span class="lv">L1</span>
+        <div class="lvhead">
+          <span class="lv">L1</span>
+        </div>
         <h3>
-          <span class="t" lang="en">Assisted</span>
-          <span class="t" lang="zh-Hant">輔助</span>
-          <span class="t" lang="ja">支援あり</span>
-          <span class="t" lang="ko">보조</span>
-          <span class="t" lang="es">Asistido</span>
+          <button class="disclose" type="button" aria-expanded="false" aria-controls="cf-1">
+            <span class="dl">
+            <span class="t" lang="en">Assisted</span>
+            <span class="t" lang="zh-Hant">輔助</span>
+            <span class="t" lang="ja">支援あり</span>
+            <span class="t" lang="ko">보조</span>
+            <span class="t" lang="es">Asistido</span>
+            </span>
+            <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
+          </button>
         </h3>
         <p class="t" lang="en">Checklists loaded into context: the skill, or a config digest.</p>
         <p class="t" lang="zh-Hant">檢查清單載入情境：技能或設定摘要。</p>
         <p class="t" lang="ja">チェックリストをコンテキストに読み込む：スキルまたは設定ダイジェスト。</p>
         <p class="t" lang="ko">체크리스트를 컨텍스트에 로드: 스킬 또는 설정 다이제스트.</p>
         <p class="t" lang="es">Listas de verificación cargadas en contexto: la skill o un resumen de configuración.</p>
+        <div class="more" id="cf-1">
+          <div class="more-in">
+            <p class="t" lang="en"><span class="mono">codex</span> · <span class="mono">openclaw</span> · <span class="mono">hermes</span>. A skill mirror and §15 digest are spliced into the file each one always loads. Context, not enforcement.</p>
+            <p class="t" lang="zh-Hant"><span class="mono">codex</span>、<span class="mono">openclaw</span>、<span class="mono">hermes</span>。技能鏡像與 §15 摘要被接進每個執行環境必載的檔案。是情境，不是強制。</p>
+            <p class="t" lang="ja"><span class="mono">codex</span>・<span class="mono">openclaw</span>・<span class="mono">hermes</span>。スキルのミラーと §15 ダイジェストを、各ランタイムが必ず読む ファイルへ差し込みます。強制ではなく文脈。</p>
+            <p class="t" lang="ko"><span class="mono">codex</span> · <span class="mono">openclaw</span> · <span class="mono">hermes</span>. 스킬 미러와 §15 다이제스트를 각 런타임이 항상 읽는 파일에 끼웁니다. 강제가 아니라 맥락.</p>
+            <p class="t" lang="es"><span class="mono">codex</span> · <span class="mono">openclaw</span> · <span class="mono">hermes</span>. Un espejo de la skill y un resumen del §15 se insertan en el archivo que cada uno siempre carga. Contexto, no obligación.</p>
+          </div>
+        </div>
       </div>
       <div class="level current">
-        <span class="lv">L2</span>
+        <div class="lvhead">
+          <span class="lv">L2</span>
+          <span class="now">
+            <span class="t" lang="en">where AMP is today</span>
+            <span class="t" lang="zh-Hant">AMP 目前所在</span>
+            <span class="t" lang="ja">AMP の現在地</span>
+            <span class="t" lang="ko">AMP의 현재 위치</span>
+            <span class="t" lang="es">dónde está AMP hoy</span>
+          </span>
+        </div>
         <h3>
-          <span class="t" lang="en">Enforced</span>
-          <span class="t" lang="zh-Hant">強制</span>
-          <span class="t" lang="ja">強制</span>
-          <span class="t" lang="ko">강제</span>
-          <span class="t" lang="es">Aplicado</span>
+          <button class="disclose" type="button" aria-expanded="false" aria-controls="cf-2">
+            <span class="dl">
+            <span class="t" lang="en">Enforced</span>
+            <span class="t" lang="zh-Hant">強制</span>
+            <span class="t" lang="ja">強制</span>
+            <span class="t" lang="ko">강제</span>
+            <span class="t" lang="es">Aplicado</span>
+            </span>
+            <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
+          </button>
         </h3>
         <p class="t" lang="en">Deterministic hooks + session ledger interpose real checkpoints.</p>
         <p class="t" lang="zh-Hant">確定性 Hook 加帳本，設置真正的檢查點。</p>
         <p class="t" lang="ja">決定的フックとセッション台帳が本物のチェックポイントを挟み込む。</p>
         <p class="t" lang="ko">결정적 훅과 세션 원장이 실제 체크포인트를 세웁니다.</p>
         <p class="t" lang="es">Hooks deterministas + libro de sesión interponen checkpoints reales.</p>
+        <div class="more" id="cf-2">
+          <div class="more-in">
+            <p class="t" lang="en"><span class="mono">claudecowork</span> · <span class="mono">agy</span>. Hooks fire outside the model, so forgetting is not an option. The ledger under <span class="mono">~/.rxai-amp/</span> is advisory only.</p>
+            <p class="t" lang="zh-Hant"><span class="mono">claudecowork</span>、<span class="mono">agy</span>。Hook 在模型之外觸發，「忘記」不是選項。<span class="mono">~/.rxai-amp/</span> 下的帳本僅供參考。</p>
+            <p class="t" lang="ja"><span class="mono">claudecowork</span>・<span class="mono">agy</span>。フックはモデルの外で発火するので「忘れる」選択肢はありません。<span class="mono">~/.rxai-amp/</span> の台帳は参考情報のみ。</p>
+            <p class="t" lang="ko"><span class="mono">claudecowork</span> · <span class="mono">agy</span>. 훅은 모델 바깥에서 발동하므로 ‘잊기’는 선택지가 아닙니다. <span class="mono">~/.rxai-amp/</span> 아래 원장은 참고용입니다.</p>
+            <p class="t" lang="es"><span class="mono">claudecowork</span> · <span class="mono">agy</span>. Los hooks se disparan fuera del modelo, así que olvidar no es una opción. El libro en <span class="mono">~/.rxai-amp/</span> es solo orientativo.</p>
+          </div>
+        </div>
       </div>
       <div class="level">
-        <span class="lv">L3</span>
+        <div class="lvhead">
+          <span class="lv">L3</span>
+        </div>
         <h3>
-          <span class="t" lang="en">Tool-boundary</span>
-          <span class="t" lang="zh-Hant">工具邊界</span>
-          <span class="t" lang="ja">ツール境界</span>
-          <span class="t" lang="ko">도구 경계</span>
-          <span class="t" lang="es">Frontera de herramienta</span>
+          <button class="disclose" type="button" aria-expanded="false" aria-controls="cf-3">
+            <span class="dl">
+            <span class="t" lang="en">Tool-boundary</span>
+            <span class="t" lang="zh-Hant">工具邊界</span>
+            <span class="t" lang="ja">ツール境界</span>
+            <span class="t" lang="ko">도구 경계</span>
+            <span class="t" lang="es">Frontera de herramienta</span>
+            </span>
+            <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
+          </button>
         </h3>
         <p class="t" lang="en">Future MCP server validates every write before it reaches GitHub.</p>
         <p class="t" lang="zh-Hant">未來的 MCP 伺服器在寫入前就攔截格式錯誤。</p>
         <p class="t" lang="ja">将来の MCP サーバーが GitHub に届く前にすべての書き込みを検証。</p>
         <p class="t" lang="ko">미래의 MCP 서버가 GitHub에 닿기 전에 모든 쓰기를 검증합니다.</p>
         <p class="t" lang="es">Un futuro servidor MCP validará cada escritura antes de llegar a GitHub.</p>
+        <div class="more" id="cf-3">
+          <div class="more-in">
+            <p class="t" lang="en">Not shipped. An MCP server would reject a malformed title before it became an issue. Today that lives in the skill — guidance, not a gate.</p>
+            <p class="t" lang="zh-Hant">尚未推出。MCP 伺服器會在格式錯誤的標題變成 Issue 前就擋下。目前這層驗證住在技能裡——是指引，不是關卡。</p>
+            <p class="t" lang="ja">未提供。MCP サーバーなら不正なタイトルを Issue になる前に拒否します。現在その検証はスキルの中——指針であってゲートではありません。</p>
+            <p class="t" lang="ko">미제공. MCP 서버라면 잘못된 제목을 이슈가 되기 전에 거부합니다. 지금은 스킬 안에 있으며, 안내이지 관문이 아닙니다.</p>
+            <p class="t" lang="es">No disponible. Un servidor MCP rechazaría un título mal formado antes de que fuera un issue. Hoy vive en la skill: orientación, no barrera.</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -967,6 +1154,7 @@
 (function () {
   var LANGS = ["en", "zh-Hant", "ja", "ko", "es"];
   var bar = document.querySelector(".langbar");
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
   function apply(l) {
     if (LANGS.indexOf(l) === -1) l = "en";
     document.body.setAttribute("data-lang", l);
@@ -977,9 +1165,44 @@
     }
     try { localStorage.setItem("amp-lang", l); } catch (e) {}
   }
+  // Swapping languages replaces every visible string on the page, so cross-fade
+  // it where the browser supports it; everywhere else the swap stays instant.
+  function setLang(l) {
+    if (document.startViewTransition && !reduce.matches) {
+      document.startViewTransition(function () { apply(l); });
+    } else {
+      apply(l);
+    }
+  }
   bar.addEventListener("click", function (e) {
     var b = e.target.closest("button[data-set]");
-    if (b) apply(b.getAttribute("data-set"));
+    if (b) setLang(b.getAttribute("data-set"));
+  });
+
+  // The lifecycle and conformance cards hover like controls, so they have to
+  // behave like controls. The .more panel sits above the button's stretched hit
+  // area, which keeps the file paths inside it selectable.
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest(".disclose");
+    if (!b) return;
+    var card = b.closest(".step, .level");
+    if (!card) return;
+    var panel = card.querySelector(".more");
+    var open = b.getAttribute("aria-expanded") !== "true";
+    b.setAttribute("aria-expanded", String(open));
+    card.setAttribute("data-open", String(open));
+
+    // Commit the end state first: a paused or cancelled animation must never be
+    // what decides whether the panel is open. The animation only shows the move.
+    var from = panel.getBoundingClientRect().height;
+    panel.style.height = open ? "auto" : "0px";
+    if (reduce.matches || !panel.animate) return;
+    var to = panel.getBoundingClientRect().height;
+    if (panel.rxAnim) panel.rxAnim.cancel();
+    panel.rxAnim = panel.animate(
+      [{ height: from + "px" }, { height: to + "px" }],
+      { duration: open ? 320 : 240, easing: "cubic-bezier(0.25, 1, 0.5, 1)" }
+    );
   });
   var saved = null;
   try { saved = localStorage.getItem("amp-lang"); } catch (e) {}
