@@ -24,11 +24,11 @@
   var KEY = "amp-consent";
   var LANGS = ["en", "zh-Hant", "ja", "ko", "es"];
   var TEXT = {
-    en: { msg: "We use Google Analytics to see which pages and links help. Cookies are set only if you accept.", accept: "Accept", decline: "Essential only", more: "How Google uses this data", settings: "Cookie settings" },
-    "zh-Hant": { msg: "我們用 Google Analytics 了解哪些頁面和連結有幫助；只有在你接受後才會設定 Cookie。", accept: "接受", decline: "只用必要的", more: "Google 如何使用這些資料", settings: "Cookie 設定" },
-    ja: { msg: "どのページやリンクが役立っているかを知るために Google Analytics を使っています。Cookie は同意された場合にのみ設定されます。", accept: "同意する", decline: "必要なもののみ", more: "Google のデータ利用について", settings: "Cookie 設定" },
-    ko: { msg: "어떤 페이지와 링크가 도움이 되는지 알기 위해 Google Analytics를 사용합니다. 쿠키는 동의한 경우에만 설정됩니다.", accept: "동의", decline: "필수만", more: "Google의 데이터 사용 방식", settings: "쿠키 설정" },
-    es: { msg: "Usamos Google Analytics para saber qué páginas y enlaces ayudan. Solo se instalan cookies si aceptas.", accept: "Aceptar", decline: "Solo esenciales", more: "Cómo usa Google estos datos", settings: "Ajustes de cookies" }
+    en: { msg: "We use Google Analytics to see which pages and links help. It sets cookies only if you allow them.", accept: "Allow analytics cookies", decline: "Continue without cookies", more: "How Google uses this data", settings: "Cookie settings" },
+    "zh-Hant": { msg: "我們用 Google Analytics 了解哪些頁面和連結有幫助；只有在你允許後才會設定 Cookie。", accept: "允許分析 Cookie", decline: "不使用 Cookie 繼續", more: "Google 如何使用這些資料", settings: "Cookie 設定" },
+    ja: { msg: "どのページやリンクが役立っているかを知るために Google Analytics を使っています。Cookie は許可された場合にのみ設定されます。", accept: "分析 Cookie を許可", decline: "Cookie なしで続ける", more: "Google のデータ利用について", settings: "Cookie 設定" },
+    ko: { msg: "어떤 페이지와 링크가 도움이 되는지 알기 위해 Google Analytics를 사용합니다. 쿠키는 허용한 경우에만 설정됩니다.", accept: "분석 쿠키 허용", decline: "쿠키 없이 계속", more: "Google의 데이터 사용 방식", settings: "쿠키 설정" },
+    es: { msg: "Usamos Google Analytics para saber qué páginas y enlaces ayudan. Solo instala cookies si las permites.", accept: "Permitir cookies de análisis", decline: "Continuar sin cookies", more: "Cómo usa Google estos datos", settings: "Ajustes de cookies" }
   };
   var MORE_URL = "https://policies.google.com/technologies/partner-sites";
 
