@@ -65,7 +65,7 @@
 
   // ---- consent banner ---------------------------------------------------
   var css =
-    ".amp-consent{position:fixed;left:16px;right:16px;bottom:16px;z-index:60;max-width:680px;margin:0 auto;" +
+    ".amp-consent{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom, 0px));z-index:60;max-width:680px;margin:0 auto;" +
     "background:var(--paper,#fff);color:var(--ink,#1a2334);border:1px solid var(--line,#d9e0ea);border-radius:12px;" +
     "box-shadow:0 4px 8px rgba(0,0,0,.12);padding:14px 16px;font-size:14px;line-height:1.5;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}" +
     ".amp-consent[hidden]{display:none}" +
@@ -76,7 +76,8 @@
     "border:1px solid var(--line,#d9e0ea);background:var(--panel,#f0f3f8);color:var(--ink,#1a2334)}" +
     ".amp-consent button.primary{background:var(--accent,#8b5a0e);border-color:var(--accent,#8b5a0e);color:var(--paper,#fff);font-weight:700}" +
     ".amp-consent button:focus-visible{outline:2px solid var(--accent,#8b5a0e);outline-offset:2px}" +
-    "@media (max-width:640px){.amp-consent{left:8px;right:8px;bottom:8px;padding:12px 14px}}";
+    "@media (max-width:640px){.amp-consent{left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom, 0px));padding:12px 14px;font-size:13px;gap:8px 12px}.amp-consent .amp-consent-actions{width:100%}.amp-consent button{flex:1 1 auto}}" +
+    "@media print{.amp-consent{display:none}}";
 
   function injectStyle() {
     var s = document.createElement("style");

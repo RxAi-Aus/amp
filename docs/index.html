@@ -224,7 +224,8 @@
     background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
     padding: 20px 22px; overflow-x: auto;
   }
-  .title-line { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 15px; white-space: nowrap; }
+  .title-line { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 15px; line-height: 1.7; }
+  .title-line .seg { white-space: nowrap; }
   .title-line + .title-line { margin-top: 10px; }
   .seg { padding: 2px 1px; border-radius: 4px; font-weight: 600; }
   .seg.from { color: var(--tag-from); }
@@ -366,9 +367,40 @@
   footer p { margin: 6px 0 0; }
   footer .built { margin-top: 10px; font-weight: 600; color: var(--ink); }
 
+  /* Narrow screens: 16 px gutter, one scrollable row of languages, a table that fits. */
+  @media (max-width: 640px) {
+    .wrap { padding: 16px 16px 72px; }
+    .wtable th, .wtable td { padding-right: 8px; }
+  }
+  @media (max-width: 440px) {
+    .langbar { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
+    .langbar::-webkit-scrollbar { display: none; }
+    .langbar button { flex: 0 0 auto; }
+  }
+  /* Short screens (a phone on its side): the bar scrolls away with the page. */
+  @media (max-height: 500px) {
+    .langbar { position: static; }
+  }
+  @media print {
+    .langbar, .amp-consent, .amp-consent-open, .scroll-hint, .chev { display: none !important; }
+    body { background: #fff; color: #000; }
+    .wrap { max-width: none; padding: 0; }
+    html[data-js] .more { height: auto !important; }
+    section { margin-top: 28px; }
+    .step, .level, .tile, .fnode, .rung, .twin, .sum, tr, pre.cmd, .formula { break-inside: avoid; }
+    h2, h3 { break-after: avoid; }
+    a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #444; overflow-wrap: anywhere; }
+    .chips a::after, .langbar a::after { content: none; }
+  }
   @media (pointer: coarse) {
     .langbar button { min-height: 44px; padding-inline: 14px; }
     a.chip { min-height: 44px; display: inline-flex; align-items: center; }
+  }
+  /* Five languages on one row at 320 px: narrower buttons, still 44 px targets. */
+  @media (max-width: 440px) {
+    .langbar { gap: 4px; }
+    .langbar button { padding-inline: 8px; min-width: 44px; }
+    .wtable .delta { white-space: normal; }
   }
   @media (max-width: 640px) {
     .fnode { grid-template-columns: 92px 1fr; gap: 12px; }

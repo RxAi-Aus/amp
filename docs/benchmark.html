@@ -88,6 +88,7 @@
     --seg-new: #D99A2B;
     --seg-out: #2E7D4F;
     --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+    --shade: rgba(26, 35, 52, 0.18);
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -108,6 +109,7 @@
       --seg-cached: #2E4466;
       --seg-new: #C98F2A;
       --seg-out: #4FAE7A;
+      --shade: rgba(0, 0, 0, 0.55);
     }
   }
 
@@ -244,6 +246,22 @@
 
   /* ---------- tables ---------- */
   .tscroll { overflow-x: auto; }
+  /* Anything that scrolls sideways shows a soft shadow on the clipped edge: the
+     local layers cover it at the start and end, the scroll layers stay put. */
+  .tscroll, pre.cmd, .formula { --sbg: var(--paper); }
+  pre.cmd, .formula { --sbg: var(--panel); }
+  .tscroll, pre.cmd, .formula {
+    background:
+      linear-gradient(to right, var(--sbg) 30%, transparent) left center / 28px 100% no-repeat local,
+      linear-gradient(to left, var(--sbg) 30%, transparent) right center / 28px 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%, var(--shade), transparent) left center / 12px 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, var(--shade), transparent) right center / 12px 100% no-repeat scroll,
+      var(--sbg);
+  }
+  /* The row label stays put while the numbers slide under it. */
+  .tscroll th:first-child, .tscroll td:first-child { position: sticky; left: 0; z-index: 1; background: var(--paper); }
+  .tscroll { overscroll-behavior-x: contain; }
+  .scroll-hint { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--muted); text-align: right; margin: 0 0 6px; }
   .wtable { width: 100%; border-collapse: collapse; font-size: 14px; }
   .wtable th {
     text-align: left; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px;
@@ -275,7 +293,7 @@
   .callout p { margin: 0; }
   .formula {
     font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 15px; font-weight: 600;
-    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    border: 1px solid var(--line); border-radius: 10px;
     padding: 16px 20px; margin: 0 0 14px; overflow-x: auto; white-space: nowrap;
   }
   .formula .g { color: var(--ok); } .formula .b { color: var(--bad); }
@@ -283,7 +301,7 @@
   /* ---------- commands ---------- */
   pre.cmd {
     font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.55;
-    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    border: 1px solid var(--line); border-radius: 10px;
     padding: 14px 18px; margin: 10px 0 16px; overflow-x: auto;
   }
   pre.cmd .c { color: var(--muted); }
@@ -297,6 +315,23 @@
   footer p { margin: 6px 0 0; }
   footer .built { margin-top: 10px; font-weight: 600; color: var(--ink); }
 
+  @media (max-width: 440px) {
+    .formula { white-space: normal; }
+  }
+  @media (max-height: 500px) {
+    .langbar { position: static; }
+  }
+  @media print {
+    .langbar, .amp-consent, .amp-consent-open, .scroll-hint, .chev { display: none !important; }
+    body { background: #fff; color: #000; }
+    .wrap { max-width: none; padding: 0; }
+    html[data-js] .more { height: auto !important; }
+    section { margin-top: 28px; }
+    .step, .level, .tile, .fnode, .rung, .twin, .sum, tr, pre.cmd, .formula { break-inside: avoid; }
+    h2, h3 { break-after: avoid; }
+    a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #444; overflow-wrap: anywhere; }
+    .chips a::after, .langbar a::after { content: none; }
+  }
   @media (pointer: coarse) {
     .langbar button { min-height: 44px; padding-inline: 14px; }
     .langbar .home, a.chip { min-height: 44px; display: inline-flex; align-items: center; }
@@ -851,5 +886,33 @@ npm run benchmark:codex -- --cases 20 --hooks \
 })();
 </script>
 
+<script>
+(function () {
+  // A results table wider than the screen scrolls sideways; say so above the ones that do.
+  var HINT = { "en": "Swipe sideways for more columns →", "zh-Hant": "左右滑動看更多欄位 →" };
+  function mark() {
+    document.querySelectorAll(".tscroll").forEach(function (el) {
+      var over = el.scrollWidth > el.clientWidth + 1;
+      var prev = el.previousElementSibling;
+      var has = prev && prev.classList.contains("scroll-hint");
+      if (over && !has) {
+        var p = document.createElement("p");
+        p.className = "scroll-hint";
+        p.innerHTML = '<span class="t" lang="en">' + HINT.en + '</span><span class="t" lang="zh-Hant">' + HINT["zh-Hant"] + "</span>";
+        el.parentNode.insertBefore(p, el);
+      } else if (!over && has) {
+        prev.remove();
+      }
+    });
+  }
+  var queued = false;
+  window.addEventListener("resize", function () {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function () { queued = false; mark(); });
+  });
+  mark();
+})();
+</script>
 </body>
 </html>
