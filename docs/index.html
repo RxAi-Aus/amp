@@ -341,16 +341,17 @@
       <span class="t" lang="es">Cómo funciona el cerebro compartido</span>
     </h1>
     <div class="lede">
-      <p class="t" lang="en">Every memory is one GitHub Issue. Comments are the conversation about it. GitHub Actions — not any AI — compiles the index. Agents read the index, do their work, then leave a record behind.</p>
-      <p class="t" lang="zh-Hant">每一條記憶就是一則 GitHub Issue；留言是針對它的討論。索引由 GitHub Actions（而非任何 AI）自動編譯。代理先讀索引、再工作、最後留下紀錄。</p>
-      <p class="t" lang="ja">記憶はすべて1件の GitHub Issue。コメントはそれをめぐる会話です。インデックスを編纂するのは AI ではなく GitHub Actions。エージェントはインデックスを読み、作業し、記録を残します。</p>
-      <p class="t" lang="ko">모든 기억은 하나의 GitHub 이슈입니다. 댓글은 그 기억에 대한 대화입니다. 인덱스는 AI가 아니라 GitHub Actions가 컴파일합니다. 에이전트는 인덱스를 읽고, 작업하고, 기록을 남깁니다.</p>
-      <p class="t" lang="es">Cada recuerdo es un issue de GitHub. Los comentarios son la conversación sobre él. GitHub Actions —no ninguna IA— compila el índice. Los agentes leen el índice, hacen su trabajo y dejan constancia.</p>
+      <p class="t" lang="en">Every memory is one GitHub Issue. Comments are the conversation about it. GitHub Actions — not any AI — compiles the index. Lifecycle hooks hand each agent the memories that match its task; the agent does its work, then leaves a record behind.</p>
+      <p class="t" lang="zh-Hant">每一條記憶就是一則 GitHub Issue；留言是針對它的討論。索引由 GitHub Actions（而非任何 AI）自動編譯。生命週期 hook 把和任務相符的記憶交給代理；代理工作完，留下紀錄。</p>
+      <p class="t" lang="ja">記憶はすべて1件の GitHub Issue。コメントはそれをめぐる会話です。インデックスを編纂するのは AI ではなく GitHub Actions。ライフサイクルフックがタスクに合う記憶をエージェントに手渡し、エージェントは作業して記録を残します。</p>
+      <p class="t" lang="ko">모든 기억은 하나의 GitHub 이슈입니다. 댓글은 그 기억에 대한 대화입니다. 인덱스는 AI가 아니라 GitHub Actions가 컴파일합니다. 라이프사이클 훅이 작업에 맞는 기억을 에이전트에게 건네고, 에이전트는 작업한 뒤 기록을 남깁니다.</p>
+      <p class="t" lang="es">Cada recuerdo es un issue de GitHub. Los comentarios son la conversación sobre él. GitHub Actions —no ninguna IA— compila el índice. Los hooks de ciclo de vida entregan a cada agente los recuerdos que encajan con su tarea; el agente hace su trabajo y deja constancia.</p>
     </div>
     <div class="chips">
       <a class="chip" href="https://github.com/RxAi-Aus/amp">GitHub ↗</a>
       <a class="chip" href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md ↗</a>
       <a class="chip" href="https://github.com/RxAi-Aus/amp#readme">README ↗</a>
+      <a class="chip" href="benchmark.html">Benchmarks →</a>
       <span class="chip t" lang="en">zero backend</span>
       <span class="chip t" lang="zh-Hant">零後端</span>
       <span class="chip t" lang="ja">バックエンドゼロ</span>
@@ -374,10 +375,10 @@
     </div>
     <img class="hero-art" src="assets/hero-ant-trail.png" alt="A glowing trail of ants converging on a GitHub issue card; side trails that lead nowhere fade out" width="1456" height="720">
     <div class="proof" aria-label="Measured results">
-      <div class="tile"><div class="v">−18%</div><div class="l"><span class="t" lang="en">fewer tokens spent reading the project once memory is on: a heavy-reading model read 18% less of the codebase in an A/B with identical prompts.</span><span class="t" lang="zh-Hant">開啟記憶後，讀取專案所耗的 token 少 18%：閱讀量大的模型在相同提示的 A/B 測試中少讀 18% 的程式碼。</span><span class="t" lang="ja">メモリ有効時、プロジェクト読み込みに使うトークンが 18% 減。読み込み量の多いモデルが同一プロンプトの A/B でコードを 18% 少なく読んだ。</span><span class="t" lang="ko">메모리를 켜면 프로젝트 읽기에 쓰는 토큰이 18% 감소: 읽기가 많은 모델이 동일 프롬프트 A/B에서 코드를 18% 덜 읽음.</span><span class="t" lang="es">18% menos tokens leyendo el proyecto con la memoria activada: un modelo de lectura intensiva leyó un 18% menos del código en un A/B con prompts idénticos.</span></div></div>
-      <div class="tile"><div class="v">−14% · −5%</div><div class="l"><span class="t" lang="en">faster, and cheaper, end to end on the same tasks. The injected memory block costs about 1.5k tokens per call, so the net saving is smaller than the reading saving.</span><span class="t" lang="zh-Hant">同樣的任務端到端快 14%、成本低 5%。注入的記憶區塊每次呼叫約耗 1.5k token，所以淨節省比讀取節省小。</span><span class="t" lang="ja">同じタスクで端から端まで 14% 速く、5% 安い。注入するメモリブロックは呼び出しごとに約 1.5k トークンかかるため、純節約は読み込み削減より小さい。</span><span class="t" lang="ko">같은 작업에서 처음부터 끝까지 14% 빠르고 5% 저렴. 주입되는 기억 블록이 호출당 약 1.5k 토큰이므로 순절감은 읽기 절감보다 작음.</span><span class="t" lang="es">14% más rápido y 5% más barato de extremo a extremo en las mismas tareas. El bloque de memoria inyectado cuesta unos 1,5k tokens por llamada, así que el ahorro neto es menor que el de lectura.</span></div></div>
+      <div class="tile"><div class="v">−18%</div><div class="l"><span class="t" lang="en">less of the codebase dug up once memory is on: a heavy-reading model pulled 18% fewer bytes of files and command output in an A/B with identical prompts.</span><span class="t" lang="zh-Hant">開啟記憶後少挖 18% 的程式碼：閱讀量大的模型在相同提示的 A/B 測試中，從檔案與指令挖出的內容少了 18%。</span><span class="t" lang="ja">メモリ有効時、コードベースの読み込みが 18% 減。読み込み量の多いモデルが同一プロンプトの A/B で、ファイルやコマンド出力から掘り出した量が 18% 少なかった。</span><span class="t" lang="ko">메모리를 켜면 코드베이스를 18% 덜 파냄: 읽기가 많은 모델이 동일 프롬프트 A/B에서 파일과 명령 출력에서 파낸 양이 18% 감소.</span><span class="t" lang="es">18% menos código extraído con la memoria activada: un modelo de lectura intensiva sacó un 18% menos de archivos y salidas de comandos en un A/B con prompts idénticos.</span></div></div>
+      <div class="tile"><div class="v">−14% · −5%</div><div class="l"><span class="t" lang="en">faster, and cheaper, end to end on the same tasks. The injected memory block costs about 1k tokens per call, so the net saving is smaller than the reading saving.</span><span class="t" lang="zh-Hant">同樣的任務端到端快 14%、成本低 5%。注入的記憶區塊每次呼叫約耗 1k token，所以淨節省比讀取節省小。</span><span class="t" lang="ja">同じタスクで端から端まで 14% 速く、5% 安い。注入するメモリブロックは呼び出しごとに約 1k トークンかかるため、純節約は読み込み削減より小さい。</span><span class="t" lang="ko">같은 작업에서 처음부터 끝까지 14% 빠르고 5% 저렴. 주입되는 기억 블록이 호출당 약 1k 토큰이므로 순절감은 읽기 절감보다 작음.</span><span class="t" lang="es">14% más rápido y 5% más barato de extremo a extremo en las mismas tareas. El bloque de memoria inyectado cuesta cerca de 1k tokens por llamada, así que el ahorro neto es menor que el de lectura.</span></div></div>
       <div class="tile"><div class="v">6.8 KB</div><div class="l"><span class="t" lang="en">to recall from a store of 145 memories, versus 914 KB and 58 API calls for a naive scan of every issue.</span><span class="t" lang="zh-Hant">從 145 筆記憶的儲存庫回憶只需 6.8 KB；不用索引、逐一讀取每個 Issue 要 914 KB 與 58 次 API 呼叫。</span><span class="t" lang="ja">145 件の記憶からの想起は 6.8 KB。全 Issue の素朴な走査なら 914 KB・API 呼び出し 58 回。</span><span class="t" lang="ko">기억 145건 저장소에서 회상하는 데 6.8 KB. 모든 이슈를 단순 스캔하면 914 KB, API 호출 58회.</span><span class="t" lang="es">para recordar de un almacén de 145 memorias, frente a 914 KB y 58 llamadas a la API de un escaneo ingenuo de cada issue.</span></div></div>
-      <p class="src"><span class="t" lang="en">Measured on a live repository in September 2026: 32 fresh sessions, memory on versus off, identical prompts and tool allow-lists. A sparse-reading model saw no benefit, so the injected volume is tiered by model.</span><span class="t" lang="zh-Hant">2026 年 9 月於真實儲存庫量測：32 個全新工作階段，記憶開啟與關閉，相同提示與工具白名單。閱讀量小的模型沒有好處，因此注入量依模型分級。</span><span class="t" lang="ja">2026年9月、実運用リポジトリで計測：新規 32 セッション、メモリ有効/無効、同一プロンプトとツール許可リスト。読み込み量の少ないモデルには効果がなく、注入量はモデル別に段階化。</span><span class="t" lang="ko">2026년 9월 실제 저장소에서 측정: 새 세션 32개, 메모리 켬/끔, 동일 프롬프트와 도구 허용 목록. 읽기가 적은 모델은 이득이 없어 주입량을 모델별로 차등.</span><span class="t" lang="es">Medido en un repositorio real en septiembre de 2026: 32 sesiones nuevas, memoria activada frente a desactivada, prompts y listas de herramientas idénticos. Un modelo de lectura escasa no obtuvo beneficio, por eso el volumen inyectado se escalona por modelo.</span></p>
+      <p class="src"><span class="t" lang="en">Measured on a live repository in September 2026: 32 fresh sessions, memory on versus off, identical prompts and tool allow-lists. A sparse-reading model saw no benefit, so only a pointer tier is injected at session start and a summary is expanded only for the task at hand.<a href="benchmark.html">How we measure this →</a></span><span class="t" lang="zh-Hant">2026 年 9 月於真實儲存庫量測：32 個全新工作階段，記憶開啟與關閉，相同提示與工具白名單。閱讀量小的模型沒有好處，因此開場只注入指標層，只在題目相關時才展開摘要。<a href="benchmark.html">我們如何量測 →</a></span><span class="t" lang="ja">2026年9月、実運用リポジトリで計測：新規 32 セッション、メモリ有効/無効、同一プロンプトとツール許可リスト。読み込み量の少ないモデルには効果がなく、開始時はポインタ層だけを注入し、タスクに関係する記憶だけを要約に展開する。<a href="benchmark.html">計測方法（英語）→</a></span><span class="t" lang="ko">2026년 9월 실제 저장소에서 측정: 새 세션 32개, 메모리 켬/끔, 동일 프롬프트와 도구 허용 목록. 읽기가 적은 모델은 이득이 없어 시작 시에는 포인터 층만 주입하고, 작업과 관련된 기억만 요약으로 확장.<a href="benchmark.html">측정 방법(영어) →</a></span><span class="t" lang="es">Medido en un repositorio real en septiembre de 2026: 32 sesiones nuevas, memoria activada frente a desactivada, prompts y listas de herramientas idénticos. Un modelo de lectura escasa no obtuvo beneficio, por eso al inicio solo se inyecta la capa de punteros y se expande únicamente lo que atañe a la tarea.<a href="benchmark.html">Cómo lo medimos (en inglés) →</a></span></p>
     </div>
   </header>
 
@@ -781,65 +782,65 @@
     <div class="sec-head">
       <span class="mono-label">READ&nbsp;PATH</span>
       <h2>
-        <span class="t" lang="en">Two-tier navigation</span>
-        <span class="t" lang="zh-Hant">兩層式導覽（讀取流程）</span>
-        <span class="t" lang="ja">二層ナビゲーション（読み取り経路）</span>
-        <span class="t" lang="ko">2단 내비게이션(읽기 경로)</span>
-        <span class="t" lang="es">Navegación en dos niveles</span>
+        <span class="t" lang="en">Three-tier recall</span>
+        <span class="t" lang="zh-Hant">三層式召回（讀取流程）</span>
+        <span class="t" lang="ja">三層の想起（読み取り経路）</span>
+        <span class="t" lang="ko">3단 회상(읽기 경로)</span>
+        <span class="t" lang="es">Recuerdo en tres niveles</span>
       </h2>
     </div>
-    <p class="note t" lang="en">Recall stays cheap because the agent descends only as far as the task needs — the index stays small no matter how many memories accumulate.</p>
-    <p class="note t" lang="zh-Hant">回憶的成本很低：代理只往下讀到任務需要的深度。不管記憶累積多少，索引永遠精簡。</p>
-    <p class="note t" lang="ja">エージェントはタスクに必要な深さまでしか降りないので、想起のコストは低いまま。記憶がいくら増えてもインデックスは小さいままです。</p>
-    <p class="note t" lang="ko">에이전트는 작업에 필요한 깊이까지만 내려가므로 회상 비용은 낮게 유지됩니다. 기억이 아무리 쌓여도 인덱스는 작게 유지됩니다.</p>
-    <p class="note t" lang="es">Recordar sigue siendo barato porque el agente desciende solo hasta donde la tarea lo requiere; el índice se mantiene pequeño por muchos recuerdos que se acumulen.</p>
+    <p class="note t" lang="en">Recall is delivered, not performed. The hooks inject the pointer tier before the agent's first action and expand to a summary only for the task at hand, so the context stays small no matter how many memories accumulate — Region files are for browsing, never for recall.</p>
+    <p class="note t" lang="zh-Hant">召回是「送到手上」，不是代理自己去做。Hook 在代理的第一個動作之前注入指標層，只在題目相關時才展開摘要，所以不管記憶累積多少，context 永遠精簡——區域檔案只供瀏覽，不參與召回。</p>
+    <p class="note t" lang="ja">想起は「届けられる」もので、エージェントが自分で行うものではありません。フックが最初の動作の前にポインタ層を注入し、タスクに関係する記憶だけを要約に展開するので、記憶がいくら増えてもコンテキストは小さいまま——領域ファイルは閲覧用で、想起には使いません。</p>
+    <p class="note t" lang="ko">회상은 '전달되는' 것이지 에이전트가 직접 수행하는 것이 아닙니다. 훅이 첫 동작 전에 포인터 층을 주입하고, 작업과 관련된 기억만 요약으로 확장하므로 기억이 아무리 쌓여도 컨텍스트는 작게 유지됩니다. 영역 파일은 둘러보기용이며 회상에는 쓰이지 않습니다.</p>
+    <p class="note t" lang="es">El recuerdo se entrega, no se ejecuta. Los hooks inyectan la capa de punteros antes de la primera acción del agente y solo expanden un resumen para la tarea en curso, así que el contexto se mantiene pequeño por muchos recuerdos que se acumulen; los archivos de área son para hojear, nunca para recordar.</p>
     <div class="ladder">
       <div class="rung">
-        <span class="file">INDEX.md</span>
+        <span class="file">INDEX.md + not_indexed.md</span>
         <span class="why">
-          <span class="t" lang="en">always read first — region list + summaries only</span>
-          <span class="t" lang="zh-Hant">永遠先讀——只有區域清單與摘要</span>
-          <span class="t" lang="ja">常に最初に読む——領域リストと要約のみ</span>
-          <span class="t" lang="ko">항상 먼저 읽기 — 영역 목록과 요약만</span>
-          <span class="t" lang="es">siempre se lee primero: solo lista de áreas y resúmenes</span>
+          <span class="t" lang="en">the navigation layer, injected at session start and compacted around the repo's Region</span>
+          <span class="t" lang="zh-Hant">導覽層：session 開始時注入，並依此儲存庫的區域壓縮</span>
+          <span class="t" lang="ja">ナビゲーション層：セッション開始時に注入し、このリポジトリの領域を中心に圧縮</span>
+          <span class="t" lang="ko">내비게이션 층: 세션 시작 시 주입되며 이 저장소의 영역을 중심으로 압축</span>
+          <span class="t" lang="es">la capa de navegación, inyectada al inicio de sesión y compactada en torno al área del repositorio</span>
         </span>
       </div>
       <div class="rung">
-        <span class="file">not_indexed.md</span>
+        <span class="file">pointer</span>
         <span class="why">
-          <span class="t" lang="en">anything posted since the last compile</span>
-          <span class="t" lang="zh-Hant">上次編譯後的新貼文</span>
-          <span class="t" lang="ja">前回コンパイル以降の投稿すべて</span>
-          <span class="t" lang="ko">마지막 컴파일 이후 게시물</span>
-          <span class="t" lang="es">lo publicado desde la última compilación</span>
+          <span class="t" lang="en"><span class="mono">#N [type · place · weight] title</span> — every matching record on one line, no network</span>
+          <span class="t" lang="zh-Hant"><span class="mono">#N [type · place · weight] title</span>——每一則相符的記憶各一行，不用連網</span>
+          <span class="t" lang="ja"><span class="mono">#N [type · place · weight] title</span>——一致する記録を1行ずつ、ネットワーク不要</span>
+          <span class="t" lang="ko"><span class="mono">#N [type · place · weight] title</span> — 일치하는 기록마다 한 줄, 네트워크 불필요</span>
+          <span class="t" lang="es"><span class="mono">#N [type · place · weight] title</span>: cada registro coincidente en una línea, sin red</span>
         </span>
       </div>
       <div class="rung">
-        <span class="file">REGION-{name}.md</span>
+        <span class="file">summary</span>
         <span class="why">
-          <span class="t" lang="en">only the regions this task needs</span>
-          <span class="t" lang="zh-Hant">只載入本次任務相關的區域</span>
-          <span class="t" lang="ja">このタスクに必要な領域だけ</span>
-          <span class="t" lang="ko">이번 작업에 필요한 영역만</span>
-          <span class="t" lang="es">solo las áreas que esta tarea necesita</span>
+          <span class="t" lang="en">the record's <span class="mono">## Now</span>, else its opening prose, ≤ 240 chars — expanded only for records the prompt overlaps (Claude Code); at session start on Codex and agy</span>
+          <span class="t" lang="zh-Hant">記憶的 <span class="mono">## Now</span>，沒有就取開頭的散文，≤ 240 字——只展開和 prompt 相符的記憶（Claude Code）；Codex 與 agy 在 session 開始時給</span>
+          <span class="t" lang="ja">記録の <span class="mono">## Now</span>、なければ冒頭の散文、240 文字以内——プロンプトと重なる記録だけ展開（Claude Code）。Codex と agy はセッション開始時</span>
+          <span class="t" lang="ko">기록의 <span class="mono">## Now</span>, 없으면 첫 산문, 240자 이하 — 프롬프트와 겹치는 기록만 확장(Claude Code); Codex와 agy는 세션 시작 시</span>
+          <span class="t" lang="es">el <span class="mono">## Now</span> del registro, o su prosa inicial, ≤ 240 caracteres: solo se expande para los registros que la petición toca (Claude Code); al inicio de sesión en Codex y agy</span>
         </span>
       </div>
       <div class="rung">
         <span class="file">issue + comments</span>
         <span class="why">
-          <span class="t" lang="en">full thread, fetched only once relevance is confirmed</span>
-          <span class="t" lang="zh-Hant">確認相關後才抓完整討論串</span>
-          <span class="t" lang="ja">関連が確認できてから全スレッドを取得</span>
-          <span class="t" lang="ko">관련성이 확인된 후에야 전체 스레드 가져오기</span>
-          <span class="t" lang="es">el hilo completo, solo tras confirmar su relevancia</span>
+          <span class="t" lang="en">the full thread, fetched only when the agent acts on a record's details</span>
+          <span class="t" lang="zh-Hant">完整討論串，只在代理要依據細節行動時才抓取</span>
+          <span class="t" lang="ja">全スレッドは、エージェントが記録の詳細に基づいて動くときだけ取得</span>
+          <span class="t" lang="ko">전체 스레드는 에이전트가 기록의 세부 내용에 따라 행동할 때만 가져옴</span>
+          <span class="t" lang="es">el hilo completo, solo cuando el agente actúa sobre los detalles de un registro</span>
         </span>
       </div>
     </div>
-    <p class="note t" lang="en" style="margin-top:16px">Within a region, types are read in a fixed order — goal before steps, doubts before trust: <span class="mono">intent → facts → pattern → invalidation → discovery → events</span>.</p>
-    <p class="note t" lang="zh-Hant" style="margin-top:16px">在每個區域內，類型有固定閱讀順序——先看目標再看步驟、先查反證再信事實：<span class="mono">intent → facts → pattern → invalidation → discovery → events</span>。</p>
-    <p class="note t" lang="ja" style="margin-top:16px">領域内ではタイプを決まった順に読みます——手順より先に目的を、信頼より先に反証を：<span class="mono">intent → facts → pattern → invalidation → discovery → events</span>。</p>
-    <p class="note t" lang="ko" style="margin-top:16px">영역 안에서는 유형을 정해진 순서로 읽습니다. 단계보다 목표를, 신뢰보다 의심을 먼저: <span class="mono">intent → facts → pattern → invalidation → discovery → events</span>.</p>
-    <p class="note t" lang="es" style="margin-top:16px">Dentro de un área, los tipos se leen en orden fijo: la meta antes que los pasos, las dudas antes que la confianza: <span class="mono">intent → facts → pattern → invalidation → discovery → events</span>.</p>
+    <p class="note t" lang="en" style="margin-top:16px">Pointers arrive in a fixed order — goal before steps, doubts before trust: <span class="mono">intent → facts → pattern → invalidation → discovery → events</span>.</p>
+    <p class="note t" lang="zh-Hant" style="margin-top:16px">指標有固定順序——先看目標再看步驟、先查反證再信事實：<span class="mono">intent → facts → pattern → invalidation → discovery → events</span>。</p>
+    <p class="note t" lang="ja" style="margin-top:16px">ポインタは決まった順で届きます——手順より先に目的を、信頼より先に反証を：<span class="mono">intent → facts → pattern → invalidation → discovery → events</span>。</p>
+    <p class="note t" lang="ko" style="margin-top:16px">포인터는 정해진 순서로 도착합니다. 단계보다 목표를, 신뢰보다 의심을 먼저: <span class="mono">intent → facts → pattern → invalidation → discovery → events</span>.</p>
+    <p class="note t" lang="es" style="margin-top:16px">Los punteros llegan en orden fijo: la meta antes que los pasos, las dudas antes que la confianza: <span class="mono">intent → facts → pattern → invalidation → discovery → events</span>.</p>
   </section>
 
   <section>
@@ -959,11 +960,11 @@
         <span class="t" lang="es">Cuatro niveles de cumplimiento</span>
       </h2>
     </div>
-    <p class="note t" lang="en">Levels change what is <em>mechanical</em>, never what is <em>required</em>. A higher level always degrades gracefully to the one below — a broken adapter never blocks the user's real work.</p>
-    <p class="note t" lang="zh-Hant">等級改變的是「多少事被機械化」，而非「要求本身」。高等級故障時一律優雅降級到下一級——壞掉的配接器絕不擋住使用者的正事。</p>
-    <p class="note t" lang="ja">レベルが変えるのは「どれだけ機械化されるか」であって「要求そのもの」ではありません。上位レベルは常に下位へ優雅に縮退します——壊れたアダプタがユーザーの本来の作業を妨げることはありません。</p>
-    <p class="note t" lang="ko">수준이 바꾸는 것은 '얼마나 기계화되는가'이지 '요구 사항 자체'가 아닙니다. 상위 수준은 언제나 아래 수준으로 우아하게 강등됩니다. 고장 난 어댑터가 사용자의 실제 작업을 막는 일은 없습니다.</p>
-    <p class="note t" lang="es">Los niveles cambian lo que es <em>mecánico</em>, nunca lo que es <em>obligatorio</em>. Un nivel superior siempre se degrada con elegancia al inferior: un adaptador roto jamás bloquea el trabajo real del usuario.</p>
+    <p class="note t" lang="en">Levels change what is <em>mechanical</em>, never what is <em>required</em>. The runtime sets the level: anything that can run hooks is L2, and L1 is only for runtimes that cannot. A broken adapter never blocks the user's real work — on a hook-capable runtime it degrades to silent recall (the agent says once how to restore the hooks), never to reading the index by hand.</p>
+    <p class="note t" lang="zh-Hant">等級改變的是「多少事被機械化」，而非「要求本身」。等級由執行環境決定：能跑 hook 的一律是 L2，L1 只留給跑不了 hook 的環境。壞掉的配接器絕不擋住使用者的正事——在能跑 hook 的環境上，它退化為「靜默召回」（代理只說一次怎麼修復 hook），絕不會退化成手動翻索引。</p>
+    <p class="note t" lang="ja">レベルが変えるのは「どれだけ機械化されるか」であって「要求そのもの」ではありません。レベルはランタイムが決めます：フックを実行できるものはすべて L2、L1 はフックを実行できないランタイムだけ。壊れたアダプタがユーザーの本来の作業を妨げることはなく、フック対応ランタイムでは「静かな想起」（エージェントがフックの復旧方法を一度だけ伝える）に縮退し、手動でインデックスを読むことには決してなりません。</p>
+    <p class="note t" lang="ko">수준이 바꾸는 것은 '얼마나 기계화되는가'이지 '요구 사항 자체'가 아닙니다. 수준은 런타임이 정합니다: 훅을 실행할 수 있으면 모두 L2이고, L1은 훅을 실행할 수 없는 런타임만을 위한 것입니다. 고장 난 어댑터가 사용자의 실제 작업을 막는 일은 없습니다. 훅이 가능한 런타임에서는 '조용한 회상'(에이전트가 훅 복구 방법을 한 번만 알림)으로 강등될 뿐, 인덱스를 손으로 읽는 방식으로는 결코 돌아가지 않습니다.</p>
+    <p class="note t" lang="es">Los niveles cambian lo que es <em>mecánico</em>, nunca lo que es <em>obligatorio</em>. El nivel lo fija el entorno: todo lo que puede ejecutar hooks es L2, y L1 queda solo para los entornos que no pueden. Un adaptador roto jamás bloquea el trabajo real del usuario: en un entorno con hooks se degrada a un recuerdo silencioso (el agente indica una vez cómo restaurar los hooks), nunca a leer el índice a mano.</p>
     <div class="levels">
       <div class="level">
         <div class="lvhead">
@@ -1057,11 +1058,11 @@
         <p class="t" lang="es">Hooks deterministas + libro de sesión interponen checkpoints reales.</p>
         <div class="more" id="cf-2">
           <div class="more-in">
-            <p class="t" lang="en"><span class="mono">claudecowork</span> · <span class="mono">agy</span> · <span class="mono">codex</span>. Hooks fire outside the model, so forgetting is not an option. The ledger under <span class="mono">~/.rxai-amp/</span> is advisory only.</p>
-            <p class="t" lang="zh-Hant"><span class="mono">claudecowork</span>、<span class="mono">agy</span>、<span class="mono">codex</span>。Hook 在模型之外觸發，「忘記」不是選項。<span class="mono">~/.rxai-amp/</span> 下的帳本僅供參考。</p>
-            <p class="t" lang="ja"><span class="mono">claudecowork</span>・<span class="mono">agy</span>・<span class="mono">codex</span>。フックはモデルの外で発火するので「忘れる」選択肢はありません。<span class="mono">~/.rxai-amp/</span> の台帳は参考情報のみ。</p>
-            <p class="t" lang="ko"><span class="mono">claudecowork</span> · <span class="mono">agy</span> · <span class="mono">codex</span>. 훅은 모델 바깥에서 발동하므로 ‘잊기’는 선택지가 아닙니다. <span class="mono">~/.rxai-amp/</span> 아래 원장은 참고용입니다.</p>
-            <p class="t" lang="es"><span class="mono">claudecowork</span> · <span class="mono">agy</span> · <span class="mono">codex</span>. Los hooks se disparan fuera del modelo, así que olvidar no es una opción. El libro en <span class="mono">~/.rxai-amp/</span> es solo orientativo.</p>
+            <p class="t" lang="en"><span class="mono">Claude Code</span> · <span class="mono">Codex</span> · <span class="mono">agy</span>. Hooks fire outside the model, so forgetting is not an option. The ledger under <span class="mono">~/.rxai-amp/</span> is advisory only.</p>
+            <p class="t" lang="zh-Hant"><span class="mono">Claude Code</span>、<span class="mono">Codex</span>、<span class="mono">agy</span>。Hook 在模型之外觸發，「忘記」不是選項。<span class="mono">~/.rxai-amp/</span> 下的帳本僅供參考。</p>
+            <p class="t" lang="ja"><span class="mono">Claude Code</span>・<span class="mono">Codex</span>・<span class="mono">agy</span>。フックはモデルの外で発火するので「忘れる」選択肢はありません。<span class="mono">~/.rxai-amp/</span> の台帳は参考情報のみ。</p>
+            <p class="t" lang="ko"><span class="mono">Claude Code</span> · <span class="mono">Codex</span> · <span class="mono">agy</span>. 훅은 모델 바깥에서 발동하므로 ‘잊기’는 선택지가 아닙니다. <span class="mono">~/.rxai-amp/</span> 아래 원장은 참고용입니다.</p>
+            <p class="t" lang="es"><span class="mono">Claude Code</span> · <span class="mono">Codex</span> · <span class="mono">agy</span>. Los hooks se disparan fuera del modelo, así que olvidar no es una opción. El libro en <span class="mono">~/.rxai-amp/</span> es solo orientativo.</p>
           </div>
         </div>
       </div>
@@ -1098,11 +1099,11 @@
       </div>
     </div>
 
-    <p class="note t" lang="en" style="margin-top:20px">Measured at both levels, same tasks and same store. At <span class="mono">L1</span>, where the agent performs recall itself, one model paid <b>+46% input</b> and <b>+35% wall time</b> against no memory at all. At <span class="mono">L2</span>, where a hook delivers the same records before the first action, that inverted to <b>−5.6% input</b> and <b>−5.4% tool output</b>; the second model improved but never crossed over. Recall also stopped being optional — all ten enabled sessions injected the same three records, where at <span class="mono">L1</span> one model navigated five times and fetched nothing. The level decides whether memory <em>can</em> repay itself; whether it does still depends on how much reading it replaces.</p>
-    <p class="note t" lang="zh-Hant" style="margin-top:20px">兩個等級都實測過,任務與儲存相同。在 <span class="mono">L1</span>(由代理自行執行回憶),其中一個模型比完全不用記憶多付 <b>+46% 輸入</b>與 <b>+35% 時間</b>。移到 <span class="mono">L2</span>(由 hook 在第一個動作前送達同樣的紀錄)後,反轉為<b>輸入 −5.6%</b>、<b>工具輸出 −5.4%</b>;第二個模型有改善但始終沒有由正轉負。回憶本身也不再是選項——十個啟用階段全部注入了相同的三筆紀錄,而在 <span class="mono">L1</span>,其中一個模型導覽了五次卻什麼都沒取。等級決定記憶「能不能」回本;真的回不回得了,仍取決於它替代掉多少閱讀量。</p>
-    <p class="note t" lang="ja" style="margin-top:20px">両レベルで計測、タスクとストアは同一。<span class="mono">L1</span>(エージェント自身が想起を実行)では、ある1モデルが記憶なしに対して<b>入力 +46%</b>・<b>実時間 +35%</b>を支払いました。<span class="mono">L2</span>(フックが最初の動作の前に同じ記録を届ける)へ移すと、<b>入力 −5.6%</b>・<b>ツール出力 −5.4%</b>へ反転。もう1モデルは改善したものの転換には至らず。想起自体も任意ではなくなりました——有効化した10セッションすべてが同じ3件を注入。<span class="mono">L1</span> では1モデルが5回ナビゲートして1件も取得しませんでした。レベルは記憶が元を取れる「余地」を決めます。実際に取れるかは、どれだけの読み込みを置き換えるか次第です。</p>
-    <p class="note t" lang="ko" style="margin-top:20px">두 수준 모두 측정했으며 과제와 저장소는 동일합니다. <span class="mono">L1</span>(에이전트가 직접 회상을 수행)에서는 한 모델이 기억을 아예 쓰지 않는 것보다 <b>입력 +46%</b>, <b>실행 시간 +35%</b>를 더 썼습니다. <span class="mono">L2</span>(훅이 첫 동작 전에 같은 기록을 전달)로 옮기자 <b>입력 −5.6%</b>, <b>도구 출력 −5.4%</b>로 뒤집혔습니다. 두 번째 모델은 개선됐지만 끝내 전환되지는 않았습니다. 회상 자체도 선택이 아니게 되었습니다 — 활성화된 열 개 세션 모두 같은 세 건을 주입했고, <span class="mono">L1</span>에서는 한 모델이 다섯 번 탐색하고도 아무것도 가져오지 않았습니다. 수준은 기억이 본전을 뽑을 <em>수 있는지</em>를 결정하고, 실제로 뽑는지는 얼마나 많은 읽기를 대체하느냐에 달려 있습니다.</p>
-    <p class="note t" lang="es" style="margin-top:20px">Medido en ambos niveles, con las mismas tareas y el mismo almacén. En <span class="mono">L1</span>, donde el agente ejecuta el recuerdo por su cuenta, un modelo pagó <b>+46% de entrada</b> y <b>+35% de tiempo</b> frente a no usar memoria. En <span class="mono">L2</span>, donde un hook entrega los mismos registros antes de la primera acción, eso se invirtió a <b>−5,6% de entrada</b> y <b>−5,4% de salida de herramientas</b>; el segundo modelo mejoró pero nunca cruzó a favor. El recuerdo además dejó de ser opcional: las diez sesiones habilitadas inyectaron los mismos tres registros, mientras que en <span class="mono">L1</span> un modelo navegó cinco veces sin recuperar nada. El nivel decide si la memoria <em>puede</em> amortizarse; que lo haga sigue dependiendo de cuánta lectura sustituya.</p>
+    <p class="note t" lang="en" style="margin-top:20px">Measured at both levels, same tasks and same store. At <span class="mono">L1</span>, where the agent performs recall itself, one model paid <b>+46% input</b> and <b>+35% wall time</b> against no memory at all. At <span class="mono">L2</span>, where a hook delivers the same records before the first action, that inverted to <b>−5.6% input</b> and <b>−5.4% tool output</b>; the second model improved but never crossed over. Recall also stopped being optional — all ten enabled sessions injected the same three records, where at <span class="mono">L1</span> one model navigated five times and fetched nothing. The level decides whether memory <em>can</em> repay itself; whether it does still depends on how much reading it replaces. Re-run on 24 September 2026 with Codex's own memory switched off, the same model was +9.9% input at medium effort and −3.4% at xhigh, where it also dug up 13.6% less and finished 10.7% sooner.</p>
+    <p class="note t" lang="zh-Hant" style="margin-top:20px">兩個等級都實測過,任務與儲存相同。在 <span class="mono">L1</span>(由代理自行執行回憶),其中一個模型比完全不用記憶多付 <b>+46% 輸入</b>與 <b>+35% 時間</b>。移到 <span class="mono">L2</span>(由 hook 在第一個動作前送達同樣的紀錄)後,反轉為<b>輸入 −5.6%</b>、<b>工具輸出 −5.4%</b>;第二個模型有改善但始終沒有由正轉負。回憶本身也不再是選項——十個啟用階段全部注入了相同的三筆紀錄,而在 <span class="mono">L1</span>,其中一個模型導覽了五次卻什麼都沒取。等級決定記憶「能不能」回本;真的回不回得了,仍取決於它替代掉多少閱讀量。2026 年 9 月 24 日關掉 Codex 自己的記憶重跑，同一個模型在 medium 時輸入 +9.9%、在 xhigh 時 −3.4%，而且少挖 13.6%、早 10.7% 完成。</p>
+    <p class="note t" lang="ja" style="margin-top:20px">両レベルで計測、タスクとストアは同一。<span class="mono">L1</span>(エージェント自身が想起を実行)では、ある1モデルが記憶なしに対して<b>入力 +46%</b>・<b>実時間 +35%</b>を支払いました。<span class="mono">L2</span>(フックが最初の動作の前に同じ記録を届ける)へ移すと、<b>入力 −5.6%</b>・<b>ツール出力 −5.4%</b>へ反転。もう1モデルは改善したものの転換には至らず。想起自体も任意ではなくなりました——有効化した10セッションすべてが同じ3件を注入。<span class="mono">L1</span> では1モデルが5回ナビゲートして1件も取得しませんでした。レベルは記憶が元を取れる「余地」を決めます。実際に取れるかは、どれだけの読み込みを置き換えるか次第です。2026年9月24日、Codex 自身のメモリを切って再計測すると、同じモデルは medium で入力 +9.9%、xhigh で −3.4%（掘り出し量 13.6% 減、所要時間 10.7% 短縮）でした。</p>
+    <p class="note t" lang="ko" style="margin-top:20px">두 수준 모두 측정했으며 과제와 저장소는 동일합니다. <span class="mono">L1</span>(에이전트가 직접 회상을 수행)에서는 한 모델이 기억을 아예 쓰지 않는 것보다 <b>입력 +46%</b>, <b>실행 시간 +35%</b>를 더 썼습니다. <span class="mono">L2</span>(훅이 첫 동작 전에 같은 기록을 전달)로 옮기자 <b>입력 −5.6%</b>, <b>도구 출력 −5.4%</b>로 뒤집혔습니다. 두 번째 모델은 개선됐지만 끝내 전환되지는 않았습니다. 회상 자체도 선택이 아니게 되었습니다 — 활성화된 열 개 세션 모두 같은 세 건을 주입했고, <span class="mono">L1</span>에서는 한 모델이 다섯 번 탐색하고도 아무것도 가져오지 않았습니다. 수준은 기억이 본전을 뽑을 <em>수 있는지</em>를 결정하고, 실제로 뽑는지는 얼마나 많은 읽기를 대체하느냐에 달려 있습니다. 2026년 9월 24일 Codex 자체 메모리를 끄고 다시 측정하자 같은 모델이 medium에서는 입력 +9.9%, xhigh에서는 −3.4%였고, xhigh에서는 13.6% 덜 파내고 10.7% 빨리 끝냈습니다.</p>
+    <p class="note t" lang="es" style="margin-top:20px">Medido en ambos niveles, con las mismas tareas y el mismo almacén. En <span class="mono">L1</span>, donde el agente ejecuta el recuerdo por su cuenta, un modelo pagó <b>+46% de entrada</b> y <b>+35% de tiempo</b> frente a no usar memoria. En <span class="mono">L2</span>, donde un hook entrega los mismos registros antes de la primera acción, eso se invirtió a <b>−5,6% de entrada</b> y <b>−5,4% de salida de herramientas</b>; el segundo modelo mejoró pero nunca cruzó a favor. El recuerdo además dejó de ser opcional: las diez sesiones habilitadas inyectaron los mismos tres registros, mientras que en <span class="mono">L1</span> un modelo navegó cinco veces sin recuperar nada. El nivel decide si la memoria <em>puede</em> amortizarse; que lo haga sigue dependiendo de cuánta lectura sustituya. Repetido el 24 de septiembre de 2026 con la memoria propia de Codex desactivada, el mismo modelo dio +9,9% de entrada con esfuerzo medium y −3,4% con xhigh, donde además extrajo un 13,6% menos y terminó un 10,7% antes.</p>
   </section>
 
   <section>

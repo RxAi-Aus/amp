@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RxAi AMP · How we benchmark memory</title>
+<meta name="description" content="How the RxAi AMP A/B benchmark works: twin AI sessions, one with shared memory and one without, and exactly how every token they read and write is counted. EN · 繁中.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+<meta property="og:title" content="RxAi AMP · How we benchmark memory">
+<meta property="og:description" content="Twin AI sessions, one sticky note of memory, and a receipt for every token. How the AMP A/B benchmark is designed.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://amp.rxai.com.au/benchmark.html">
+<meta property="og:image" content="https://amp.rxai.com.au/assets/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://amp.rxai.com.au/assets/social-preview.png">
+<link rel="canonical" href="https://amp.rxai.com.au/benchmark.html">
+<style>
+  /* Tokens and components follow index.html so the two pages read as one site. */
+  :root {
+    --paper: #FAFBFD;
+    --ink: #1A2334;
+    --muted: #55637A;
+    --line: #D9E0EA;
+    --panel: #F0F3F8;
+    --accent: #8B5A0E;
+    --accent-soft: #F5EAD4;
+    --ok: #2E7D4F;
+    --ok-soft: #E3F0E8;
+    --bad: #B3453F;
+    --bad-soft: #F6E5E4;
+    --ref: #2F5FA8;
+    --ref-soft: #E4ECF7;
+    --tag-place: #1F7A72;
+    --seg-cached: #BFD0EA;
+    --seg-new: #D99A2B;
+    --seg-out: #2E7D4F;
+    --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0E1420;
+      --ink: #E8ECF4;
+      --muted: #93A1B8;
+      --line: #263248;
+      --panel: #161F30;
+      --accent: #E0A83C;
+      --accent-soft: #2B2415;
+      --ok: #5BBF87;
+      --ok-soft: #14261C;
+      --bad: #E08078;
+      --bad-soft: #2C1817;
+      --ref: #7EA6E8;
+      --ref-soft: #15202F;
+      --tag-place: #5FBDB4;
+      --seg-cached: #2E4466;
+      --seg-new: #C98F2A;
+      --seg-out: #4FAE7A;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    line-height: 1.62;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 20px 24px 96px; }
+  code, .mono {
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.86em;
+  }
+  p code, li code, td code, .note code {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px;
+    overflow-wrap: anywhere;
+  }
+  a { color: var(--ref); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+  /* ---------- language switching ---------- */
+  .t { display: none; }
+  body[data-lang="en"]      .t[lang="en"],
+  body[data-lang="zh-Hant"] .t[lang="zh-Hant"] { display: revert; }
+
+  .langbar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+    padding: 14px 0 12px; margin-bottom: 22px;
+    background: var(--paper); border-bottom: 1px solid var(--line);
+  }
+  .langbar .home {
+    margin-right: auto; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;
+    color: var(--muted); text-decoration: none;
+  }
+  .langbar .home:hover { color: var(--accent); }
+  .langbar button {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;
+    border: 1px solid var(--line); background: var(--paper); color: var(--muted);
+    border-radius: 999px; padding: 4px 13px; cursor: pointer;
+  }
+  .langbar button:hover { border-color: var(--accent); color: var(--accent); }
+  .langbar button[aria-pressed="true"] {
+    color: var(--accent); border-color: var(--accent); background: var(--accent-soft); font-weight: 700;
+  }
+
+  /* ---------- header ---------- */
+  header { border-bottom: 2px solid var(--ink); padding-bottom: 28px; margin-bottom: 12px; }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 14px;
+  }
+  h1 {
+    font-size: clamp(30px, 5.4vw, 46px); font-weight: 800; letter-spacing: -0.02em;
+    line-height: 1.12; margin: 0 0 20px; text-wrap: balance;
+  }
+  .lede { max-width: 68ch; }
+  .lede p { margin: 14px 0 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .chip {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
+    border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; color: var(--muted);
+  }
+  a.chip { color: var(--accent); border-color: var(--accent); text-decoration: none; font-weight: 700; }
+  a.chip:hover { background: var(--accent-soft); }
+
+  /* ---------- sections ---------- */
+  section { margin-top: 64px; }
+  .sec-head { display: flex; align-items: baseline; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 22px; }
+  .sec-head .mono-label {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
+    letter-spacing: 0.12em; color: var(--accent); white-space: nowrap;
+  }
+  h2 { font-size: 21px; font-weight: 750; letter-spacing: -0.01em; margin: 0; }
+  h3.sub { font-size: 16.5px; font-weight: 750; margin: 34px 0 10px; }
+  .note { color: var(--muted); font-size: 14.5px; max-width: 70ch; margin: 0 0 18px; }
+  .prose { max-width: 70ch; }
+  .prose p { margin: 0 0 14px; }
+
+  /* ---------- twins ---------- */
+  .twins { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 30px; }
+  .twin { border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; background: var(--panel); }
+  .twin.on { border-color: var(--accent); background: var(--accent-soft); }
+  .twin .k {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; color: var(--muted);
+  }
+  .twin.on .k { color: var(--accent); }
+  .twin h3 { margin: 4px 0 8px; font-size: 17px; font-weight: 750; }
+  .twin ul { margin: 0; padding-left: 18px; font-size: 14px; color: var(--muted); }
+  .twin li + li { margin-top: 2px; }
+  .twin li.diff { color: var(--ink); font-weight: 650; }
+
+  /* ---------- cards ---------- */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  .step { border: 1px solid var(--line); border-radius: 10px; padding: 16px 16px 14px; background: var(--panel); display: flex; flex-direction: column; gap: 8px; }
+  .step .k {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; color: var(--accent);
+  }
+  .step h3 { margin: 0; font-size: 16px; font-weight: 750; }
+  .step p { margin: 0; font-size: 13.5px; color: var(--muted); }
+  .step .trigger {
+    margin-top: auto; padding-top: 8px; border-top: 1px dashed var(--line);
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--tag-place);
+    overflow-wrap: anywhere;
+  }
+
+  /* ---------- call bars ---------- */
+  .calls {
+    border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px 16px;
+    background: var(--panel); margin: 4px 0 12px;
+  }
+  .callrow { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; }
+  .callrow + .callrow { margin-top: 9px; }
+  .callrow .lbl { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .bar { display: flex; height: 18px; }
+  .bar span { display: block; height: 100%; }
+  .bar span:first-child { border-radius: 4px 0 0 4px; }
+  .bar span:last-child { border-radius: 0 4px 4px 0; }
+  .bar .c { background: var(--seg-cached); }
+  .bar .n { background: var(--seg-new); }
+  .bar .o { background: var(--seg-out); }
+  .keys { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 16px; padding-top: 12px; border-top: 1px dashed var(--line); font-size: 13px; color: var(--muted); }
+  .keys i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 7px; vertical-align: -1px; }
+  .keys .c { background: var(--seg-cached); } .keys .n { background: var(--seg-new); } .keys .o { background: var(--seg-out); }
+  .caption { font-size: 13.5px; color: var(--muted); max-width: 70ch; margin: 0 0 8px; }
+
+  /* ---------- tables ---------- */
+  .tscroll { overflow-x: auto; }
+  .wtable { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .wtable th {
+    text-align: left; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 2px solid var(--ink); padding: 6px 12px 8px 0;
+  }
+  .wtable td { border-bottom: 1px solid var(--line); padding: 10px 12px 10px 0; vertical-align: top; }
+  .wtable td.field { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; font-weight: 600; overflow-wrap: anywhere; }
+  .wtable td.num { white-space: nowrap; text-align: right; }
+  .wtable th.num { text-align: right; }
+  .wtable .sub { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .delta { font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .delta.good { color: var(--ok); background: var(--ok-soft); border-radius: 4px; padding: 1px 8px; }
+  .delta.bad { color: var(--bad); background: var(--bad-soft); border-radius: 4px; padding: 1px 8px; }
+  .delta.flat { color: var(--muted); }
+
+  /* ---------- sums ---------- */
+  .sums { display: flex; flex-direction: column; }
+  .sum { display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: baseline; padding: 11px 4px; border-bottom: 1px dashed var(--line); }
+  .sum:last-child { border-bottom: none; }
+  .sum .name { font-weight: 700; font-size: 14.5px; }
+  .sum .how { font-size: 14px; color: var(--muted); }
+  .sum .how code { font-size: 0.86em; }
+
+  .callout {
+    border-left: 3px solid var(--ok); background: var(--ok-soft); border-radius: 0 8px 8px 0;
+    padding: 12px 16px; margin: 22px 0 0; font-size: 14.5px; max-width: 74ch;
+  }
+  .callout p { margin: 0; }
+  .formula {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 15px; font-weight: 600;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 20px; margin: 0 0 14px; overflow-x: auto; white-space: nowrap;
+  }
+  .formula .g { color: var(--ok); } .formula .b { color: var(--bad); }
+
+  /* ---------- commands ---------- */
+  pre.cmd {
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.55;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 18px; margin: 10px 0 16px; overflow-x: auto;
+  }
+  pre.cmd .c { color: var(--muted); }
+  ol.run { margin: 0; padding-left: 22px; max-width: 74ch; }
+  ol.run > li { margin: 0 0 14px; padding-left: 4px; }
+  ol.run > li::marker { font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 700; color: var(--accent); }
+  ul.plain { margin: 0; padding-left: 20px; max-width: 72ch; }
+  ul.plain li { margin: 0 0 10px; }
+
+  footer { margin-top: 72px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  footer p { margin: 6px 0 0; }
+  footer .built { margin-top: 10px; font-weight: 600; color: var(--ink); }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 16px 16px 72px; }
+    .sum { grid-template-columns: 1fr; gap: 2px; }
+    .callrow { grid-template-columns: 52px 1fr; gap: 8px; }
+    .calls { padding: 14px 14px 12px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .langbar button {
+      transition: color 160ms var(--ease-out-quart), border-color 160ms var(--ease-out-quart),
+                  background-color 160ms var(--ease-out-quart);
+    }
+    ::view-transition-old(root), ::view-transition-new(root) {
+      animation-duration: 220ms;
+      animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    html[data-js] header > * { animation: amp-rise 640ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+    html[data-js] header > h1 { animation-delay: 70ms; }
+    html[data-js] header > .lede { animation-delay: 140ms; }
+    html[data-js] header > .chips { animation-delay: 210ms; }
+  }
+  @keyframes amp-rise { from { opacity: 0; transform: translateY(12px); } }
+</style>
+<script>document.documentElement.setAttribute("data-js", "on");</script>
+</head>
+<body data-lang="en">
+
+<div class="wrap">
+
+  <nav class="langbar" aria-label="Language">
+    <a class="home" href="index.html">
+      <span class="t" lang="en">← AMP overview</span>
+      <span class="t" lang="zh-Hant">← AMP 總覽</span>
+    </a>
+    <button type="button" data-set="en" aria-pressed="true">EN</button>
+    <button type="button" data-set="zh-Hant" aria-pressed="false" lang="zh-Hant">繁中</button>
+  </nav>
+
+  <header>
+    <p class="eyebrow">RxAi AMP · Benchmarks</p>
+    <h1>
+      <span class="t" lang="en">Does memory pay for itself?</span>
+      <span class="t" lang="zh-Hant">記憶真的划算嗎？</span>
+    </h1>
+    <div class="lede">
+      <p class="t" lang="en">We test it the way you would test a new study trick. Two identical AI helpers get the same homework. One of them also gets a sticky note from the shared memory. Then we count every word each of them reads and writes. This page explains how it works, simply enough for a ten-year-old and precisely enough to run it again yourself.</p>
+      <p class="t" lang="zh-Hant">測試方法就像測試一個新的讀書技巧：兩個一模一樣的 AI 助手拿到同一份作業，其中一個另外拿到一張來自共享記憶的便利貼。然後，我們把兩個助手讀進和寫出的每一個字都算清楚。這一頁說明它怎麼運作：簡單到十歲小孩也看得懂，精確到你可以自己重跑一次。</p>
+    </div>
+    <div class="chips">
+      <a class="chip" href="https://github.com/RxAi-Aus/amp/tree/main/tokenMonitor#readme">tokenMonitor ↗</a>
+      <a class="chip" href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md ↗</a>
+      <span class="chip t" lang="en">paired A/B</span>
+      <span class="chip t" lang="zh-Hant">成對 A/B</span>
+      <span class="chip t" lang="en">exact token counts</span>
+      <span class="chip t" lang="zh-Hant">精確 token 數</span>
+      <span class="chip t" lang="en">read-only sessions</span>
+      <span class="chip t" lang="zh-Hant">唯讀工作階段</span>
+    </div>
+  </header>
+
+  <!-- ============ THE TEST ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">THE&nbsp;TEST</span>
+      <h2>
+        <span class="t" lang="en">Twin helpers, one sticky note</span>
+        <span class="t" lang="zh-Hant">雙胞胎助手，一張便利貼</span>
+      </h2>
+    </div>
+    <p class="note t" lang="en">Each test is a pair of brand-new sessions with the same AI model. They are identical in every way except one: whether the AMP hooks may hand the helper the memories that match its task.</p>
+    <p class="note t" lang="zh-Hant">每一次測試都是一對全新的工作階段，使用同一個 AI 模型。兩者只差一件事：AMP 的 hook 是否可以把跟這份作業相關的記憶交給助手。</p>
+
+    <div class="twins">
+      <div class="twin on">
+        <div class="k">AMP ON</div>
+        <h3><span class="t" lang="en">Helper A</span><span class="t" lang="zh-Hant">助手 A</span></h3>
+        <ul class="t" lang="en">
+          <li>same question</li>
+          <li>same model and effort level</li>
+          <li>same tools, read-only</li>
+          <li class="diff">+ a sticky note: the hooks inject the matching memories</li>
+        </ul>
+        <ul class="t" lang="zh-Hant">
+          <li>同一個問題</li>
+          <li>同一個模型、同一個思考強度</li>
+          <li>同一組工具，唯讀</li>
+          <li class="diff">＋ 一張便利貼：hook 注入相關的記憶</li>
+        </ul>
+      </div>
+      <div class="twin">
+        <div class="k">AMP OFF</div>
+        <h3><span class="t" lang="en">Helper B</span><span class="t" lang="zh-Hant">助手 B</span></h3>
+        <ul class="t" lang="en">
+          <li>same question</li>
+          <li>same model and effort level</li>
+          <li>same tools, read-only</li>
+          <li class="diff"><code>AMP_DISABLE=1</code>: the same hooks stay silent</li>
+        </ul>
+        <ul class="t" lang="zh-Hant">
+          <li>同一個問題</li>
+          <li>同一個模型、同一個思考強度</li>
+          <li>同一組工具，唯讀</li>
+          <li class="diff"><code>AMP_DISABLE=1</code>：同樣的 hook 保持沉默</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 class="sub">
+      <span class="t" lang="en">Keeping it fair</span>
+      <span class="t" lang="zh-Hant">怎麼保持公平</span>
+    </h3>
+    <div class="steps">
+      <div class="step">
+        <span class="k">01 · ONE SWITCH</span>
+        <h3><span class="t" lang="en">Only one thing differs</span><span class="t" lang="zh-Hant">只有一個差別</span></h3>
+        <p class="t" lang="en">Prompt, model, tool allowlist and project are identical. The only difference between the two helpers is the memory switch.</p>
+        <p class="t" lang="zh-Hant">提示、模型、工具白名單、專案都一樣。兩個助手之間唯一的差別，就是記憶開關。</p>
+        <span class="trigger">AMP_DISABLE=1</span>
+      </div>
+      <div class="step">
+        <span class="k">02 · TAKE TURNS</span>
+        <h3><span class="t" lang="en">They take turns going first</span><span class="t" lang="zh-Hant">輪流先跑</span></h3>
+        <p class="t" lang="en">In one pair the memory helper runs first, in the next pair the other one does. Neither side always gets the warm start of a filled prompt cache.</p>
+        <p class="t" lang="zh-Hant">這一對由有記憶的助手先跑，下一對換另一個先跑。這樣沒有任何一方總是佔到「快取已經熱好」的便宜。</p>
+        <span class="trigger">(pair + model) % 2</span>
+      </div>
+      <div class="step">
+        <span class="k">03 · REPEAT</span>
+        <h3><span class="t" lang="en">Do it many times</span><span class="t" lang="zh-Hant">重複很多次</span></h3>
+        <p class="t" lang="en">One try could just be luck, so tasks rotate across pairs and every question is asked more than once.</p>
+        <p class="t" lang="zh-Hant">只試一次可能只是運氣，所以題目在不同的配對之間輪替，每一題都會問不只一次。</p>
+        <span class="trigger">--cases 16 → 8 pairs</span>
+      </div>
+      <div class="step">
+        <span class="k">04 · TRICK QUESTION</span>
+        <h3><span class="t" lang="en">One question has no answer in memory</span><span class="t" lang="zh-Hant">有一題是陷阱題</span></h3>
+        <p class="t" lang="en">The control task is one no memory covers. It checks that memory stays quiet, and costs nothing, when it has nothing useful to say.</p>
+        <p class="t" lang="zh-Hant">對照題是沒有任何記憶涵蓋的題目。它檢查記憶在幫不上忙的時候，會不會乖乖保持安靜、不多花成本。</p>
+        <span class="trigger">"expectedIssue": null</span>
+      </div>
+      <div class="step">
+        <span class="k">05 · FROZEN MEMORY</span>
+        <h3><span class="t" lang="en">The memory box is frozen</span><span class="t" lang="zh-Hant">記憶盒子是凍結的</span></h3>
+        <p class="t" lang="en">Memories keep changing weight as the store compiles. The helpers read a pinned copy with its remote removed, so every run sees the same records.</p>
+        <p class="t" lang="zh-Hant">記憶的權重會隨著每次編譯改變。助手讀的是一份固定的副本，並移除了遠端，所以每一輪看到的記憶都一樣。</p>
+        <span class="trigger">--memory-repo &lt;snapshot&gt;</span>
+      </div>
+      <div class="step">
+        <span class="k">06 · HANDS OFF</span>
+        <h3><span class="t" lang="en">Look, don't touch</span><span class="t" lang="zh-Hant">只能看，不能動</span></h3>
+        <p class="t" lang="en">Sessions may read files and run read-only commands, nothing else. Personal connectors are switched off, so AMP is the only memory under test.</p>
+        <p class="t" lang="zh-Hant">工作階段只能讀檔、執行唯讀指令，其他一律不行。個人的外部連接器全部關閉，所以受測的記憶只有 AMP。</p>
+        <span class="trigger">--strict-mcp-config</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RECEIPTS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">RECEIPTS</span>
+      <h2>
+        <span class="t" lang="en">How the tokens are counted</span>
+        <span class="t" lang="zh-Hant">token 是怎麼算的</span>
+      </h2>
+    </div>
+    <div class="prose">
+      <p class="t" lang="en">A <b>token</b> is a small piece of a word. The helper is charged for every token it reads and every token it writes.</p>
+      <p class="t" lang="zh-Hant"><b>token</b> 是一小段字。助手讀進的每一個 token、寫出的每一個 token，都要付費。</p>
+      <p class="t" lang="en">It doesn't do the homework in one go. It works in steps: think, open a file, think again, open another file. Each step is one call to the model, and <b>at every call it re-reads the whole conversation from the beginning</b>, like reading your whole notebook again before you write the next sentence. That is why the reading count grows so fast.</p>
+      <p class="t" lang="zh-Hant">它不會一口氣寫完作業，而是一步一步來：想一想、打開一個檔案、再想一想、再打開另一個檔案。每一步都是對模型的一次呼叫，而且<b>每一次呼叫，它都會把整段對話從頭再讀一遍</b>，就像每寫下一句話之前，都要把整本筆記從頭讀一次。這就是為什麼「讀的量」長得那麼快。</p>
+    </div>
+
+    <div class="calls" role="img" aria-label="Five model calls drawn as bars that grow longer each call. Most of each bar is bookmarked, re-read text; a smaller part is new text; the last call ends with the written answer.">
+      <div class="callrow"><span class="lbl"><span class="t" lang="en">call 1</span><span class="t" lang="zh-Hant">第 1 次</span></span><div class="bar"><span class="n" style="width:30%"></span><span class="o" style="width:2%"></span></div></div>
+      <div class="callrow"><span class="lbl"><span class="t" lang="en">call 2</span><span class="t" lang="zh-Hant">第 2 次</span></span><div class="bar"><span class="c" style="width:32%"></span><span class="n" style="width:11%"></span><span class="o" style="width:2%"></span></div></div>
+      <div class="callrow"><span class="lbl"><span class="t" lang="en">call 3</span><span class="t" lang="zh-Hant">第 3 次</span></span><div class="bar"><span class="c" style="width:45%"></span><span class="n" style="width:14%"></span><span class="o" style="width:2%"></span></div></div>
+      <div class="callrow"><span class="lbl"><span class="t" lang="en">call 4</span><span class="t" lang="zh-Hant">第 4 次</span></span><div class="bar"><span class="c" style="width:61%"></span><span class="n" style="width:10%"></span><span class="o" style="width:2%"></span></div></div>
+      <div class="callrow"><span class="lbl"><span class="t" lang="en">call 5</span><span class="t" lang="zh-Hant">第 5 次</span></span><div class="bar"><span class="c" style="width:73%"></span><span class="n" style="width:8%"></span><span class="o" style="width:9%"></span></div></div>
+      <div class="keys">
+        <span><i class="c"></i><span class="t" lang="en">bookmarked: re-read from cache, about a tenth of the price</span><span class="t" lang="zh-Hant">書籤：從快取重讀，大約一成的價格</span></span>
+        <span><i class="n"></i><span class="t" lang="en">new: read for the first time, full price</span><span class="t" lang="zh-Hant">新內容：第一次讀，全價</span></span>
+        <span><i class="o"></i><span class="t" lang="en">written: output, private thinking included</span><span class="t" lang="zh-Hant">寫出：輸出，包含內部思考</span></span>
+      </div>
+    </div>
+    <p class="caption t" lang="en">An illustration, not measured data. Call 1 holds the system prompt, the question and (for helper A) the sticky note. Each later call carries everything before it plus the file it just opened. Add up every bar and you get the context tokens.</p>
+    <p class="caption t" lang="zh-Hant">這是示意圖，不是實測數據。第 1 次呼叫裝著系統提示、題目，以及（助手 A 才有的）便利貼。之後每一次呼叫，都帶著前面所有內容，再加上剛打開的檔案。把所有長條加起來，就是「context token 總量」。</p>
+
+    <h3 class="sub">
+      <span class="t" lang="en">The receipt printed after every call</span>
+      <span class="t" lang="zh-Hant">每次呼叫之後印出的收據</span>
+    </h3>
+    <p class="note t" lang="en">The runner starts Claude Code with <code>--output-format stream-json</code>, which prints one line per model call with a <code>usage</code> block. The benchmark adds the fields up across the whole session.</p>
+    <p class="note t" lang="zh-Hant">執行器用 <code>--output-format stream-json</code> 啟動 Claude Code，每次模型呼叫都會印出一行，內含一個 <code>usage</code> 區塊。benchmark 把整個工作階段的這些欄位加總起來。</p>
+    <div class="tscroll">
+      <table class="wtable">
+        <thead><tr>
+          <th><span class="t" lang="en">On the receipt</span><span class="t" lang="zh-Hant">收據上的欄位</span></th>
+          <th><span class="t" lang="en">What it means</span><span class="t" lang="zh-Hant">意思</span></th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="field">input_tokens</td><td><span class="t" lang="en">Brand-new pages, read for the first time</span><span class="t" lang="zh-Hant">全新的頁面，第一次讀</span></td></tr>
+          <tr><td class="field">cache_creation_input_tokens</td><td><span class="t" lang="en">Pages read and bookmarked so they can be skipped cheaply next time</span><span class="t" lang="zh-Hant">讀過並夾上書籤，下次可以便宜地跳過的頁面</span></td></tr>
+          <tr><td class="field">cache_read_input_tokens</td><td><span class="t" lang="en">Pages already bookmarked; about a tenth of the normal price</span><span class="t" lang="zh-Hant">已經夾好書籤的頁面；大約原價的一成</span></td></tr>
+          <tr><td class="field">output_tokens</td><td><span class="t" lang="en">Words it wrote, including its private thinking</span><span class="t" lang="zh-Hant">它寫出的字，包含內部思考</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub">
+      <span class="t" lang="en">What gets added up</span>
+      <span class="t" lang="zh-Hant">加總出哪些數字</span>
+    </h3>
+    <div class="sums">
+      <div class="sum">
+        <span class="name"><span class="t" lang="en">Context tokens</span><span class="t" lang="zh-Hant">Context token 總量</span></span>
+        <span class="how"><span class="t" lang="en">All the reading, bookmarked or not: Σ (input + cache creation + cache read) over every call.</span><span class="t" lang="zh-Hant">所有的閱讀量，不管有沒有書籤：每次呼叫的 Σ（input + cache creation + cache read）。</span></span>
+      </div>
+      <div class="sum">
+        <span class="name"><span class="t" lang="en">Uncached input</span><span class="t" lang="zh-Hant">未快取輸入</span></span>
+        <span class="how"><span class="t" lang="en">Only the full-price reading: Σ (input + cache creation).</span><span class="t" lang="zh-Hant">只算全價的閱讀：Σ（input + cache creation）。</span></span>
+      </div>
+      <div class="sum">
+        <span class="name"><span class="t" lang="en">Start context</span><span class="t" lang="zh-Hant">起始 context</span></span>
+        <span class="how"><span class="t" lang="en">How heavy the backpack is before any work: the first call's context, which includes the setup text and the sticky note.</span><span class="t" lang="zh-Hant">開工之前書包有多重：第一次呼叫的 context，包含設定文字和便利貼。</span></span>
+      </div>
+      <div class="sum">
+        <span class="name"><span class="t" lang="en">Tool output</span><span class="t" lang="zh-Hant">工具輸出</span></span>
+        <span class="how"><span class="t" lang="en">How much it dug up: the bytes of every file and command result it received before writing its answer.</span><span class="t" lang="zh-Hant">它挖出了多少東西：寫答案之前，收到的所有檔案與指令結果的位元組數。</span></span>
+      </div>
+      <div class="sum">
+        <span class="name"><span class="t" lang="en">Calls and look-ups</span><span class="t" lang="zh-Hant">呼叫與查找次數</span></span>
+        <span class="how"><span class="t" lang="en">Model calls, tool calls, and reads (<code>Read</code>, <code>Grep</code>, <code>Glob</code>).</span><span class="t" lang="zh-Hant">模型呼叫次數、工具呼叫次數，以及讀取次數（<code>Read</code>、<code>Grep</code>、<code>Glob</code>）。</span></span>
+      </div>
+      <div class="sum">
+        <span class="name"><span class="t" lang="en">Time and cost</span><span class="t" lang="zh-Hant">時間與成本</span></span>
+        <span class="how"><span class="t" lang="en">The runner's own stopwatch, and the list price Claude Code reports in its final <code>result</code> event (<code>total_cost_usd</code>).</span><span class="t" lang="zh-Hant">執行器自己的碼錶，以及 Claude Code 在最後的 <code>result</code> 事件中回報的牌價（<code>total_cost_usd</code>）。</span></span>
+      </div>
+    </div>
+    <div class="callout">
+      <p class="t" lang="en"><b>These are exact numbers from the model's own receipts, not guesses.</b> The monitor's <code>npm run scan</code> estimates token counts with a tokenizer and a calibration factor; the benchmark never estimates.</p>
+      <p class="t" lang="zh-Hant"><b>這些都是模型自己收據上的精確數字，不是猜的。</b>監測工具的 <code>npm run scan</code> 是用 tokenizer 加校正係數來估算 token；benchmark 從來不用估的。</p>
+    </div>
+  </section>
+
+  <!-- ============ GRADING ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">GRADING</span>
+      <h2>
+        <span class="t" lang="en">Checking the homework</span>
+        <span class="t" lang="zh-Hant">批改作業</span>
+      </h2>
+    </div>
+    <p class="note t" lang="en">Being cheaper means nothing if the answer is wrong. Every answer gets three checks: one on its content, one on what the model says it used, and one on what the hooks actually delivered.</p>
+    <p class="note t" lang="zh-Hant">答案如果錯了，再便宜也沒有意義。每個答案都要經過三道檢查：一道看內容，一道看模型說自己用了什麼，一道看 hook 實際送出了什麼。</p>
+    <div class="steps">
+      <div class="step">
+        <span class="k">CHECK 1 · KEYWORDS</span>
+        <h3><span class="t" lang="en">Did it name the right things?</span><span class="t" lang="zh-Hant">有沒有講到對的東西？</span></h3>
+        <p class="t" lang="en">Each task lists signals: file and function names a correct answer should mention. The runner checks which ones appear. This is a deterministic check, not a quality grade.</p>
+        <p class="t" lang="zh-Hant">每一題都列出「訊號」：正確答案應該提到的檔名和函式名稱。執行器檢查哪些有出現。這是固定規則的比對，不是品質評分。</p>
+        <span class="trigger">"signals": [ … ]</span>
+      </div>
+      <div class="step">
+        <span class="k">CHECK 2 · RECALL LINE</span>
+        <h3><span class="t" lang="en">Did it say which note helped?</span><span class="t" lang="zh-Hant">它有說是哪張便利貼幫了忙嗎？</span></h3>
+        <p class="t" lang="en">Every answer must end with a line naming the memories it used. Right means the expected memory is named, or <code>none</code> on the trick question.</p>
+        <p class="t" lang="zh-Hant">每個答案結尾都必須有一行，列出它用到的記憶。答對的意思是：列出了預期的那則記憶；陷阱題則要回答 <code>none</code>。</p>
+        <span class="trigger">Recall used: #N | none</span>
+      </div>
+      <div class="step">
+        <span class="k">CHECK 3 · LEDGER</span>
+        <h3><span class="t" lang="en">Was the note really handed over?</span><span class="t" lang="zh-Hant">便利貼真的交出去了嗎？</span></h3>
+        <p class="t" lang="en">The hooks keep a diary of what they injected and how much of it: the title only, or a short summary. The runner copies it next to each result.</p>
+        <p class="t" lang="zh-Hant">hook 會寫一本日誌，記下它注入了什麼、注入了多少：只有標題，還是一段簡短摘要。執行器把這本日誌複製到每筆結果旁邊。</p>
+        <span class="trigger">ledger · pointer | summary</span>
+      </div>
+    </div>
+    <p class="note t" lang="en" style="margin-top:18px">Checks 2 and 3 are kept apart on purpose. In one September 2026 run, two sessions had the right summary in front of them and still wrote <code>Recall used: none</code>. A single "memory hits" number would have called that a retrieval miss; the ledger shows the memory was delivered and simply not credited.</p>
+    <p class="note t" lang="zh-Hant" style="margin-top:18px">第 2 和第 3 道檢查刻意分開。2026 年 9 月的一次測試中，有兩個工作階段明明看到了正確的摘要，卻還是寫了 <code>Recall used: none</code>。如果只有一個「記憶命中」數字，會被誤判成沒有取到記憶；日誌則證明記憶確實送到了，只是沒有被標註出來。</p>
+  </section>
+
+  <!-- ============ SCORE ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">SCORE</span>
+      <h2>
+        <span class="t" lang="en">Keeping score</span>
+        <span class="t" lang="zh-Hant">計分方式</span>
+      </h2>
+    </div>
+    <div class="formula">change = (<span class="g">AMP on</span> − <span class="b">AMP off</span>) ÷ <span class="b">AMP off</span> × 100%</div>
+    <p class="note t" lang="en">Each measurement is summed over every successful session in each arm. A negative number means the memory helper used less. "Cheaper pairs" counts how often the memory helper beat its own twin.</p>
+    <p class="note t" lang="zh-Hant">每一項數字都是把該組所有成功的工作階段加總。負數代表有記憶的助手用得比較少。「比較便宜的配對」計算有記憶的助手贏過自己雙胞胎的次數。</p>
+
+    <h3 class="sub">
+      <span class="t" lang="en">A real result: Opus 5.5 at xhigh effort, 8 pairs, 2026-09-23</span>
+      <span class="t" lang="zh-Hant">一組真實結果：Opus 5.5，xhigh 思考強度，8 對，2026-09-23</span>
+    </h3>
+    <div class="tscroll">
+      <table class="wtable">
+        <thead><tr>
+          <th><span class="t" lang="en">Measurement</span><span class="t" lang="zh-Hant">項目</span></th>
+          <th class="num"><span class="t" lang="en">Change with memory</span><span class="t" lang="zh-Hant">有記憶時的變化</span></th>
+        </tr></thead>
+        <tbody>
+          <tr><td><span class="t" lang="en">Total reading</span><span class="t" lang="zh-Hant">總閱讀量</span><span class="sub">context tokens</span></td><td class="num"><span class="delta good">−13.6%</span></td></tr>
+          <tr><td><span class="t" lang="en">Full-price reading</span><span class="t" lang="zh-Hant">全價閱讀量</span><span class="sub">uncached input</span></td><td class="num"><span class="delta bad">+21.2%</span></td></tr>
+          <tr><td><span class="t" lang="en">Stuff dug up from files</span><span class="t" lang="zh-Hant">從檔案挖出的東西</span><span class="sub">tool output</span></td><td class="num"><span class="delta good">−14.9%</span></td></tr>
+          <tr><td><span class="t" lang="en">Tool calls</span><span class="t" lang="zh-Hant">工具呼叫次數</span></td><td class="num"><span class="delta good">−11.1%</span></td></tr>
+          <tr><td><span class="t" lang="en">Time</span><span class="t" lang="zh-Hant">時間</span></td><td class="num"><span class="delta good">−9.0%</span></td></tr>
+          <tr><td><span class="t" lang="en">Cost<span class="sub">cheaper in 4 of 8 pairs</span></span><span class="t" lang="zh-Hant">成本<span class="sub">8 對中有 4 對比較便宜</span></span></td><td class="num"><span class="delta bad">+4.9%</span></td></tr>
+          <tr><td><span class="t" lang="en">Keyword checklist<span class="sub">memory on vs off</span></span><span class="t" lang="zh-Hant">關鍵字檢查<span class="sub">有記憶 vs 無記憶</span></span></td><td class="num"><span class="delta flat">34/34 · 34/34</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose" style="margin-top:18px">
+      <p class="t" lang="en"><b>In kid terms:</b> with the sticky note, the helper read less overall, dug up less, and finished a bit faster. But the note itself is new, full-price text, so the total bill came out about the same, slightly higher on average. Both helpers got the homework equally right.</p>
+      <p class="t" lang="zh-Hant"><b>用小朋友的話說：</b>有了便利貼，助手整體讀得比較少、挖得比較少，也稍微快一點寫完。但便利貼本身是新的、全價的文字，所以總帳單差不多，平均還稍微高一點。兩個助手的作業正確度一樣好。</p>
+    </div>
+
+    <h3 class="sub">
+      <span class="t" lang="en">What the benchmark taught us</span>
+      <span class="t" lang="zh-Hant">這個 benchmark 教會我們的事</span>
+    </h3>
+    <div class="tscroll">
+      <table class="wtable">
+        <thead><tr>
+          <th><span class="t" lang="en">Same test, same day</span><span class="t" lang="zh-Hant">同一個測試、同一天</span></th>
+          <th class="num"><span class="t" lang="en">Reading</span><span class="t" lang="zh-Hant">閱讀量</span></th>
+          <th class="num"><span class="t" lang="en">Dug up</span><span class="t" lang="zh-Hant">挖出量</span></th>
+          <th class="num"><span class="t" lang="en">Time</span><span class="t" lang="zh-Hant">時間</span></th>
+          <th class="num"><span class="t" lang="en">Cost</span><span class="t" lang="zh-Hant">成本</span></th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="t" lang="en">Before: the note was a long excerpt</span><span class="t" lang="zh-Hant">之前：便利貼是一大段摘錄</span></td>
+            <td class="num"><span class="delta bad">+27.9%</span></td><td class="num"><span class="delta bad">+19.2%</span></td><td class="num"><span class="delta bad">+7.1%</span></td><td class="num"><span class="delta bad">+27.1%</span></td>
+          </tr>
+          <tr>
+            <td><span class="t" lang="en">After: a short summary, only when the task matches</span><span class="t" lang="zh-Hant">之後：簡短摘要，而且只在題目相關時才給</span></td>
+            <td class="num"><span class="delta good">−13.6%</span></td><td class="num"><span class="delta good">−14.9%</span></td><td class="num"><span class="delta good">−9.0%</span></td><td class="num"><span class="delta bad">+4.9%</span></td>
+          </tr>
+          <tr>
+            <td><span class="t" lang="en">After, repeated with stricter matching (B2)</span><span class="t" lang="zh-Hant">之後，再跑一次並加嚴比對（B2）</span></td>
+            <td class="num"><span class="delta good">−6.5%</span></td><td class="num"><span class="delta good">−4.6%</span></td><td class="num"><span class="delta good">−3.9%</span></td><td class="num"><span class="delta bad">+14.1%</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose" style="margin-top:18px">
+      <p class="t" lang="en">The two "after" rows should agree and don't quite: with only two pairs per task, one control session that dug up 8 KB more and one cold-cache first session are enough to move cost by ten points. Read the direction — memory reads less and costs a little more — not the decimals.</p>
+      <p class="t" lang="zh-Hant">兩列「之後」照理應該一致，卻有落差：每題只有兩對時，一個多挖了 8 KB 的對照題工作階段，加上一個快取還沒熱的第一個工作階段，就足以讓成本差十個百分點。請看方向——記憶讓它讀得少、成本略高——不要看小數點。</p>
+      <p class="t" lang="en">The first sticky note listed a person's decisions one by one. The helper treated the list as homework of its own and went to check every item, so memory made it read <em>more</em>. The fix was to hand over only a short goal-and-status summary, and only for tasks the memory matches; the full record stays one fetch away. Same model, same questions: reading flipped from +28% to −14%.</p>
+      <p class="t" lang="zh-Hant">第一版的便利貼把某人的決定一條一條列出來。助手把這張清單當成自己的作業，逐項去檢查，結果記憶反而讓它讀得<em>更多</em>。修正方法是只交出一段簡短的「目標加現況」摘要，而且只在題目和記憶相關時才給；完整紀錄需要時再去取。同一個模型、同樣的題目：閱讀量從 +28% 翻轉為 −14%。</p>
+      <p class="t" lang="en">An earlier run with Opus 5 produced the numbers on the <a href="index.html">overview page</a>: 18% less dug up from files, 5% cheaper, 14% faster. A model that reads little to begin with gained nothing there. Memory saves blind exploration, so the more a model explores, the more memory pays.</p>
+      <p class="t" lang="zh-Hant"><a href="index.html">總覽頁</a>上的數字來自更早一輪的 Opus 5 測試：從檔案挖出的量少 18%、成本低 5%、快 14%。本來就讀得少的模型，在那一輪沒有得到好處。記憶省下的是「盲目探索」，所以模型越愛探索，記憶越划算。</p>
+    </div>
+  </section>
+
+  <!-- ============ CODEX ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">CODEX</span>
+      <h2>
+        <span class="t" lang="en">Same test, different receipts</span>
+        <span class="t" lang="zh-Hant">同一個測試，不同的收據</span>
+      </h2>
+    </div>
+    <div class="prose">
+      <p class="t" lang="en">Codex runs the same experiment with the same task table and schedule. Its receipts come from the <code>turn.completed</code> event at the end of each turn:</p>
+      <p class="t" lang="zh-Hant">Codex 跑的是同一個實驗，用同一張題目表與排程。它的收據來自每一回合結束時的 <code>turn.completed</code> 事件：</p>
+    </div>
+    <div class="tscroll">
+      <table class="wtable">
+        <thead><tr>
+          <th><span class="t" lang="en">On the receipt</span><span class="t" lang="zh-Hant">收據上的欄位</span></th>
+          <th><span class="t" lang="en">What it means</span><span class="t" lang="zh-Hant">意思</span></th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="field">input_tokens</td><td><span class="t" lang="en">Everything read, bookmarked pages included</span><span class="t" lang="zh-Hant">全部讀進的量，包含有書籤的頁面</span></td></tr>
+          <tr><td class="field">cached_input_tokens</td><td><span class="t" lang="en">The bookmarked part of that; uncached = input − cached</span><span class="t" lang="zh-Hant">其中有書籤的部分；未快取 = input − cached</span></td></tr>
+          <tr><td class="field">output_tokens</td><td><span class="t" lang="en">Everything written, reasoning included</span><span class="t" lang="zh-Hant">全部寫出的量，包含推理</span></td></tr>
+          <tr><td class="field">reasoning_output_tokens</td><td><span class="t" lang="en">The thinking part of that; visible output = output − reasoning</span><span class="t" lang="zh-Hant">其中思考的部分；可見輸出 = output − reasoning</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="plain t" lang="en" style="margin-top:18px">
+      <li><b>Codex never prints a price</b>, so cost is worked out from a price list (<code>config/prices.json</code>): uncached input × input price + cached input × cached price + output × output price. On a ChatGPT plan nothing is billed per token; the number is what the same traffic would cost on the API.</li>
+      <li><b>Isolation:</b> <code>--ignore-rules</code> and <code>--disable memories</code> switch off Codex's own saved approvals and its built-in memory, so AMP is the only memory being tested.</li>
+      <li><b>Per-call detail:</b> with <code>--rollouts</code> the runner also reads each session's rollout file for per-call numbers: calls per case, the first call's size, the biggest call, and cold starts.</li>
+      <li><b>By hand vs by hook:</b> when four Codex models had to fetch memory themselves (load the skill, read the index, search), they read 39–80% more and took 31–52% longer for 0–2 useful hits in 4 tasks. When the hooks delivered the same records, the change ranged from −5.6% to +36%. That result is why every runtime that can run hooks must use them (PROTOCOL.md §15.3).</li>
+    </ul>
+    <ul class="plain t" lang="zh-Hant" style="margin-top:18px">
+      <li><b>Codex 從來不印價格</b>，所以成本是用價目表（<code>config/prices.json</code>）算出來的：未快取輸入 × 輸入單價 ＋ 快取輸入 × 快取單價 ＋ 輸出 × 輸出單價。ChatGPT 方案不是按 token 計費；這個數字代表同樣的流量在 API 上要花多少錢。</li>
+      <li><b>隔離：</b><code>--ignore-rules</code> 和 <code>--disable memories</code> 關掉 Codex 自己存下的核准規則與內建記憶，讓受測的記憶只有 AMP。</li>
+      <li><b>逐次呼叫的細節：</b>加上 <code>--rollouts</code> 時，執行器還會讀每個工作階段的 rollout 檔，取得逐次呼叫的數字：每題的呼叫次數、第一次呼叫的大小、最大的一次呼叫，以及冷啟動次數。</li>
+      <li><b>手動 vs hook：</b>四個 Codex 模型自己去找記憶時（載入 skill、讀索引、搜尋），4 題只得到 0–2 次有用命中，卻多讀 39–80%、多花 31–52% 的時間。由 hook 送上同樣的紀錄時，變化落在 −5.6% 到 +36%。這就是為什麼所有能跑 hook 的執行環境都必須使用 hook（PROTOCOL.md §15.3）。</li>
+    </ul>
+
+    <h3 class="sub">
+      <span class="t" lang="en">Same snapshot, same questions: the GPT-6 family on Codex, hooks delivering</span>
+      <span class="t" lang="zh-Hant">同一份快照、同樣的題目：GPT-6 系列在 Codex 上，由 hook 送達</span>
+    </h3>
+    <p class="note t" lang="en">Every row is memory on against memory off on the same pinned memory snapshot and the same project commit, prompt wording v2. "Named the right note" is the model's own <code>Recall used:</code> line on the three memory-backed tasks. Cost is the API-equivalent from the price list; astra has no price row yet.</p>
+    <p class="note t" lang="zh-Hant">每一列都是同一份固定記憶快照、同一個專案 commit 上「有記憶 vs 無記憶」的比較，提示措辭 v2。「有說出對的便利貼」是模型自己在三題有記憶的題目上寫的 <code>Recall used:</code>。成本是用價目表換算的 API 等價值；astra 還沒有價目。</p>
+    <div class="tscroll">
+      <table class="wtable">
+        <thead><tr>
+          <th><span class="t" lang="en">Run</span><span class="t" lang="zh-Hant">回合</span></th>
+          <th class="num"><span class="t" lang="en">Reading</span><span class="t" lang="zh-Hant">閱讀量</span><span class="sub">input tokens</span></th>
+          <th class="num"><span class="t" lang="en">Dug up</span><span class="t" lang="zh-Hant">挖出量</span></th>
+          <th class="num"><span class="t" lang="en">Time</span><span class="t" lang="zh-Hant">時間</span></th>
+          <th class="num"><span class="t" lang="en">Cost</span><span class="t" lang="zh-Hant">成本</span></th>
+          <th class="num"><span class="t" lang="en">Named the right note</span><span class="t" lang="zh-Hant">有說出對的便利貼</span></th>
+        </tr></thead>
+        <tbody>
+          <tr><td>GPT-6 Sol · xhigh<span class="sub">8 pairs · 2026-09-23</span></td><td class="num"><span class="delta bad">+0.7%</span></td><td class="num"><span class="delta good">−18.4%</span></td><td class="num"><span class="delta good">−4.2%</span></td><td class="num"><span class="delta bad">+4.2%</span></td><td class="num">4/6</td></tr>
+          <tr><td>GPT-6 Luna · xhigh<span class="sub">8 pairs · 2026-09-23</span></td><td class="num"><span class="delta good">−12.3%</span></td><td class="num"><span class="delta good">−8.1%</span></td><td class="num"><span class="delta bad">+8.5%</span></td><td class="num"><span class="delta flat">0.0%</span></td><td class="num">4/6</td></tr>
+          <tr><td>GPT-6 Sol · xhigh<span class="sub">4 pairs · 2026-09-24 · Codex memory off</span></td><td class="num"><span class="delta good">−17.1%</span></td><td class="num"><span class="delta bad">+8.5%</span></td><td class="num"><span class="delta good">−25.5%</span></td><td class="num"><span class="delta good">−10.6%</span></td><td class="num">3/3</td></tr>
+          <tr><td>GPT-6 Luna · xhigh<span class="sub">4 pairs · 2026-09-24 · Codex memory off</span></td><td class="num"><span class="delta bad">+26.1%</span></td><td class="num"><span class="delta bad">+49.1%</span></td><td class="num"><span class="delta bad">+41.9%</span></td><td class="num"><span class="delta bad">+11.4%</span></td><td class="num">2/3</td></tr>
+          <tr><td>gpt-6-astra · medium<span class="sub">4 pairs · 2026-09-24 · Codex memory off</span></td><td class="num"><span class="delta bad">+9.9%</span></td><td class="num"><span class="delta good">−4.5%</span></td><td class="num"><span class="delta good">−1.7%</span></td><td class="num"><span class="delta flat">—</span></td><td class="num">2/3</td></tr>
+          <tr><td>gpt-6-astra · xhigh<span class="sub">4 pairs · 2026-09-24 · Codex memory off</span></td><td class="num"><span class="delta good">−3.4%</span></td><td class="num"><span class="delta good">−13.6%</span></td><td class="num"><span class="delta good">−10.7%</span></td><td class="num"><span class="delta flat">—</span></td><td class="num">3/3</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose" style="margin-top:18px">
+      <p class="t" lang="en">Four pairs per model is half a normal run. Sol's 4-pair −17% sits next to its 8-pair +0.7% from the day before, and Luna flips the other way, so neither is a headline yet; an 8-pair repeat with the isolation flags decides it. What holds across Codex is what held on Claude Code: the harder the model thinks, the more it reads, and the more there is for memory to replace — astra at xhigh dug up 13.6% less and finished 10.7% sooner, while at medium it broke even. Every session's ledger shows the same three notes delivered.</p>
+      <p class="t" lang="zh-Hant">每個模型 4 對只有一般測試的一半。Sol 的 4 對 −17% 旁邊，就是前一天 8 對的 +0.7%，Luna 則往反方向翻轉，所以兩者都還不能當標題；要等加上隔離旗標重跑 8 對才能定案。在 Codex 上站得住的結論，和 Claude Code 上一樣：模型想得越用力就讀得越多，記憶能替代的探索也越多——astra 在 xhigh 時少挖 13.6%、早 10.7% 完成，在 medium 時打平。每個工作階段的日誌都顯示同樣三張便利貼確實送到。</p>
+    </div>
+  </section>
+
+  <!-- ============ LIMITS ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">LIMITS</span>
+      <h2>
+        <span class="t" lang="en">What it can't tell you</span>
+        <span class="t" lang="zh-Hant">它無法告訴你的事</span>
+      </h2>
+    </div>
+    <ul class="plain t" lang="en">
+      <li><b>Small samples.</b> A run is usually 8 pairs per model. One unusual session can move a percentage by several points.</li>
+      <li><b>Keywords are not a grade.</b> The checklist confirms the right names appear, not that the explanation is good.</li>
+      <li><b>Cost is a list-price estimate.</b> Claude Code reports it; for Codex it is computed from the price list.</li>
+      <li><b>Compare like with like.</b> Only compare runs made on the same pinned memory snapshot and the same prompt wording; each report prints its <code>Prompt rules: vN</code>.</li>
+      <li><b>No fixed seed.</b> There is no temperature or seed to pin. The paired, turn-taking design is what absorbs the randomness.</li>
+    </ul>
+    <ul class="plain t" lang="zh-Hant">
+      <li><b>樣本小。</b>一輪通常是每個模型 8 對。只要一個工作階段比較特別，百分比就可能差好幾個點。</li>
+      <li><b>關鍵字不等於評分。</b>檢查清單只確認對的名稱有出現，不代表解釋得好。</li>
+      <li><b>成本是牌價估計。</b>Claude Code 會自己回報；Codex 的則是用價目表算出來的。</li>
+      <li><b>要比較同類的結果。</b>只比較使用同一份固定記憶快照、同一版提示措辭的測試；每份報告都會印出 <code>Prompt rules: vN</code>。</li>
+      <li><b>沒有固定種子。</b>沒有 temperature 或 seed 可以固定，靠的是「成對、輪流先跑」的設計來吸收隨機性。</li>
+    </ul>
+  </section>
+
+  <!-- ============ RUN IT ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">RUN&nbsp;IT</span>
+      <h2>
+        <span class="t" lang="en">Run it yourself</span>
+        <span class="t" lang="zh-Hant">自己跑一次</span>
+      </h2>
+    </div>
+    <ol class="run">
+      <li>
+        <span class="t" lang="en"><b>Write the questions.</b> They are specific to the project you test, so they are not committed. Each task has an <code>id</code>, a <code>question</code>, the <code>signals</code> a good answer names, and the <code>expectedIssue</code> it should recall (<code>null</code> for the trick question).</span>
+        <span class="t" lang="zh-Hant"><b>寫題目。</b>題目跟受測專案有關，所以不進版控。每一題有 <code>id</code>、<code>question</code>、好答案應該提到的 <code>signals</code>，以及應該想起的 <code>expectedIssue</code>（陷阱題填 <code>null</code>）。</span>
+<pre class="cmd">cd tokenMonitor
+cp config/tasks.example.json config/tasks.json   <span class="c"># then edit</span></pre>
+      </li>
+      <li>
+        <span class="t" lang="en"><b>Freeze the memory.</b> Clone the memory repo to a snapshot and remove its remote so no hook can pull newer records into it.</span>
+        <span class="t" lang="zh-Hant"><b>凍結記憶。</b>把記憶儲存庫複製成一份快照，並移除遠端，讓 hook 無法把更新的紀錄拉進來。</span>
+<pre class="cmd">git clone &lt;memory-repo&gt; ../memory-snapshot
+git -C ../memory-snapshot remote remove origin</pre>
+      </li>
+      <li>
+        <span class="t" lang="en"><b>Run the pairs.</b> <code>--cases</code> counts sessions, not pairs, and every case is a full, paid session.</span>
+        <span class="t" lang="zh-Hant"><b>跑配對。</b><code>--cases</code> 算的是工作階段數，不是配對數，而且每一個 case 都是一次完整、要付費的工作階段。</span>
+<pre class="cmd">npm run benchmark:claude -- --cases 16 \
+  --models claude-opus-5-5 --effort xhigh \
+  --project /path/to/target-project \
+  --memory-repo ../memory-snapshot
+
+npm run benchmark:codex -- --cases 20 --hooks \
+  --models &lt;model-a&gt;,&lt;model-b&gt; --reasoning medium \
+  --project /path/to/target-project \
+  --memory-repo ../memory-snapshot</pre>
+      </li>
+      <li>
+        <span class="t" lang="en"><b>Read the report.</b> Each run writes <code>report.md</code> and <code>summary.json</code>, and keeps every session's raw output next to them. An interrupted run resumes from <code>results.ndjson</code>.</span>
+        <span class="t" lang="zh-Hant"><b>讀報告。</b>每一輪都會寫出 <code>report.md</code> 與 <code>summary.json</code>，並在旁邊保留每個工作階段的原始輸出。中斷的測試會從 <code>results.ndjson</code> 接續。</span>
+      </li>
+    </ol>
+    <p class="note t" lang="en" style="margin-top:6px">Full options and caveats: <a href="https://github.com/RxAi-Aus/amp/tree/main/tokenMonitor#readme">tokenMonitor/README.md</a>.</p>
+    <p class="note t" lang="zh-Hant" style="margin-top:6px">完整選項與注意事項：<a href="https://github.com/RxAi-Aus/amp/tree/main/tokenMonitor#readme">tokenMonitor/README.md</a>。</p>
+  </section>
+
+  <footer>
+    <span class="mono"><a href="index.html">RxAi AMP</a> · <a href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md</a>
+      <span class="t" lang="en">is the single source of truth · Issues in, knowledge out.</span>
+      <span class="t" lang="zh-Hant">為唯一真相來源 · Issue 進，知識出。</span>
+    </span>
+    <p class="built">
+      <span class="t" lang="en">Built by <a href="https://rxai.com.au">RxAI</a></span>
+      <span class="t" lang="zh-Hant">由 <a href="https://rxai.com.au">RxAI</a> 打造</span>
+    </p>
+    <p>© 2026 James Ho · <a href="https://github.com/RxAi-Aus/amp/blob/main/LICENSE">Dual-licensed</a>: AGPL-3.0-or-later or commercial · patent pending (AU provisional 2026907694) · <a href="https://github.com/RxAi-Aus/amp">github.com/RxAi-Aus/amp</a></p>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  // This page carries two of the overview's five languages. It reads the
+  // overview's saved choice but only writes on a click here, so visiting in a
+  // language this page lacks never resets the overview.
+  var LANGS = ["en", "zh-Hant"];
+  var bar = document.querySelector(".langbar");
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+  function apply(l) {
+    if (LANGS.indexOf(l) === -1) l = "en";
+    document.body.setAttribute("data-lang", l);
+    document.documentElement.setAttribute("lang", l);
+    var buttons = bar.querySelectorAll("button[data-set]");
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].setAttribute("aria-pressed", String(buttons[i].getAttribute("data-set") === l));
+    }
+  }
+  bar.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-set]");
+    if (!b) return;
+    var l = b.getAttribute("data-set");
+    try { localStorage.setItem("amp-lang", l); } catch (err) {}
+    if (document.startViewTransition && !reduce.matches) {
+      document.startViewTransition(function () { apply(l); });
+    } else {
+      apply(l);
+    }
+  });
+  var saved = null;
+  try { saved = localStorage.getItem("amp-lang"); } catch (e) {}
+  if (!saved) saved = (navigator.language || "en").toLowerCase().indexOf("zh") === 0 ? "zh-Hant" : "en";
+  apply(saved);
+})();
+</script>
+
+</body>
+</html>

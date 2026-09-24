@@ -39,6 +39,8 @@ in [PROTOCOL.md](./PROTOCOL.md).
 - [Daily use as an agent](#daily-use-as-an-agent)
 - [Local issue cache](#local-issue-cache)
 - [Secret/privacy scan hook](#secretprivacy-scan-hook)
+- [Lifecycle triggers & the rxai-amp skill (v2.8)](#lifecycle-triggers--the-rxai-amp-skill-v28)
+- [What we measured — where AMP pays for itself](#what-we-measured--where-amp-pays-for-itself)
 - [AMP Board — local task board over memory](#amp-board--local-task-board-over-memory)
 - [AMP Librarian — Copilot CLI setup and maintenance](#amp-librarian--copilot-cli-setup-and-maintenance)
 - [What's new in v2.4 and v2.5](#whats-new-in-v24-and-v25)
@@ -729,6 +731,56 @@ issues you actually used (OUTCOME). Everything fails soft — no config, no
 network, no problem: the session proceeds untouched. Kill switch:
 `AMP_DISABLE=1`. Full mechanism detail: [adapters/README.md](./adapters/README.md).
 
+## What we measured — where AMP pays for itself
+
+Every number here is AMP on against the same model with AMP off: four read-only
+investigation tasks on one private app (three covered by a memory record, one
+control that no memory covers), identical prompts and tool allow-lists, sessions
+paired and alternated. "Reads" are the bytes of files and command output a
+session dug up before answering. On Claude Code, cost is the list price Claude
+Code reports; on Codex it is an API-equivalent from `config/prices.json`.
+Method, receipts and grading: [docs/benchmark.html](./docs/benchmark.html) and
+[tokenMonitor/README.md](./tokenMonitor/README.md); per-run reports in
+[tokenMonitor/reports/](./tokenMonitor/reports/).
+
+Two rules, from nineteen runs between 2026-09-06 and 2026-09-24:
+
+1. **Delivery has to be by hook.** Every manual-recall (L1) run lost: four Codex
+   models read 39–80% more and took 31–52% longer for 0–2 hits in 4. The same
+   records delivered by hook took gpt-6-astra from +46% to −5.6% input with
+   nothing else changed — which is why v2.12 makes L2 mandatory for any runtime
+   that can run hooks.
+2. **The saving scales with how much the model reads on its own.** Memory
+   replaces blind exploration, so a model that already reads precisely has
+   little to save, and the injected block (≈1k tokens at the pointer tier) is a
+   fixed cost. Raising the effort level moves the same model along that line.
+
+| Runtime · model | Effort | Reads/task, AMP off | Reads Δ | Cost Δ | Hooks / notes |
+|---|---|---:|---:|---:|---|
+| Claude Code · Fable 5.1 | unrecorded | 77 KB | −33% | −2% | v2.7, before the 09-06 fixes |
+| Claude Code · Opus 5 | unrecorded | 52 KB | −18% | −5% | 09-06 fixes |
+| Claude Code · Sonnet 5 | unrecorded | 29 KB | +4% | +29% | 09-06 fixes |
+| Claude Code · Opus 5.5 | unset (~high) | 15 KB | +32% | +41% | v2.10 |
+| Claude Code · Opus 5.5 | xhigh | 40 KB | +19% | +27% | v2.10 |
+| Claude Code · Opus 5.5 | xhigh | 40 KB | **−15%** | +5% | v2.11 task-aware |
+| Claude Code · Opus 5.5 | xhigh | 38 KB | −5% | +14% | v2.11 + weighted matching |
+| Codex · GPT-6 Sol | xhigh | — | −18% | +4% | L2, 8 pairs; input +0.7% |
+| Codex · GPT-6 Luna | xhigh | — | −8% | 0% | L2, 8 pairs; input −12% |
+| Codex · GPT-6 Sol | xhigh | 194 KB | +9% | −11% | L2, 4 pairs, Codex memory off; input −17% |
+| Codex · GPT-6 Luna | xhigh | 222 KB | +49% | +11% | L2, 4 pairs, Codex memory off; input +26% |
+| Codex · gpt-6-astra | medium | 128 KB | −5% | — | L2, 4 pairs, Codex memory off; input +10% |
+| Codex · gpt-6-astra | xhigh | 239 KB | **−14%** | — | L2, 4 pairs, Codex memory off; input −3%, time −11% |
+
+Across every ledgered run the hooks delivered the expected record 42/42 times;
+the model named it on its `Recall used:` line in 26 of 42 memory-backed answers
+(mostly under the older prompt wording that never mentioned injection), and no
+control answer invented a source (14/14) — with AMP *off*, one model did. Cost
+is not reliably lower yet: Opus 5 after the 09-06 fixes and the 4-pair GPT-6 Sol
+run are the only cost savings, and a 4-pair Codex run is half a normal sample
+(the 8-pair Sol run the day before was +0.7%). To run the same test on your own
+model: `npm run benchmark:claude` or `npm run benchmark:codex -- --hooks` in
+`tokenMonitor/`, against a pinned memory snapshot.
+
 ## AMP Board — local task board over memory
 
 `npm run board` starts a local five-column task board on top of your memory
@@ -921,6 +973,24 @@ Folderless agents (OpenClaw, Hermes) stay at L1 with a shorter path: read
 then fetch only the issues whose titles overlap the task. `REGION-*.md`
 files are no longer part of recall at any level (Rule 4, Rule 6, §8 Step 3);
 they remain the browsing aid and the duplicate check before a post.
+
+**Shipped after the v2.12 row, 2026-09-24 (no format change):**
+
+- `Stop` never closes the session ledger. It fires after every turn on Claude
+  Code and Codex, and closing on a quiet first turn had silenced the CAPTURE
+  checkpoint for the rest of the session — 13 of 167 closed ledgers on one
+  machine received commits afterwards with no prompt. A new `SessionEnd` hook
+  closes the ledger; a closed or stale ledger reopens on activity (§15.4).
+  Re-run `npm run hooks:install:claude` to register the fifth hook.
+- `manifest_audit.ts` (§15.6), the Librarian's deterministic half: non-numeric
+  Recall refs, refs to issues that do not exist, and `(used → success|failure)`
+  claims with no `Outcome` comment in the session window — run before Copilot,
+  report-only, `npm run manifest:audit`.
+- `compile_index.ts` now reads a `## Recall` manifest that closes a summary
+  body (its section regex ended in `\Z`, a literal Z in JavaScript), so
+  §4.4b/§4.4c finally apply to every manifest.
+- "Daily use as an agent" above and `/amp recall` follow §15.3; the
+  measured-results section above is new.
 
 ## What's new in v2.11
 

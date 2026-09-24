@@ -8,7 +8,7 @@
 
 ## 30 秒版本
 
-代理程式用**結構化標題**發 GitHub **Issue（議題）**當作一則記憶；GitHub **Actions** 持續把這些 Issue 編成索引；一套**信心權重系統**讓「成功」的模式浮上來、「失敗」的模式沉下去。沒有資料庫、沒有後端伺服器 —— 記憶就是可以 `git clone` 的純文字，人類看得懂、可稽核、有版本歷史。現行版本 **v2.9**(發佈前強化):新增自動化測試套件與 CI 驗證(`npm test` + `verify.yml`)、Rule 14 代理迴圈防護正式轉為規範性條文(`agent_loop_guard.ts`)、官方 Docker 版 GitHub MCP 伺服器成為主要設定,以及 §16 安全考量與威脅模型章節。v2.8 新增代理生命週期契約(§15)、lifecycle adapters、`/amp` 指令與 `npm run setup` 一鍵安裝精靈。
+代理程式用**結構化標題**發 GitHub **Issue（議題）**當作一則記憶；GitHub **Actions** 持續把這些 Issue 編成索引；一套**信心權重系統**讓「成功」的模式浮上來、「失敗」的模式沉下去。沒有資料庫、沒有後端伺服器 —— 記憶就是可以 `git clone` 的純文字，人類看得懂、可稽核、有版本歷史。現行版本 **v2.12**：L1 只保留給沒有 lifecycle hook 的 folderless 執行環境，能跑 hook 的執行環境一律以 L2 參與，adapter 壞掉時退化為「靜默召回」而不是手動翻索引；v2.11 把注入上限定在摘要層、在 Claude Code 上依題目展開，並讓 Recall manifest 的 `(used → success)` 回饋權重（§4.4c）。v2.9 新增自動化測試套件與 CI 驗證（`npm test` + `verify.yml`）、Rule 14 代理迴圈防護正式轉為規範性條文（`agent_loop_guard.ts`）、官方 Docker 版 GitHub MCP 伺服器成為主要設定，以及 §16 安全考量與威脅模型章節。v2.8 新增代理生命週期契約(§15)、lifecycle adapters、`/amp` 指令與 `npm run setup` 一鍵安裝精靈。
 
 ```
 你（人類）  ┐
