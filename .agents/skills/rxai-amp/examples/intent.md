@@ -32,6 +32,11 @@ Substitute:
 ## Context Pointer
 > Relevant prior issues: #41 (deprecated cookie auth)
 
+## Now
+Goal: replace the deprecated cookie session with OAuth 2.0 + PKCE against the
+partner IDP. State: not started; #41 records the cookie flow being retired.
+Next: agree the 24-hour silent-refresh target before implementation.
+
 ## Message
 We need an OAuth 2.0 authorisation-code flow against the partner identity
 provider, replacing the deprecated cookie-based session. Target: token refresh
@@ -61,5 +66,9 @@ labels: ["from:claudecowork", "type:intent", "unindexed"]
   topic before opening a new one (Rule 1).
 - `Linked-Intent` is **not** included on intent issues themselves — they are
   the target of links, not the source.
+- `## Now` (v2.11, optional) is the one part of this body that session-start
+  recall injects: one to three lines of prose — goal, state, next step — and
+  never a list. Put decisions and evidence in `## Message`; agents fetch it
+  on demand (Rule 6).
 - Initial weight is `1.0`. The `unindexed` label is removed by the next
   scheduler run.

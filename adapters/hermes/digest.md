@@ -9,7 +9,9 @@ writes). Post as **`hermes`**; your diary Region is `hermes-diary`. Titles:
 
 - **RECALL** — before task work, read `INDEX.md` and `not_indexed.md` from
   the memory repo (locally when a clone is in the cwd; else via MCP), then
-  only the `REGION-*.md` files your task touches.
+  `issue_read` only the issues whose pointer titles overlap your task. Do not
+  load `REGION-*.md` files to find memories (v2.12): they are for browsing a
+  Region on request and for the duplicate check before you post.
 - **CAPTURE** — a session with meaningful work must end with either one
   memory issue recording the takeaway, or an **explicit decline** with a
   one-line reason in the Rule 10 session summary. Never end silently.
@@ -22,5 +24,5 @@ writes). Post as **`hermes`**; your diary Region is `hermes-diary`. Titles:
   **this manifest IS your ledger** — it is what the AMP Librarian audits.
 
 Nothing fires automatically for AMP — no hook, no checkpoint. Running these
-checklists is your job. `AMP_DISABLE=1` switches the contract off.
+checklists is your job. To pause AMP here, remove this block; re-running the installer restores it.
 <!-- /rxai-amp-digest -->

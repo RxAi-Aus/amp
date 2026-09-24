@@ -3,29 +3,37 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later OR LicenseRef-Commercial
 
 /**
- * stop.mjs — Claude Code Stop hook (Protocol v2.9.1 §15, CAPTURE + OUTCOME)
+ * stop.mjs — Claude Code Stop hook (Protocol v2.12 §15, CAPTURE + OUTCOME)
  *
- * The one enforcement point. Decision order (§15.5: block at most once,
- * always fail-soft, always offer decline):
+ * The one enforcement point. `Stop` fires after every assistant turn on
+ * Claude Code (and on Codex, whose shim imports this file), not once at
+ * session end, so this hook never closes the ledger — session-end.mjs does.
+ * Closing here on a quiet first turn silenced CAPTURE for the rest of the
+ * session: 13 of 167 closed ledgers on one machine received commits after
+ * `closed_at` with no checkpoint (found 2026-09-24).
  *
- *   1. stop_hook_active true          → exit 0  (runtime re-entry guard)
- *   2. AMP disabled / no config       → exit 0
- *   3. no ledger for this session     → exit 0  (L2 not initialised → L1)
- *   4. already nagged this session    → exit 0  (block-once)
- *   5. capture discharged (write/decline) or session not meaningful
- *      (no boundaries)                → close ledger, exit 0
+ * Decision order (§15.5: block at most once, always fail-soft, always offer
+ * decline):
+ *
+ *   1. stop_hook_active true           → exit 0  (runtime re-entry guard)
+ *   2. AMP disabled / no config        → exit 0
+ *   3. no open ledger for this session → exit 0  (adapter not initialised →
+ *      silent recall, §15.3; CAPTURE still binds through the git floor)
+ *   4. already nagged this session     → exit 0  (block-once)
+ *   5. capture discharged (write/decline) or session not meaningful yet
+ *      (no boundaries)                 → exit 0, ledger stays open
  *   6. remote verify: agent may have posted without recording — one
  *      GET /repos/<slug>/issues?since=<started>. [FROM:<agent> title hit
- *      → record write, close, exit 0. Network failure → fall through.
+ *      → record write, exit 0. Network failure → fall through.
  *   7. block once: {"decision":"block","reason":<checklist>}
  *
- * Hook JSON shapes verified against code.claude.com/docs/en/hooks (2026-08-01).
+ * Hook JSON shapes verified against code.claude.com/docs/en/hooks (2026-09-24).
  */
 
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { githubToken, readStdinJson, resolveConfig } from "../../lib/amp-config.mjs";
-import { closeLedger, loadLedger, markNagged, obligations, recordWrite, saveLedger } from "../../lib/amp-ledger.mjs";
+import { loadLedger, markNagged, obligations, recordWrite } from "../../lib/amp-ledger.mjs";
 
 const LIB = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../lib");
 
@@ -45,13 +53,11 @@ if (ledger.capture.nagged) process.exit(0);
 let { discharged, unmarked, injected, trivial } = obligations(ledger);
 
 if (trivial) {
-  // Trivial session: no boundaries and nothing the agent fetched itself —
-  // nothing owed (§15.2), close quietly. Memories auto-injected at session
-  // start do not count: surfaced-but-unused memories get nothing (§15.1),
-  // and only the agent can tell whether it relied on one.
-  // Codex Stop fires at the end of every turn, not only when the session is
-  // ending. Keep its ledger open for a later turn; SessionEnd closes it.
-  if (process.env.RXAI_AMP_RUNTIME !== "codex") closeLedger(sessionId);
+  // Trivial so far: no boundaries and nothing the agent fetched itself —
+  // nothing owed (§15.2). Memories auto-injected at session start do not
+  // count: surfaced-but-unused memories get nothing (§15.1), and only the
+  // agent can tell whether it relied on one. The ledger stays open: a later
+  // turn may commit, and this hook runs again after it.
   process.exit(0);
 }
 
@@ -89,7 +95,7 @@ if (!discharged && config.repoSlug && githubToken()) {
 
 if (discharged) {
   // OUTCOME reminders ride along in the manifest; capture is satisfied.
-  if (process.env.RXAI_AMP_RUNTIME !== "codex") closeLedger(sessionId);
+  // The ledger stays open until SessionEnd, like after every other turn.
   process.exit(0);
 }
 

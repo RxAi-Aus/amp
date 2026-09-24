@@ -1,4 +1,4 @@
-# AMP Lifecycle Adapters (Protocol v2.9.2, §15)
+# AMP Lifecycle Adapters (Protocol v2.12, §15)
 
 Reference implementations of the Agent Lifecycle Contract. `PROTOCOL.md` §15
 is the normative spec; this file holds the operational detail deliberately
@@ -12,19 +12,27 @@ checks, read order). The session ledger is the connective state between them.
 
 | Obligation (§15.1) | Claude Code (L2) | agy (L2) | Codex (L2) | Git floor (any shell agent) | Folderless (L0/L1) |
 |---|---|---|---|---|---|
-| RECALL | `SessionStart` hook injects INDEX.md + not_indexed.md, then the bodies of the top open issues whose Region matches the cwd repo (`lib/amp-recall.mjs`, #442), ledgered as surfaced `via: "inject"`. With a matched Region, INDEX.md is rendered around it (matched Regions verbatim, every other Region as one item with its active thread numbers) and an empty not_indexed.md collapses to one line — the block is re-read on every turn, so it is kept near 4–5 KB | `PreInvocation` injects the same, once per conversation (ledger-gated) | `SessionStart` injects the same compact block as developer context; `SessionEnd` closes the ledger | — (pair with an L1 digest) | read via MCP per digest |
-| CAPTURE | `Stop` hook blocks once with checklist; decline always offered | `Stop` hook returns `decision: "continue"` once, same checklist | `PostToolUse` + git floor record boundaries; `Stop` returns `decision: "block"` once with the checklist | `post-commit` records a boundary and prints a reminder | Rule 10 summary or decline |
+| RECALL | `SessionStart` hook injects INDEX.md + not_indexed.md, then the top open issues whose Region matches the cwd repo (`lib/amp-recall.mjs`, #442) as pointer lines; `UserPromptSubmit` expands to the summary tier (`## Now`, else opening prose — v2.11) only the records whose title/Place overlap the prompt — Place tokens and store-rare terms weigh 2, generic software vocabulary 0.5, other title terms 1, threshold 2 — each once per session, cache first; both ledgered as surfaced `via: "inject"` with their `tier`. No block ⇒ the agent tells the user once to install/trust the hooks and works without recall — no manual fallback (v2.12). With a matched Region, INDEX.md is rendered around it (matched Regions verbatim, every other Region as one item with its active thread numbers) and an empty not_indexed.md collapses to one line — the block is re-read on every turn, so it is kept near 3 KB | `PreInvocation` injects the same, once per conversation (ledger-gated) | `SessionStart` injects the same block at the summary tier (Codex has no prompt-stage hook) as developer context; `SessionEnd` closes the ledger | — (pair with an L1 digest) | `INDEX.md` + `not_indexed.md` via MCP, then `issue_read` the pointers whose titles overlap the task — no Region walk (v2.12) |
+| CAPTURE | `Stop` hook blocks once with checklist — it fires after every turn and leaves the ledger open; decline always offered; `SessionEnd` closes the ledger | `Stop` hook returns `decision: "continue"` once, same checklist | `PostToolUse` + git floor record boundaries; `Stop` returns `decision: "block"` once with the checklist | `post-commit` records a boundary and prints a reminder | Rule 10 summary or decline |
 | OUTCOME | `Stop` checklist lists unmarked recalled issues; `PostToolUse` auto-records | `Stop` checklist lists them with the `gh issue comment` form (no tool-arg observer available) | `PostToolUse` observes issue reads; `Stop` lists unmarked recalls | manifest audited remotely by Librarian | manifest in summary |
 
 ## Conformance matrix (declared in PROTOCOL.md §2)
 
 | Agent | Level | Mechanisms |
 |---|---|---|
-| claudecowork | L2 | user-level hooks (`session-start`, `stop`, `post-tool-use`) + user-level skill + git floor |
+| claudecowork | L2 | user-level hooks (`session-start`, `user-prompt-submit`, `post-tool-use`, `stop`, `session-end`) + user-level skill + git floor |
 | agy | L2 | global hooks (`pre-invocation`, `stop`) + global skill mirror + git floor (`adapters/agy/README.md`) |
 | codex | L2 | `SessionStart`/`PostToolUse`/`Stop`/`SessionEnd` + skill mirror + `AGENTS.md` digest + git floor, installed by `npm run hooks:install:codex` (`adapters/codex/README.md`) |
 | openclaw | L1 | workspace `AGENTS.md` digest + git floor, installed by `npm run hooks:install:openclaw` (`adapters/openclaw/README.md`) |
 | hermes | L1 | `~/.hermes/SOUL.md` digest (always loaded from HERMES_HOME), manifest-as-ledger, installed by `npm run hooks:install:hermes` (`adapters/hermes/README.md`) |
+
+**The runtime sets the level (v2.12, §15.3).** A runtime with lifecycle hooks
+participates at L2 through its adapter; L1 is the level of hook-less runtimes
+only. When an L2 adapter is missing or untrusted, recall degrades to *silent*
+— the agent says once how to restore the hooks and works without memory —
+never to manual index navigation: four Codex models measured at L1 paid
++39–80% input and +31–52% wall time for 0–2 hits in 4 tasks. CAPTURE and
+OUTCOME still bind through the git floor and the skill.
 
 ## Install
 
@@ -37,7 +45,7 @@ npm run hooks:install:claude          # add -- --dry-run to preview
 # agy / Antigravity CLI (hooks + skill into ~/.gemini/config/):
 npm run hooks:install:agy             # add -- --dry-run to preview
 
-# Codex (L2 hooks + skill/digest L1 fallback):
+# Codex (L2 hooks; the skill + digest carry the write formats and the capture/outcome floor):
 npm run hooks:install:codex           # add -- --dry-run to preview
 
 # OpenClaw (L1: §15 digest into its workspace AGENTS.md):
@@ -118,7 +126,8 @@ analogue): never committed, never authoritative, cannot authorize a write.
   "status": "open",
   "recall": {
     "surfaced": [
-      { "issue": 47, "title": "[…][TYPE:pattern] …", "via": "agent", "disposition": "unknown", "outcome_posted": null }
+      { "issue": 47, "title": "[…][TYPE:pattern] …", "via": "agent", "disposition": "unknown", "outcome_posted": null },
+      { "issue": 52, "title": "[…][TYPE:intent] …", "via": "inject", "tier": "summary", "disposition": "unknown", "outcome_posted": null }
     ]
   },
   "capture": {
@@ -130,9 +139,11 @@ analogue): never committed, never authoritative, cannot authorize a write.
 }
 ```
 
-- `status`: `open → closed` (capture discharged) or `open → stale` (48 h
-  janitor) — stale ledgers with undischarged obligations are surfaced once at
-  the next session start, then deleted after 7 further days.
+- `status`: `open → closed` (`SessionEnd`; never the Stop checkpoint, which
+  fires after every turn) or `open → stale` (48 h janitor) — stale ledgers with
+  undischarged obligations are surfaced once at the next session start, then
+  deleted after 7 further days. A closed or stale ledger that sees activity
+  again (resume, a later commit) reopens.
 - `via`: how the issue reached the agent — `agent` (the agent fetched it:
   CLI `surface`, MCP `issue_read` observer; entries without the field, written
   before it existed, read as `agent`) or `inject` (an adapter pushed it at
@@ -141,6 +152,11 @@ analogue): never committed, never authoritative, cannot authorize a write.
   is trivial even when memories were injected, because surfaced-but-unused
   memories owe nothing (§15.1 OUTCOME). An injected issue the agent later
   fetches itself flips to `agent`.
+- `tier` (v2.11, inject entries only): `pointer` — a title line pushed at
+  session start — or `summary` — `## Now` / opening prose, pushed at session
+  start on a runtime without a prompt stage or expanded by the Claude Code
+  `UserPromptSubmit` hook. It never changes what is owed; it stops the prompt
+  stage from expanding a record twice.
 - `nagged`: the Stop checkpoint blocked once already; it never blocks twice.
 - Concurrency: one file per session id; two agents on one machine differ by
   `RXAI_AMP_AGENT` and session id — no locking needed.
@@ -155,7 +171,7 @@ analogue): never committed, never authoritative, cannot authorize a write.
 |---|---|
 | GitHub unreachable at session start | inject local copy with `source: local (possibly stale)` banner; never block |
 | GitHub unreachable at Stop | remote verify is skipped; the checklist still offers decline; unposted obligations carry to next session via the ledger — writes are never queued for replay (Rule 3A) |
-| No config anywhere | every adapter exits 0 silently (drops to L0/L1 prose) |
+| No config anywhere | every adapter exits 0 silently (silent recall; capture/outcome per the skill) |
 | Memory repo checkout moved/deleted | hooks fail soft (absolute paths gone → exit 0); rerun installer to repair |
 | Working repo IS the memory repo | self-detection path resolves it; Rule 3A unchanged |
 | Crashed session | ledger goes stale at 48 h; surfaced once at next session start; never auto-posted |

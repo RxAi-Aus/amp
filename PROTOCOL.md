@@ -1,6 +1,6 @@
 # RxAi AMP — Agent Memory Protocol
 
-**RxAi AMP v2.10**
+**RxAi AMP v2.12**
 
 **Purpose:** This document defines the complete communication and shared memory protocol for AI agents operating on a shared GitHub repository. Any agent that reads this file and can reach GitHub Issues for this repository — through the GitHub MCP server or an authenticated `gh` CLI — can participate in the protocol.
 
@@ -455,7 +455,7 @@ number of surfaced-but-unused recalls recorded against the issue (§4.4b).
 | `neutral` | weight unchanged |
 | no marker | treated as neutral (backward compatible) |
 
-After all per-comment deltas are summed, the result is **clamped to [0.0, 1.0]**.
+After all per-comment deltas and the per-manifest deltas of §4.4c are summed, the result is **clamped to [0.0, 1.0]**.
 
 #### 4.4b Unused-recall decay (v2.10)
 
@@ -491,6 +491,40 @@ the record, not about the clock. Rule 12 (`lifefact` pinned at 1.0) and Rule 8
 **Archival** — when weight drops below `0.10`, the issue is summarised in the Summary and removed from the active pointer table. It is not deleted — it evaporates from active consideration.
 
 **Reading order** — within any Type, agents read issues in descending weight order. High-weight issues represent the most actively validated context.
+
+#### 4.4c Manifest reinforcement (v2.11)
+
+§4.4b lets a Recall manifest lower a weight; nothing let it raise one. The
+asymmetry mattered more than it looked. A memory that reaches an agent by
+adapter injection (§15.1, ledger `via: inject`) creates no Stop-checkpoint
+obligation (§15.4), so the `Outcome` comment §15.1 requires for a used memory
+rests on the agent remembering to post it — and prose compliance is what §15
+exists to replace. Measured 2026-09: the three records injected in every A/B
+session were cited correctly in 23 of 24 memory-backed sessions, and all three
+were archived by age-decay within sixteen days of being their Region's top
+three.
+
+A manifest ref that records the issue as relied upon therefore reinforces it:
+
+| Manifest ref | Effect |
+|---|---|
+| `#N (used → success)` | weight += 0.15 |
+| `#N (used → failure)` | weight −= 0.10 |
+| `#N (used → neutral)`, `#N (used)`, bare `#N` | nothing |
+| `#N (unused)` | §4.4b (multiplicative, standing) |
+
+Half the value of a direct `Outcome` comment (§4.4): the manifest is the
+session's own account in its diary, not a marker on the thread, so it is
+weaker evidence and cannot be cross-checked in the thread itself. A direct
+comment remains the primary signal; a session that posts both is counted for
+both, and the clamp bounds the sum. Unlike `u`, these are additive deltas and
+are counted **once, in the compile after the summary issue is created**
+(`created_at` later than `_last_compile_iso`), exactly like comment deltas —
+a standing additive term would pin any once-used record at 1.0 forever. An
+issue never counts its own manifest against itself. `->` and `=>` are
+accepted in place of `→`. Rule 12 pinning and Rule 8 supersession take
+precedence, and a store whose manifests carry no `(used → …)` refs reproduces
+the v2.10 arithmetic exactly.
 
 ### 4.5 not_indexed.md — Real-Time Unindexed Register
 
@@ -700,11 +734,11 @@ At the start of every session:
 2. If the worktree is dirty or pull fails, do not discard local changes; read current remote files through MCP instead and treat the dirty state as repository maintenance work to resolve deliberately
 3. Read `INDEX.md` (Layer 0 + Layer 1), locally after a successful pull or through `get_file_contents`
 4. Read `not_indexed.md`, locally after a successful pull or through `get_file_contents`
-5. Load relevant Region file if needed (Layer 2), locally after a successful pull or through `get_file_contents`
+5. Fetch the issues whose pointer titles overlap the task (Layer 3, Rule 6) — from `INDEX.md` directly; a Region file (Layer 2) is loaded only to browse a Region on request or for step 6
 6. Confirm whether a topic issue already exists before opening a new one
 7. Before any write or duplicate-sensitive decision, refresh the relevant live GitHub issue/comment state through MCP/API
 
-Since v2.8, steps 1–4 are restated as the **RECALL** obligation in §15.1 and SHOULD be discharged by a deterministic adapter (§15.5) rather than left to the agent's memory of this rule.
+Since v2.8, steps 1–4 are restated as the **RECALL** obligation in §15.1 and SHOULD be discharged by a deterministic adapter (§15.5) rather than left to the agent's memory of this rule. Since v2.12 a Region file is not part of recall at any level (§15.3): `INDEX.md` pointers carry titles (v2.10) and adapters inject the summary tier (v2.11), so recall descends from a title straight to the issue.
 
 ### Rule 5 — Respect the Timestamp
 
@@ -712,7 +746,7 @@ If `Last Compiled` in `INDEX.md` is more than 6 hours old, treat it as potential
 
 ### Rule 6 — Fetch Full Thread Only When Needed
 
-Fetch via `issue_read` (Layer 3) only after the Region file confirms the issue is relevant. Never pre-fetch all threads at session start.
+Fetch via `issue_read` (Layer 3) only after a pointer says the issue is relevant — its `INDEX.md` title, its injected summary tier (§15.1), or a Region-file row you were browsing. Never pre-fetch all threads at session start.
 
 ### Rule 7 — Read Intent Before Action Details
 
@@ -871,6 +905,12 @@ bind.
 ## Context Pointer
 > Relevant prior issues: #{num}, #{num}     ← Omit if none
 
+## Now
+{One to three lines of prose: the goal,   ← Optional (v2.11). No lists. This is
+ where it stands, the next step.}           the summary tier that session-start
+                                            recall injects (§15.1); the Message
+                                            below stays fetch-on-demand.
+
 ## Message
 {Self-contained content. Do not assume the recipient has memory of prior sessions.
 Include all context needed to act.}
@@ -881,6 +921,17 @@ Include all context needed to act.}
 - [ ] Acknowledge only
 - [ ] No action required
 ```
+
+**`## Now` (v2.11).** Optional, one to three lines of prose — the goal, where
+it stands, the next step — and never a list. It exists for the reader who
+gets the record by adapter injection at session start (§15.1): the summary
+tier is `## Now` when present, else the opening prose of `## Message` up to
+its first list, table or heading. SHOULD be written for every `type:intent`,
+and for any record whose Message opens with a list (such a record otherwise
+injects as a pointer with no summary). The decisions, steps and evidence stay
+in `## Message`, one `gh issue view` away (Rule 6). Measured 2026-09-23: an
+intent injected as its enumerated decisions doubled a high-effort model's
+tool output on the matching task; the same intent as goal-plus-state does not.
 
 ### Labels
 
@@ -961,9 +1012,10 @@ tool: get_file_contents
 path: "INDEX.md"
 ```
 
-Parse `Last Compiled` timestamp. Identify relevant Regions from Summary blurbs.
+Parse `Last Compiled` timestamp. Identify relevant Regions from Summary blurbs and the pointer titles (v2.10).
 
 > If Step 0 was performed successfully, read `INDEX.md` from the local filesystem instead.
+> On an L2 runtime the adapter has already injected Steps 1–2 (§15.1) — do not re-read them.
 
 ### Step 2 — Read Unindexed Issues
 
@@ -976,14 +1028,16 @@ Check for recent unindexed issues relevant to your task.
 
 > If Step 0 was performed successfully, read `not_indexed.md` from the local filesystem instead.
 
-### Step 3 — Layer 2: Load Region File (If Needed)
+### Step 3 — Layer 2: Load Region File (Browsing and Duplicate Check Only)
 
 ```
 tool: get_file_contents
 path: "REGION-{name}.md"
 ```
 
-Read types in order: `intent` → `facts` → `pattern` → `invalidation` → `discovery` → `events`. Check `type:invalidation` before trusting any `type:facts`. Check `type:pattern` before reasoning independently. Within each Type, read issues in descending weight order.
+Since v2.12 this step is **not part of recall** (§15.3). Read a Region file when the user asks to browse a Region, or for the Step 5 duplicate check before posting into a Place. For recall, go from the pointer titles of Step 1 — or the injected summary tier — straight to Step 4.
+
+When you do browse a Region, read types in order: `intent` → `facts` → `pattern` → `invalidation` → `discovery` → `events`. Check `type:invalidation` before trusting any `type:facts`. Check `type:pattern` before reasoning independently. Within each Type, read issues in descending weight order.
 
 > If Step 0 was performed successfully, read the relevant `REGION-*.md` file from the local filesystem instead.
 
@@ -1456,10 +1510,35 @@ continuous agent run on behalf of one user.
 
 - **RECALL (MUST).** A conforming session begins with the navigation layer in
   context before the first task action: the content of `INDEX.md` and
-  `not_indexed.md` (Rule 4 steps 1–4 restated). Region files and issue bodies
-  remain fetch-on-demand (Rule 6) — recall injection MUST NOT exceed the
-  navigation layer. Observable test: the agent can name the Regions and the
-  `Last Compiled` time without a new fetch.
+  `not_indexed.md` (Rule 4 steps 1–4 restated). An adapter MAY add the open
+  records whose Region matches the working repository, at one of three tiers
+  (v2.11):
+  - *pointer* — `#N [type · place · weight] title`: always, for every record shown;
+  - *summary* — the record's `## Now` section, else the opening prose of its
+    `## Message` before the first list, table or heading; one line, ≤ 240
+    characters: the default;
+  - *body* — the full issue: never injected; fetch-on-demand (Rule 6).
+
+  Recall injection MUST NOT exceed the summary tier, and the summary tier
+  MUST NOT carry a list. Measured 2026-09-23 on identical tasks: an injected
+  intent whose Message enumerated the user's decisions doubled a high-effort
+  model's tool output on the matching task, because the list read as things
+  to verify; the same record as goal-plus-state does not.
+
+  Session start cannot know the task. On a runtime with a prompt-stage
+  trigger, an adapter SHOULD inject the pointer tier at session start and
+  expand to the summary tier, when a prompt arrives, only the records whose
+  title or Place lexically overlap that prompt — a deterministic match
+  (stemmed tokens minus stopwords and the project's own names, CJK bigrams,
+  an explicit `#N`; an overlap on a Place token or on a term rare across the
+  store's pointer tables is evidence, one on generic software vocabulary is
+  not), no LLM in the trigger path (§15.5), each record at most
+  once per session; a prompt that overlaps nothing injects nothing. A runtime
+  without a prompt-stage trigger injects the summary tier at session start.
+  Measured 2026-09-23: on a task no memory covered, unrelated injected
+  summaries cost 14–17 KB of extra reading per session. Region files and
+  bodies remain fetch-on-demand. Observable test: the agent can name the
+  Regions and the `Last Compiled` time without a new fetch.
 - **CAPTURE (MUST, per session — not per boundary).** A session in which
   meaningful work occurred ends with either (a) at least one memory write
   recording the takeaway (Rule 10), or (b) an explicit decline with a one-line
@@ -1494,10 +1573,13 @@ or, for a declined session:
 ```
 
 This is the **only remote artifact the contract adds**. It lives in an issue
-body, which `compile_index.ts` ignores — zero indexer changes. Its purpose is
-remote observability: any auditor (human or the AMP Librarian) can distinguish
-"considered, nothing worth storing" from "forgot", and can cross-check a
-claimed `used → success` against the actual `Outcome` comment on that issue.
+body. Its first purpose is remote observability: any auditor (human or the AMP
+Librarian) can distinguish "considered, nothing worth storing" from "forgot",
+and can cross-check a claimed `used → success` against the actual `Outcome`
+comment on that issue. Since v2.10 the compiler also reads it: `(unused)`
+refs feed §4.4b decay and, since v2.11, `(used → success|failure)` refs feed
+§4.4c reinforcement — which makes the manifest the weight signal for a memory
+that reached the agent by injection and was relied upon without a comment.
 A session with no recorded work boundaries and nothing surfaced owes nothing —
 trivial sessions post no summary and no manifest (Rule 10 is unchanged on
 this point).
@@ -1511,16 +1593,28 @@ every level.
 | Level | Name | Mechanism |
 |-------|------|-----------|
 | L0 | prose | Agent follows PROTOCOL.md / AGENTS.md text voluntarily |
-| L1 | assisted | Session checklists are loaded into context (the `rxai-amp` skill, or a config-file digest) |
+| L1 | assisted (folderless) | The §15 digest is loaded into the agent's config. Recall is manual and **title-driven**: `INDEX.md` and `not_indexed.md`, then the bodies whose pointer titles overlap the task — never a Region walk. Only for runtimes that cannot run lifecycle hooks. |
 | L2 | enforced | Deterministic triggers outside the LLM (agent lifecycle hooks, git hooks) maintain a session ledger, inject recall, and interpose a capture checkpoint at session end |
 | L3 | tool-boundary | An MCP server (§13) records obligations as side effects of `amp_*` calls and rejects malformed writes before they reach GitHub |
 
-A higher level MUST degrade to the next level down on failure — a broken
-adapter never blocks the agent's primary task. GitHub unreachable at session
-start → inject cached/local index with a staleness banner (L2→L1). GitHub
-unreachable at close → the obligation carries forward to the next session
-start via the ledger; writes are never queued for automatic replay (Rule 3A —
-memory writes require live judgment against fresh remote state, §12 applies).
+**The runtime sets the level (v2.12).** An agent whose runtime offers
+lifecycle hooks — Claude Code, Codex, agy — MUST participate at L2 through
+its reference adapter (§15.5). L1 is the level of hook-less runtimes
+(OpenClaw, Hermes, folderless MCP clients), not a choice available to the
+others. Measured on four Codex models (2026-09-10 and 2026-09-23): recall by hand — load the skill, read `INDEX.md`, read the Region file, search for an issue — cost +39–80% input and +31–52% wall time per session for 0–2 memory hits in 4 tasks, while the same records delivered by hook moved the same models between −5.6% and +36%. The delivery mechanism, not the content, decided the cost.
+
+A higher level MUST degrade on failure without blocking the agent's primary
+task — but on a hook-capable runtime it degrades to **silent recall**, not to
+L1: no navigation layer is injected, the CAPTURE and OUTCOME obligations still
+bind (git floor, skill), and the agent's one recall duty is to tell the user,
+once, how to restore the hooks (`npm run hooks:install:<agent>`, or trusting
+them in the runtime). Such a session is non-conformant on RECALL for that
+session and MUST NOT compensate by walking the index by hand. GitHub
+unreachable at session start → inject the cached/local index with a staleness
+banner (still L2). GitHub unreachable at close → the obligation carries
+forward to the next session start via the ledger; writes are never queued for
+automatic replay (Rule 3A — memory writes require live judgment against fresh
+remote state, §12 applies).
 
 ### 15.4 The Session Ledger
 
@@ -1543,7 +1637,13 @@ compliance. It stores issue numbers and titles only — never token values,
 never issue bodies. The directory is created mode `0700` (titles of a private
 memory repo are personal data).
 
-Lifecycle: opened at RECALL; appended at boundaries; closed at CAPTURE.
+Lifecycle: opened at RECALL; appended at boundaries; the CAPTURE checkpoint
+runs at the end of a turn (once per session) and leaves the ledger open;
+closed at session end (`SessionEnd`). On Claude Code and Codex the `Stop`
+event fires after every turn, so an adapter MUST NOT close the ledger there —
+a ledger closed on a quiet first turn would silence CAPTURE for the rest of
+the session. Activity on a closed or stale ledger (a resumed session, a later
+commit) reopens it, history intact.
 Stale ledgers (open > 48 h, e.g. a crashed session) are surfaced once as a
 next-session-start reminder listing unposted obligations, then archived; they
 are never auto-posted. Cleanup runs opportunistically at the next adapter
@@ -1552,7 +1652,9 @@ invocation — no daemon, no cron.
 ### 15.5 Adapter Requirements
 
 Reference adapters ship in `adapters/` (Claude Code lifecycle hooks — the L2
-flagship; Codex lifecycle hooks — `SessionStart` recall, `PostToolUse`
+flagship: `SessionStart` pointer-tier recall, `UserPromptSubmit` task-aware
+summary expansion (v2.11), `PostToolUse` observation, block-once `Stop`,
+advisory `SessionEnd` cleanup; Codex lifecycle hooks — `SessionStart` recall, `PostToolUse`
 observation, block-once `Stop`, and advisory `SessionEnd` cleanup; agy
 lifecycle hooks — `PreInvocation` recall + `Stop` checkpoint with `gh`-based
 remote verify; a portable git `post-commit` hook — the agent-agnostic floor;
@@ -1589,6 +1691,19 @@ manifest claims `#47 (used → success)` but #47 has no outcome comment" →
 emit a `missing_outcomes` suggestion with evidence. Scheduled or manually
 dispatched runs only; the Librarian suggests and reports — it never edits
 memory or generated state (its existing mandate, unchanged).
+
+The deterministic half of that cross-check is `manifest_audit.ts`, run by
+`amp-librarian.yml` before any Copilot call and needing no LLM. For every
+Rule 10 summary created in its window (default: the last 7 days) it checks
+each ref on the manifest's `Surfaced:` lines and reports three kinds of
+finding: a **non-numeric ref** (`#acme-speckit-state` — a source that
+cannot exist; a model with no memory to cite once wrote exactly that), an
+**unknown issue** (`#N` that is not an issue of the repository), and an
+**unbacked claim** (`#N (used → success|failure)` while #N has no `Outcome`
+comment between 48 h before and 24 h after the summary). The compiler keeps
+ignoring what it cannot parse — §4.4b/c cost nothing on a malformed ref — and
+the audit is what makes the malformed ref visible. Report only: it never
+writes to GitHub.
 
 ## Appendix A — Region Naming Conventions
 
@@ -1903,6 +2018,8 @@ cannot stop a poisoned memory from being *stored*, so it must never be
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.12 | 2026-09-23 | **TIGHTENING (no format change):** L1 becomes the level of runtimes that cannot run lifecycle hooks. Measured on four Codex models (2026-09-10 and 2026-09-23): recall by hand — load the skill, read `INDEX.md`, read the Region file, search for an issue — cost +39–80% input and +31–52% wall time per session for 0–2 memory hits in 4 tasks, while the same records delivered by hook moved the same models between −5.6% and +36%. The delivery mechanism, not the content, decided the cost. §15.3: a runtime with lifecycle hooks (Claude Code, Codex, agy) MUST participate at L2 through its reference adapter; a broken or untrusted adapter degrades to silent recall — the agent tells the user once how to restore the hooks and works without memory — never to manual navigation. Region files leave the recall path at every level (Rule 4 step 5, Rule 6, §8 Step 3): recall goes from an `INDEX.md` pointer title (v2.10) or an injected summary (v2.11) straight to the issue; `REGION-*.md` remains the browsing aid and the duplicate check before a post. The `rxai-amp` skill mirrors lose their index walkthrough and their "check `AMP_DISABLE` yourself" instruction (the flag is consumed by the hooks), and the agy mirror stops claiming agy has no hooks (L2 since v2.9.1); the OpenClaw/Hermes digests describe the title-driven path. No title format, label, type, decay rate, index-file set, or memory-write rule changed. |
+| 2.11 | 2026-09-23 | **ADDITIVE:** Two corrections from the 2026-09-23 Claude Code and Codex A/B runs. (a) §15.1 RECALL defines three injection tiers — pointer, summary, body — and caps adapter injection at the summary tier: a record's optional new `## Now` section (§6; one to three lines of prose, never a list), else the opening prose of `## Message` before its first list, table or heading, ≤ 240 characters. Bodies stay fetch-on-demand. An intent injected as its enumerated decisions doubled a high-effort model's tool output on the matching task; as goal-plus-state it does not. (b) New §4.4c: a §15.2 manifest ref `#N (used → success)` adds +0.15 and `(used → failure)` −0.10 — half a direct `Outcome` comment, counted once in the compile after the summary is created. §4.4b let a manifest lower a weight but nothing let it raise one, and an injected memory carries no Stop-checkpoint obligation (§15.4), so a record relied upon in every session that saw it could still reach the archive on age-decay alone — the three records of the A/B did, within sixteen days. (c) Task-aware recall: on a runtime with a prompt-stage hook (Claude Code `UserPromptSubmit`) session start injects the pointer tier only, and the prompt stage expands to the summary tier just the records whose title or Place lexically overlap the prompt — deterministic (stemmed tokens minus stopwords, CJK bigrams, explicit `#N`), each record once per session; a prompt no memory covers injects nothing (unrelated summaries cost a control task 14–17 KB of extra reading). Runtimes without a prompt stage keep the summary tier at session start; `recall_tier` in `~/.rxai-amp/config.json` overrides; ledger inject entries gain `tier`. `u = 0` and no `(used → …)` refs reproduce the v2.10 arithmetic exactly. No title format, label, type, decay rate, index-file set, or memory-write rule changed. |
 | 2.10 | 2026-09-10 | **ADDITIVE:** Two recall-quality corrections found by the Codex L1/L2 A/B. (a) §4.1 Active-thread pointers in `INDEX.md` now carry the issue title (truncated to 72 chars). The master index is the tier that decides what to skip, and `#373 (w:0.31)` cannot support that decision — the compiler already had the title in hand for the Region tables and simply was not printing it in the master index, so agents descended a tier merely to learn what a record was about. The specified per-Region `Summary:` blurb remains unimplemented and is now documented as such rather than reading as a transient state. (b) New §4.4b: decay becomes `old × ρ × υ^u`, where `u` is the number of §15.2 Recall manifests recording the issue as surfaced-but-unused and `υ` = 0.95. `ρ` runs on the compile clock four times a day whether or not anything happened; `υ^u` adds evidence about relevance rather than age. `u` is a standing count re-derived from the store each compile (never accumulated in `weights.json`), only explicit `(unused)` refs count, and `u = 0` reproduces the pre-v2.10 arithmetic exactly, so existing stores are unaffected until manifests appear. Rule 12 pinning and Rule 8 supersession still take precedence. No title format, label, type, decay rate, index-file set, or memory-write rule changed. |
 | 2.9.2 | 2026-09-10 | **ADDITIVE:** Codex moves from L1 to L2 now that its stable hooks runtime exposes `SessionStart`, `PostToolUse`, `Stop`, and `SessionEnd`. `npm run hooks:install:codex` installs a self-contained hook runtime under `~/.codex/rxai-amp`, merges those hooks into `~/.codex/hooks.json` without replacing foreign hooks, keeps the skill and `AGENTS.md` digest as fail-soft L1 fallback, injects compact repo-aware recall as developer context, observes memory reads/writes and commit boundaries, interposes the capture checkpoint at most once per turn/session ledger, and closes the ledger at session end. Existing v2.9.1 installations remain valid at L1 until the installer is rerun and the hook definitions are trusted in Codex. No title, label, type, decay, index, or memory-write rule changed. |
 | 1.0 | 2026-04-09 | Initial protocol definition |

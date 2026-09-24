@@ -1,16 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later OR LicenseRef-Commercial
-// PROTOCOL.md §4.3 decay rates, §4.4 outcome arithmetic + clamping,
-// Rule 8 Supersedes enforcement/retraction, Rule 12 lifefact pinning.
+// PROTOCOL.md §4.3 decay rates, §4.4 outcome arithmetic + clamping, §4.4b
+// unused-recall decay, §4.4c manifest reinforcement, Rule 8 Supersedes
+// enforcement/retraction, Rule 12 lifefact pinning.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import {
   ARCHIVE_THRESHOLD,
   DECAY,
+  MANIFEST_FAILURE,
+  MANIFEST_SUCCESS,
   UNUSED_DECAY,
   computeCommentDelta,
   computeIssueWeight,
+  manifestDelta,
   parseRecallUnused,
+  parseRecallUsed,
   resolveInvalidations,
 } from "../dist/compile_index.js";
 
@@ -160,4 +165,66 @@ test("parseRecallUnused is quiet on absent, empty or malformed manifests", () =>
   assert.deepEqual(parseRecallUnused("## Recall\n\n- **Capture:** declined"), []);
   // bare refs and used refs cost a record nothing
   assert.deepEqual(parseRecallUnused("## Recall\n- **Surfaced:** #47, #52 (used → success)"), []);
+});
+
+// Regression (2026-09-24): the section regex ended in `\Z`, which JavaScript
+// reads as a literal Z, so a manifest that was the last section of the body
+// — the usual place — parsed as empty and §4.4b/c never applied unless a
+// timestamp's Z happened to follow the Surfaced line.
+test("a manifest that closes the body still feeds §4.4b and §4.4c", () => {
+  const last = "## Message\nwork\n\n## Recall\n- **Surfaced:** #47 (used → success), #52 (unused)\n";
+  assert.deepEqual(parseRecallUsed(last), [{ issue: 47, outcome: "success" }]);
+  assert.deepEqual(parseRecallUnused(last), [52]);
+  assert.deepEqual(parseRecallUsed("## Recall\n- **Surfaced:** #47 (used → failure)"), [{ issue: 47, outcome: "failure" }]);
+});
+
+// --- §4.4c manifest reinforcement ----------------------------------------
+
+test("§4.4c: a manifest ref is worth half a direct Outcome comment", () => {
+  assert.equal(MANIFEST_SUCCESS, 0.15);
+  assert.equal(MANIFEST_FAILURE, 0.10);
+  assert.equal(manifestDelta("success"), 0.15);
+  assert.equal(manifestDelta("failure"), -0.10);
+});
+
+test("§4.4c: a used-recall lifts a record that no comment reinforced", () => {
+  // The injected-memory case: relied upon, cited in the manifest, never
+  // commented on. Before v2.11 this record only ever decayed.
+  const idle = computeIssueWeight("intent", 0.5, 0, false);
+  const used = computeIssueWeight("intent", 0.5, manifestDelta("success"), false);
+  assert.ok(used > idle);
+  assert.equal(used, Math.round((0.5 * DECAY.intent + MANIFEST_SUCCESS) * 10000) / 10000);
+  const failed = computeIssueWeight("intent", 0.5, manifestDelta("failure"), false);
+  assert.equal(failed, Math.round((0.5 * DECAY.intent - MANIFEST_FAILURE) * 10000) / 10000);
+});
+
+test("§4.4c: Rule 12 and Rule 8 still win over manifest reinforcement", () => {
+  assert.equal(computeIssueWeight("lifefact", 0.5, manifestDelta("failure"), false), 1.0);
+  assert.equal(computeIssueWeight("pattern", 0.9, manifestDelta("success"), true), 0);
+});
+
+test("parseRecallUsed reads (used → outcome) refs with any arrow, neutral and bare refs ignored", () => {
+  const body = [
+    "## Recall",
+    "",
+    "- **Surfaced:** #47 (used → success), #12 (used -> failure), #13 (used => success), #52 (unused), #61 (used → neutral), #62 (used), #63",
+    "- **Capture:** stored #91",
+    "",
+    "## Detail",
+    "- #99 (used → success) outside the manifest must not count",
+  ].join("\n");
+  assert.deepEqual(parseRecallUsed(body), [
+    { issue: 47, outcome: "success" },
+    { issue: 12, outcome: "failure" },
+    { issue: 13, outcome: "success" },
+  ]);
+  // …and the two parsers partition the same line without overlap.
+  assert.deepEqual(parseRecallUnused(body), [52]);
+});
+
+test("parseRecallUsed is quiet on absent, empty or malformed manifests", () => {
+  assert.deepEqual(parseRecallUsed(null), []);
+  assert.deepEqual(parseRecallUsed(""), []);
+  assert.deepEqual(parseRecallUsed("## Recall\n\n- **Capture:** declined"), []);
+  assert.deepEqual(parseRecallUsed("- **Surfaced:** #47 (used → success) with no Recall heading"), []);
 });

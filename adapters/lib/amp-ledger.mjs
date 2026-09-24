@@ -13,7 +13,7 @@
  *
  * CLI (session id = Claude Code session_id, or any stable per-session key):
  *   amp-ledger.mjs open     <session-id> [--agent <name>] [--project <path>]
- *   amp-ledger.mjs surface  <session-id> <issue-number> [--via agent|inject] [title...]
+ *   amp-ledger.mjs surface  <session-id> <issue-number> [--via agent|inject] [--tier pointer|summary] [title...]
  *   amp-ledger.mjs boundary <session-id> <repo-name> <sha> [subject...]
  *   amp-ledger.mjs write    <session-id> <issue-number>
  *   amp-ledger.mjs decline  <session-id> <reason...>
@@ -27,6 +27,13 @@
  * is misused. The sweep janitor runs opportunistically from hooks — no
  * daemon, no cron: `closed` > 7 days are deleted; `open` > 48 h become
  * `stale` (surfaced once at next session start, deleted 7 days later).
+ *
+ * Lifecycle: opened at SessionStart, appended by the observers and the
+ * agent, closed at SessionEnd — never by the Stop checkpoint. On Claude Code
+ * and Codex `Stop` fires after every turn, and a ledger closed on a quiet
+ * first turn silenced CAPTURE for the rest of the session (found
+ * 2026-09-24: 13 of 167 closed ledgers on one machine had commits after
+ * `closed_at`). Any activity on a closed or stale ledger reopens it.
  */
 
 import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -61,7 +68,18 @@ export function saveLedger(ledger) {
 
 export function openLedger(sessionId, { agent = "claudecowork", project = process.cwd() } = {}) {
   const existing = loadLedger(sessionId);
-  if (existing) return existing; // idempotent: resume/compact reuse the ledger
+  if (existing) {
+    // Idempotent: resume/compact reuse the ledger. A closed or stale one that
+    // sees activity again (a resumed session, a commit after SessionEnd) is
+    // evidently alive: reopen it, history intact, so the checkpoint can fire
+    // for the work that follows.
+    if (existing.status !== "open") {
+      existing.status = "open";
+      existing.closed_at = null;
+      saveLedger(existing);
+    }
+    return existing;
+  }
   const ledger = {
     schema: LEDGER_SCHEMA,
     session_id: String(sessionId),
@@ -85,14 +103,21 @@ export function openLedger(sessionId, { agent = "claudecowork", project = proces
  *               only the agent can judge — so injected entries never count
  *               toward the Stop checkpoint on their own.
  *  Entries written before this field existed carry no `via` and are read as
- *  "agent" (the only path that existed then). */
+ *  "agent" (the only path that existed then).
+ *  Injected entries also carry `tier` (v2.11, §15.1): "pointer" — title line
+ *  only, pushed at session start — or "summary" — the record's `## Now` /
+ *  opening prose, pushed at session start or expanded by the prompt-stage
+ *  hook. The tier never changes what is owed; it tells the prompt stage which
+ *  records are already expanded so none is injected twice. */
 export const SURFACE_VIA = ["agent", "inject"];
+export const INJECT_TIERS = ["pointer", "summary"];
 
-export function surfaceIssue(sessionId, issueNumber, title = "", via = "agent") {
-  const ledger = loadLedger(sessionId) || openLedger(sessionId);
+export function surfaceIssue(sessionId, issueNumber, title = "", via = "agent", tier = null) {
+  const ledger = openLedger(sessionId);
   const n = Number(issueNumber);
   if (!Number.isInteger(n) || n <= 0) return ledger;
   const how = SURFACE_VIA.includes(via) ? via : "agent";
+  const level = how === "inject" && INJECT_TIERS.includes(tier) ? tier : null;
   const existing = ledger.recall.surfaced.find((s) => s.issue === n);
   if (!existing) {
     // Titles only, truncated — never bodies, never tokens (§15.4).
@@ -100,6 +125,7 @@ export function surfaceIssue(sessionId, issueNumber, title = "", via = "agent") 
       issue: n,
       title: String(title).slice(0, 200),
       via: how,
+      ...(level ? { tier: level } : {}),
       disposition: "unknown",
       outcome_posted: null,
     });
@@ -109,12 +135,20 @@ export function surfaceIssue(sessionId, issueNumber, title = "", via = "agent") 
     // agent-surfaced, and the outcome reminder applies.
     existing.via = "agent";
     saveLedger(ledger);
+  } else if (level === "summary" && existing.via === "inject" && existing.tier !== "summary") {
+    // The prompt stage expanded a pointer to its summary (§15.1, v2.11). The
+    // pointer entry carried the index's title; the expansion fetched the
+    // issue, so record the fetched title — the ledger then shows whether the
+    // body was reached (a fetched title carries the [FROM:…] tag family).
+    existing.tier = "summary";
+    if (title) existing.title = String(title).slice(0, 200);
+    saveLedger(ledger);
   }
   return ledger;
 }
 
 export function recordBoundary(sessionId, repoName, sha, subject = "") {
-  const ledger = loadLedger(sessionId) || openLedger(sessionId);
+  const ledger = openLedger(sessionId);
   ledger.capture.boundaries.push({
     kind: "commit",
     repo: String(repoName).slice(0, 100),
@@ -127,7 +161,7 @@ export function recordBoundary(sessionId, repoName, sha, subject = "") {
 }
 
 export function recordWrite(sessionId, issueNumber) {
-  const ledger = loadLedger(sessionId) || openLedger(sessionId);
+  const ledger = openLedger(sessionId);
   const n = Number(issueNumber);
   ledger.capture.writes.push({ issue: Number.isInteger(n) && n > 0 ? n : null, at: new Date().toISOString() });
   saveLedger(ledger);
@@ -135,7 +169,7 @@ export function recordWrite(sessionId, issueNumber) {
 }
 
 export function recordDecline(sessionId, reason) {
-  const ledger = loadLedger(sessionId) || openLedger(sessionId);
+  const ledger = openLedger(sessionId);
   ledger.capture.declined = { at: new Date().toISOString(), reason: String(reason).slice(0, 300) };
   saveLedger(ledger);
   return ledger;
@@ -238,7 +272,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       if (!sessionId || !issue) usage();
       const viaFlag = title.indexOf("--via");
       const via = viaFlag > -1 ? title.splice(viaFlag, 2)[1] : "agent";
-      surfaceIssue(sessionId, issue, title.join(" "), via);
+      const tierFlag = title.indexOf("--tier");
+      const tier = tierFlag > -1 ? title.splice(tierFlag, 2)[1] : null;
+      surfaceIssue(sessionId, issue, title.join(" "), via, tier);
       break;
     }
     case "boundary": {

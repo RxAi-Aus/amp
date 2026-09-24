@@ -3,11 +3,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later OR LicenseRef-Commercial
 
 /**
- * install-claude-hooks.mjs — Protocol v2.9.1 (adapters/claude-code, L2)
+ * install-claude-hooks.mjs — Protocol v2.12 (adapters/claude-code, L2)
  *
  * One-command Claude Code setup:
  *   1. Writes/merges ~/.rxai-amp/config.json (creates missing keys only).
- *   2. Merges the three lifecycle hooks into ~/.claude/settings.json
+ *   2. Merges the five lifecycle hooks into ~/.claude/settings.json
  *      (user level — fires in EVERY project). Idempotent: entries whose
  *      command path contains "adapters/claude-code/" are replaced; all
  *      other hooks and settings are preserved. A timestamped backup is
@@ -100,7 +100,13 @@ const OURS = /adapters[/\\]claude-code[/\\]/;
 
 const desired = {
   SessionStart: { matcher: "startup|resume|clear|compact", hooks: [{ type: "command", command: hookCmd("session-start.mjs") }] },
+  // v2.11 task-aware stage: no matcher (the event has none); 30 s is Claude
+  // Code's default budget for this event and the hook reads the cache first.
+  UserPromptSubmit: { hooks: [{ type: "command", command: hookCmd("user-prompt-submit.mjs") }] },
   Stop: { hooks: [{ type: "command", command: hookCmd("stop.mjs") }] },
+  // Closes the ledger. Stop fires after every turn and must not (§15.4); no
+  // matcher, so every end reason (clear, resume, logout, …) closes it.
+  SessionEnd: { hooks: [{ type: "command", command: hookCmd("session-end.mjs"), timeout: 5 }] },
   PostToolUse: { matcher, hooks: [{ type: "command", command: hookCmd("post-tool-use.mjs") }] },
 };
 
@@ -113,7 +119,7 @@ for (const [event, entry] of Object.entries(desired)) {
   settings.hooks[event] = [...foreign, entry];
 }
 
-apply(`merge SessionStart/Stop/PostToolUse hooks into ${settingsFile} (backup first)`, () => {
+apply(`merge SessionStart/UserPromptSubmit/Stop/SessionEnd/PostToolUse hooks into ${settingsFile} (backup first)`, () => {
   mkdirSync(path.dirname(settingsFile), { recursive: true });
   if (existsSync(settingsFile)) {
     cpSync(settingsFile, `${settingsFile}.amp-bak`);
@@ -147,4 +153,4 @@ if (!repoSlug) {
   process.stdout.write("note: no repo slug resolved — Stop-hook remote verify disabled until RXAI_AMP_SLUG or config.json memory_repo.owner/name is set\n");
 }
 process.stdout.write("Other agents: npm run hooks:install:agy (L2) · npm run hooks:install:codex (L2) — see adapters/*/README.md\n");
-process.stdout.write("Disable everything anytime with AMP_DISABLE=1; uninstall by removing the three hook entries and rerunning nothing.\n");
+process.stdout.write("Disable everything anytime with AMP_DISABLE=1; uninstall by removing the five hook entries and rerunning nothing.\n");

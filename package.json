@@ -1,6 +1,6 @@
 {
   "name": "github-memory-agent",
-  "version": "2.10.0",
+  "version": "2.12.0",
   "private": true,
   "license": "(AGPL-3.0-or-later OR LicenseRef-RxAi-Commercial)",
   "type": "module",
@@ -13,6 +13,7 @@
     "pretest": "npm run build",
     "test": "node --test \"test/*.test.mjs\"",
     "loop:guard": "node dist/agent_loop_guard.js",
+    "manifest:audit": "node dist/manifest_audit.js",
     "compile:index": "node dist/compile_index.js",
     "okf:export": "node dist/okf_export.js",
     "track:not-indexed": "node dist/track_not_indexed.js",

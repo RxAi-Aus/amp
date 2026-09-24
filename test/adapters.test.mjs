@@ -10,10 +10,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadLedger, obligations, openLedger, recordBoundary, saveLedger, surfaceIssue } from "../adapters/lib/amp-ledger.mjs";
 import {
+  MATCH_THRESHOLD,
   collectCandidates,
   compactIndex,
   compactNotIndexed,
   excerptOf,
+  matchPrompt,
+  termFrequencies,
   parseNotIndexed,
   parseRegionFile,
   regionMatches,
@@ -76,7 +79,8 @@ test("codex skill mirror keeps the rxai-amp identity and posts as codex", () => 
   const skill = readFileSync(path.join(root, "adapters/codex/skills/rxai-amp/SKILL.md"), "utf8");
   assert.match(skill, /^---\nname: rxai-amp\n/);
   assert.match(skill, /## Codex specifics/);
-  assert.match(skill, /Conformance L2 when hooks are trusted; L1 fallback otherwise/i);
+  assert.match(skill, /Conformance L2 — required, not optional/);
+  assert.doesNotMatch(skill, /L1 fallback/);
   const summary = readFileSync(path.join(root, "adapters/codex/skills/rxai-amp/examples/session-summary.md"), "utf8");
   assert.match(summary, /\[FROM:codex→self\]\[REGION:codex-diary\]/);
 });
@@ -120,6 +124,36 @@ test("codex installer merges L2 hooks without replacing foreign hooks", (t) => {
       }
     }
   }
+});
+
+// The Claude Code installer registers all five lifecycle events — SessionEnd
+// included, since Stop no longer closes the ledger — keeps foreign hooks and
+// other settings, and is idempotent. HOME is redirected so the test never
+// touches the real ~/.claude.
+test("claude-code installer registers the five lifecycle hooks and keeps foreign ones", (t) => {
+  const home = mkdtempSync(path.join(tmpdir(), "amp-claude-install-"));
+  const claudeDir = path.join(home, ".claude");
+  mkdirSync(claudeDir, { recursive: true });
+  writeFileSync(
+    path.join(claudeDir, "settings.json"),
+    JSON.stringify({ hooks: { Stop: [{ hooks: [{ type: "command", command: "foreign-stop" }] }] }, model: "keep-me" })
+  );
+  t.after(() => rmSync(home, { recursive: true, force: true }));
+  const args = [path.join(root, "scripts/install-claude-hooks.mjs"), "--repo-path", root, "--repo-slug", "test-owner/test-memory"];
+  const env = { ...process.env, HOME: home, RXAI_AMP_HOME: path.join(home, "amp") };
+  execFileSync("node", args, { env, encoding: "utf8" });
+  execFileSync("node", args, { env, encoding: "utf8" }); // idempotent
+  const settings = JSON.parse(readFileSync(path.join(claudeDir, "settings.json"), "utf8"));
+  assert.equal(settings.model, "keep-me");
+  assert.deepEqual(Object.keys(settings.hooks).sort(), ["PostToolUse", "SessionEnd", "SessionStart", "Stop", "UserPromptSubmit"]);
+  assert.equal(settings.hooks.Stop.length, 2, "foreign Stop entry lost or ours duplicated");
+  assert.equal(settings.hooks.Stop[0].hooks[0].command, "foreign-stop");
+  for (const event of ["SessionStart", "UserPromptSubmit", "SessionEnd", "PostToolUse"]) {
+    assert.equal(settings.hooks[event].length, 1, `${event} duplicated on reinstall`);
+    const script = settings.hooks[event][0].hooks[0].command.match(/^node "(.+)"$/)?.[1];
+    assert.ok(script && existsSync(script), `missing installed hook target for ${event}`);
+  }
+  assert.match(settings.hooks.SessionEnd[0].hooks[0].command, /adapters\/claude-code\/hooks\/session-end\.mjs/);
 });
 
 for (const hook of ["session-start", "post-tool-use", "stop", "session-end"]) {
@@ -182,6 +216,9 @@ test("agy skill mirror keeps the rxai-amp identity and the gh (not MCP) write pa
   assert.match(skill, /^---\nname: rxai-amp\n/);
   assert.match(skill, /gh issue create/);
   assert.match(skill, /No GitHub MCP server in agy/);
+  // agy has run at L2 since v2.9.1; the mirror must not tell it otherwise.
+  assert.match(skill, /agy runs at L2/);
+  assert.doesNotMatch(skill, /No §15 lifecycle hooks for agy/);
   // The sender in the examples must be agy, or agy posts into another
   // agent's diary Region (PROTOCOL.md §2 identity).
   const summary = readFileSync(path.join(root, "adapters/agy/skills/rxai-amp/examples/session-summary.md"), "utf8");
@@ -228,18 +265,31 @@ test("claude-code post-tool-use records boundaries only for real git commit comm
   }
 });
 
-// §15.1 RECALL, issue #442 — repo-aware recall: the injected excerpt must be
-// the whole `## Message` section (capped), and candidates must rank
-// intent-first with fresh unindexed rows and branch-matching Places ahead.
-test("amp-recall excerptOf returns the whole Message section, not its first line", () => {
+// §15.1 RECALL, issue #442 — repo-aware recall: the injected excerpt is the
+// summary tier (v2.11) — `## Now` when present, else the opening prose of
+// `## Message` up to its first list — and candidates must rank intent-first
+// with fresh unindexed rows and branch-matching Places ahead.
+test("amp-recall excerptOf injects the opening prose of Message and never its lists", () => {
   const body =
-    "## Metadata\n- **From:** x\n\n## Message\n**Finding.**\n\nSecond paragraph.\n\n1. one\n2. two\n\n## Expected Action\n- [x] Execute task\n";
-  assert.equal(excerptOf(body), "**Finding.**\n\nSecond paragraph.\n\n1. one\n2. two");
-  assert.equal(excerptOf("## Message\nline one\nline two"), "line one\nline two");
-  // No Message section: Metadata is dropped, the rest is kept.
-  assert.equal(excerptOf("## Metadata\n- a\n\n## Summary\nno message section"), "## Summary\nno message section");
-  const capped = excerptOf("## Message\n" + "x".repeat(2000), 100);
+    "## Metadata\n- **From:** x\n\n## Message\n**Finding.**\n\nSecond paragraph.\n\n1. one\n2. two\n\nAfter the list.\n\n## Expected Action\n- [x] Execute task\n";
+  assert.equal(excerptOf(body), "**Finding.** Second paragraph.");
+  assert.equal(excerptOf("## Message\nline one\nline two"), "line one line two");
+  // A Message that opens with a list has no prose to inject: "" lets the
+  // caller say so instead of turning the list into a to-do list.
+  assert.equal(excerptOf("## Message\n- decision one\n- decision two\n"), "");
+  // No Message section: Metadata is dropped, a leading heading is skipped.
+  assert.equal(excerptOf("## Metadata\n- a\n\n## Summary\nno message section"), "no message section");
+  const capped = excerptOf("## Message\n" + "word ".repeat(200), 100);
   assert.ok(capped.length <= 102 && capped.endsWith(" …"), `cap not applied: ${capped.length}`);
+  assert.doesNotMatch(capped, /wor …$/, "cap must fall on a word boundary");
+});
+
+test("amp-recall excerptOf prefers the author's ## Now section, list markers dropped", () => {
+  const body =
+    "## Metadata\n- **From:** x\n\n## Context Pointer\n> prior #41\n\n## Now\nGoal: replace cookie sessions with OAuth.\n- State: PKCE chosen, not started.\n\n## Message\n- decision one\n- decision two\n";
+  assert.equal(excerptOf(body), "Goal: replace cookie sessions with OAuth. State: PKCE chosen, not started.");
+  // An empty Now falls through to the Message rule.
+  assert.equal(excerptOf("## Now\n\n## Message\nprose here\n- list"), "prose here");
 });
 
 test("amp-recall parses REGION pointer tables and not_indexed rows", () => {
@@ -389,7 +439,8 @@ test("claude-code stop hook does not block a session whose only recall was injec
   ledger("surface", quiet, "442", "--via", "inject", "injected intent");
   ledger("surface", quiet, "416", "--via", "inject", "injected intent");
   assert.equal(runStop(quiet), "");
-  assert.equal(ledgerOf(quiet).status, "closed");
+  // Quiet turn, not a closed session: Stop fires every turn, SessionEnd closes.
+  assert.equal(ledgerOf(quiet).status, "open");
 
   const fetched = "stop-agent-fetched";
   ledger("open", fetched);
@@ -402,6 +453,51 @@ test("claude-code stop hook does not block a session whose only recall was injec
   assert.equal(ledgerOf(fetched).capture.nagged, true);
   // Block once: the re-entry passes.
   assert.equal(runStop(fetched), "");
+});
+
+// Stop fires after every assistant turn on Claude Code, not at session end.
+// Found 2026-09-24: closing the ledger on a quiet first turn silenced the
+// checkpoint for the rest of the session (13 of 167 closed ledgers on one
+// machine received commits after closed_at). A quiet turn must leave the
+// ledger open, a later commit must still be caught once, SessionEnd closes,
+// and activity on a closed ledger reopens it.
+test("claude-code ledger survives a quiet first turn: Stop keeps it open, SessionEnd closes it", (t) => {
+  const home = mkdtempSync(path.join(tmpdir(), "amp-lifecycle-test-"));
+  t.after(() => rmSync(home, { recursive: true, force: true }));
+  const { AMP_DISABLE: _d, RXAI_AMP_REPO: _r, GH_TOKEN: _g, GITHUB_TOKEN: _gt, GITHUB_PERSONAL_ACCESS_TOKEN: _gp, ...baseEnv } =
+    process.env;
+  const env = { ...baseEnv, RXAI_AMP_HOME: home, RXAI_AMP_SLUG: "test-owner/test-memory" };
+  const sessionId = "multi-turn";
+  const ledgerCli = path.join(root, "adapters/lib/amp-ledger.mjs");
+  const ledger = (...args) => execFileSync("node", [ledgerCli, ...args], { env, encoding: "utf8" });
+  const hook = (file, extra = {}) =>
+    execFileSync("node", [path.join(root, "adapters/claude-code/hooks", file)], {
+      input: JSON.stringify({ session_id: sessionId, cwd: root, ...extra }),
+      encoding: "utf8",
+      env,
+      timeout: 20_000,
+    });
+  const ledgerOf = () => JSON.parse(readFileSync(path.join(home, "sessions", `${sessionId}.json`), "utf8"));
+
+  ledger("open", sessionId);
+  ledger("surface", sessionId, "442", "--via", "inject", "--tier", "pointer", "injected intent");
+  // Turn 1: a question, no commit. Nothing owed, and the ledger stays open.
+  assert.equal(hook("stop.mjs", { stop_hook_active: false }), "");
+  assert.equal(ledgerOf().status, "open");
+  // Turn 2 commits. The checkpoint must still fire, once.
+  ledger("boundary", sessionId, "acme-web", "abc1234", "feat: x");
+  const out = JSON.parse(hook("stop.mjs", { stop_hook_active: false }));
+  assert.equal(out.decision, "block");
+  assert.match(out.reason, /recorded 1 work boundary but no memory write/);
+  assert.equal(hook("stop.mjs", { stop_hook_active: false }), "");
+  assert.equal(ledgerOf().status, "open");
+  // SessionEnd closes; activity afterwards (a resumed session) reopens.
+  hook("session-end.mjs", { hook_event_name: "SessionEnd", reason: "other" });
+  assert.equal(ledgerOf().status, "closed");
+  ledger("boundary", sessionId, "acme-web", "def5678", "feat: y");
+  assert.equal(ledgerOf().status, "open");
+  assert.equal(ledgerOf().closed_at, null);
+  assert.equal(ledgerOf().capture.boundaries.length, 2);
 });
 
 // §15.1 RECALL budget — with a matched Region the navigation layer is
@@ -508,7 +604,8 @@ test("claude-code session-start compacts the navigation layer and ledgers inject
   const ledgerFile = path.join(home, "sessions", `${sessionId}.json`);
   assert.deepEqual(JSON.parse(readFileSync(ledgerFile, "utf8")).recall.surfaced.map((s) => [s.issue, s.via]), [[10, "inject"]]);
 
-  // …and the Stop hook lets this session end without a checkpoint.
+  // …and the Stop hook passes this turn without a checkpoint, leaving the
+  // ledger open for the turns that follow.
   const stop = execFileSync("node", [path.join(root, "adapters/claude-code/hooks/stop.mjs")], {
     input: JSON.stringify({ session_id: sessionId, stop_hook_active: false, cwd }),
     encoding: "utf8",
@@ -516,7 +613,7 @@ test("claude-code session-start compacts the navigation layer and ledgers inject
     timeout: 20_000,
   });
   assert.equal(stop, "");
-  assert.equal(JSON.parse(readFileSync(ledgerFile, "utf8")).status, "closed");
+  assert.equal(JSON.parse(readFileSync(ledgerFile, "utf8")).status, "open");
 });
 
 test("amp-recall compactIndex keeps v2.10 titles and ignores refs inside them", () => {
@@ -538,4 +635,219 @@ test("amp-recall compactIndex keeps v2.10 titles and ignores refs inside them", 
   // the collapsed Region lists only the two pointers, not the #47 inside a title
   assert.match(out, /Other \(#99 #98\)/);
   assert.doesNotMatch(out, /#47/);
+});
+
+// §15.1 task-aware stage (v2.11): the prompt decides which pointers expand.
+test("amp-recall matchPrompt scores stemmed overlap, CJK bigrams and explicit refs; stopwords and project names never match", () => {
+  const rows = [
+    { issue: 10, summary: "Image derivation pipeline for uploads", region: "Acme", place: "image-pipeline", type: "pattern", weight: 0.5, source: "index" },
+    { issue: 11, summary: "Invitation email SMTP gotchas", region: "Acme", place: "email", type: "pattern", weight: 0.4, source: "index" },
+    { issue: 12, summary: "邀請信寄送流程", region: "Acme", place: "email", type: "facts", weight: 0.3, source: "index" },
+  ];
+  const ids = (m) => m.matched.map((x) => x.issue);
+  assert.deepEqual(ids(matchPrompt("How are uploaded images derived?", rows)), [10]);
+  assert.deepEqual(ids(matchPrompt("What does the payments module do?", rows)), []);
+  assert.deepEqual(ids(matchPrompt("tell me about the email invitation", rows)), [11, 12]);
+  assert.deepEqual(ids(matchPrompt("邀請信為什麼寄不出去", rows)), [12]);
+  assert.deepEqual(ids(matchPrompt("see #11 for the reason", rows)), [11]);
+  assert.deepEqual(matchPrompt("see #11 for the reason", rows).matched[0].hits, ["#11"]);
+  // Stopwords and the project's own identifiers are not evidence.
+  assert.deepEqual(ids(matchPrompt("the acme email", rows, { ignore: new Set(["acme", "email"]) })), []);
+  assert.deepEqual(ids(matchPrompt("the and for with", rows)), []);
+  // Already-expanded records are skipped; the limit applies after ranking.
+  assert.deepEqual(ids(matchPrompt("email invitation", rows, { exclude: new Set([11]) })), [12]);
+  assert.deepEqual(ids(matchPrompt("email invitation", rows, { limit: 1 })), [11]);
+});
+
+// §15.1 task-aware recall (v2.11): on a runtime with a prompt stage the
+// SessionStart hook injects pointers only; UserPromptSubmit expands to the
+// summary tier just the records the prompt overlaps, each once per session;
+// a prompt no memory covers injects nothing; the Stop hook still owes nothing.
+// A runtime without a prompt stage (the Codex shims) gets summaries at start.
+test("claude-code session-start injects pointers and user-prompt-submit expands only the matching records, once", (t) => {
+  const home = mkdtempSync(path.join(tmpdir(), "amp-prompt-home-"));
+  const clone = mkdtempSync(path.join(tmpdir(), "amp-prompt-clone-"));
+  const work = mkdtempSync(path.join(tmpdir(), "amp-prompt-work-"));
+  const cwd = path.join(work, "acme-web");
+  mkdirSync(cwd);
+  t.after(() => {
+    for (const dir of [home, clone, work]) rmSync(dir, { recursive: true, force: true });
+  });
+  writeFileSync(
+    path.join(clone, "INDEX.md"),
+    ["# Agent Memory Index", "", "**Last Compiled:** 2026-09-23T00:00:00Z  ", "", "---", "", "## Region: Acme", "  > Active threads: #10 (w:0.5), #11 (w:0.4).  ", ""].join("\n")
+  );
+  writeFileSync(
+    path.join(clone, "REGION-Acme.md"),
+    "## Place: adapters\n  ### Type: intent\n  | #10 | Count only real git commits as capture boundaries | 0 | 0.5 | 2026-09-01 |\n\n## Place: email\n  ### Type: pattern\n  | #11 | Invitation email SMTP gotcha | 0 | 0.4 | 2026-09-01 |\n"
+  );
+  writeFileSync(
+    path.join(clone, "not_indexed.md"),
+    "# Not Yet Indexed\n\n**Since Last Index Compile:** 2026-09-23T00:00:00Z\n**Unindexed Issue Count:** 0\n\n| Issue | From | Region | Place | Type | Posted |\n|-------|------|------|------|------|--------|\n"
+  );
+  // #10's body is in the local cache (fresh): read without network. #11 is not.
+  mkdirSync(path.join(clone, ".rxai-cache", "issues"), { recursive: true });
+  writeFileSync(
+    path.join(clone, ".rxai-cache", "issues", "10.json"),
+    JSON.stringify({
+      cached_at: new Date().toISOString(),
+      repo: "acme/memory",
+      issue: {
+        number: 10,
+        state: "open",
+        title: "[FROM:codex→all][REGION:Acme][PLACE:adapters][TYPE:intent] Count only real git commits as capture boundaries",
+        body: "## Metadata\n- **From:** codex\n\n## Now\nGoal: record a boundary only for a real git commit.\n\n## Message\n- decision one\n- decision two\n",
+      },
+    })
+  );
+  const {
+    AMP_DISABLE: _d, RXAI_AMP_SLUG: _s, RXAI_AMP_RUNTIME: _r, RXAI_AMP_RECALL_TIER: _t,
+    GH_TOKEN: _g, GITHUB_TOKEN: _gt, GITHUB_PERSONAL_ACCESS_TOKEN: _gp, ...baseEnv
+  } = process.env;
+  const env = { ...baseEnv, RXAI_AMP_HOME: home, RXAI_AMP_REPO: clone };
+  const hook = (file, input, extraEnv = {}) =>
+    execFileSync("node", [path.join(root, "adapters/claude-code/hooks", file)], {
+      input: JSON.stringify(input),
+      encoding: "utf8",
+      env: { ...env, ...extraEnv },
+      timeout: 20_000,
+    });
+  const surfaced = (id) =>
+    JSON.parse(readFileSync(path.join(home, "sessions", `${id}.json`), "utf8")).recall.surfaced.map((s) => [s.issue, s.via, s.tier]);
+
+  const sessionId = "prompt-stage-test";
+  const start = hook("session-start.mjs", { session_id: sessionId, cwd, hook_event_name: "SessionStart", source: "startup" });
+  assert.match(start, /#10 \[intent · adapters · w:0\.50\] \[FROM:codex→all\].*Count only real git commits/, "cached title on the pointer");
+  assert.match(start, /#11 \[pattern · email · w:0\.40\] Invitation email SMTP gotcha/);
+  assert.doesNotMatch(start, /Goal: record a boundary/, "no summary at session start on a prompt-stage runtime");
+  assert.match(start, /Pointers only: the summaries of whichever records match your prompt arrive with it/);
+  assert.deepEqual(surfaced(sessionId), [[10, "inject", "pointer"], [11, "inject", "pointer"]]);
+
+  // A prompt no memory covers injects nothing.
+  const control = { session_id: sessionId, cwd, hook_event_name: "UserPromptSubmit", prompt: "How does the payments module charge cards?" };
+  assert.equal(hook("user-prompt-submit.mjs", control), "");
+  assert.deepEqual(surfaced(sessionId), [[10, "inject", "pointer"], [11, "inject", "pointer"]]);
+
+  // A prompt overlapping #10 (adapters, count, commits): its summary, and only it.
+  const ask = { ...control, prompt: "Why do the adapters count commits twice?" };
+  const expanded = hook("user-prompt-submit.mjs", ask);
+  assert.match(expanded, /^=== RxAi AMP shared memory — task-aware RECALL/);
+  assert.match(expanded, /1 of 2 open record\(s\) for acme-web match this prompt:/);
+  assert.match(expanded, /#10 \[intent · adapters · w:0\.50 · matched: count, commit, adapter\]/);
+  assert.match(expanded, /\n  Goal: record a boundary only for a real git commit\.\n/);
+  assert.doesNotMatch(expanded, /#11/);
+  assert.match(expanded, /=== end AMP memory ===\n$/);
+  assert.deepEqual(surfaced(sessionId), [[10, "inject", "summary"], [11, "inject", "pointer"]]);
+  // The expansion fetched the body (from the cache here), so the ledger now
+  // carries the fetched, tagged title instead of the index's title line.
+  assert.match(JSON.parse(readFileSync(path.join(home, "sessions", `${sessionId}.json`), "utf8")).recall.surfaced[0].title, /^\[FROM:codex→all\]/);
+
+  // The same prompt again: already expanded, nothing more.
+  assert.equal(hook("user-prompt-submit.mjs", ask), "");
+
+  // An explicit ref expands #11 without any term overlap; no cache and no
+  // slug, so the body is not fetched and the block says how to.
+  const named = hook("user-prompt-submit.mjs", { ...control, prompt: "what happened in #11?" });
+  assert.match(named, /#11 \[pattern · email · w:0\.40 · matched: #11\] Invitation email SMTP gotcha/);
+  assert.match(named, /\(body not fetched — run: gh issue view 11\)/);
+  assert.deepEqual(surfaced(sessionId), [[10, "inject", "summary"], [11, "inject", "summary"]]);
+
+  // Injected memories, whatever their tier, owe nothing at Stop.
+  assert.equal(hook("stop.mjs", { session_id: sessionId, stop_hook_active: false, cwd }), "");
+
+  // A runtime without a prompt stage starts at the summary tier.
+  const codex = hook("session-start.mjs", { session_id: "prompt-stage-codex", cwd, hook_event_name: "SessionStart", source: "startup" }, { RXAI_AMP_RUNTIME: "codex" });
+  assert.match(codex, /\n  Goal: record a boundary only for a real git commit\.\n/);
+  assert.doesNotMatch(codex, /Pointers only/);
+  assert.deepEqual(surfaced("prompt-stage-codex"), [[10, "inject", "summary"], [11, "inject", "summary"]]);
+
+  // …and the override wins on either runtime.
+  const forced = hook("session-start.mjs", { session_id: "prompt-stage-forced", cwd, hook_event_name: "SessionStart", source: "startup" }, { RXAI_AMP_RECALL_TIER: "pointer", RXAI_AMP_RUNTIME: "codex" });
+  assert.match(forced, /Pointers only/);
+});
+
+// §15.3 (v2.12): L1 is folderless-only. No skill mirror or digest may send a
+// hook-capable agent to walk the index by hand, and none may tell the agent
+// to check AMP_DISABLE itself — the flag is consumed by the hooks.
+test("skill mirrors and digests never prescribe manual index navigation or an AMP_DISABLE self-check", () => {
+  const files = [
+    ".claude/skills/rxai-amp/SKILL.md",
+    ".agents/skills/rxai-amp/SKILL.md",
+    "adapters/codex/skills/rxai-amp/SKILL.md",
+    "adapters/agy/skills/rxai-amp/SKILL.md",
+    "adapters/codex/digest.md",
+    "adapters/openclaw/digest.md",
+    "adapters/hermes/digest.md",
+    ".claude/commands/amp.md",
+  ];
+  for (const file of files) {
+    const text = readFileSync(path.join(root, file), "utf8");
+    assert.doesNotMatch(text, /AMP_DISABLE=1`? (means|in the environment means|switches)/, `${file} tells the agent to act on AMP_DISABLE`);
+    assert.doesNotMatch(text, /then\s+only the `REGION-\*\.md` files/, `${file} still walks Region files for recall`);
+    assert.doesNotMatch(text, /Load only the `REGION-\*\.md` files relevant/, `${file} still walks Region files for recall`);
+    assert.match(text, /(never walk the index by hand|do\s+not read the index or Region files by hand|Do not\s+load `REGION-\*\.md` files to find\s+memories|Never load a `REGION-\*\.md` to find memories)/i, `${file} does not rule out the Region walk`);
+  }
+});
+
+
+// §15.5 chain, never clobber — inside our own key too. A user who hangs a
+// sound hook on the "rxai-amp" Stop event must keep it across reinstalls
+// (found 2026-09-23: the previous {...hooks, ...ours} merge deleted it).
+test("agy installer keeps foreign entries inside its own rxai-amp key and stays idempotent", (t) => {
+  const home = mkdtempSync(path.join(tmpdir(), "amp-agy-install-"));
+  const configRoot = path.join(home, "config");
+  mkdirSync(configRoot, { recursive: true });
+  writeFileSync(
+    path.join(configRoot, "hooks.json"),
+    JSON.stringify({
+      "rxai-amp": { Stop: [{ type: "command", command: "afplay-foreign" }] },
+      other: { Stop: [{ type: "command", command: "other-stop" }] },
+    })
+  );
+  t.after(() => rmSync(home, { recursive: true, force: true }));
+  const args = [path.join(root, "scripts/install-agy-hooks.mjs"), "--repo-path", root, "--repo-slug", "test-owner/test-memory", "--config-root", configRoot];
+  const env = { ...process.env, RXAI_AMP_HOME: path.join(home, "amp") };
+  execFileSync("node", args, { env, encoding: "utf8" });
+  execFileSync("node", args, { env, encoding: "utf8" }); // idempotent
+  const installed = JSON.parse(readFileSync(path.join(configRoot, "hooks.json"), "utf8"));
+  assert.deepEqual(installed.other, { Stop: [{ type: "command", command: "other-stop" }] });
+  assert.equal(installed["rxai-amp"].Stop.length, 2, "foreign Stop entry lost or ours duplicated");
+  assert.equal(installed["rxai-amp"].Stop[0].command, "afplay-foreign", "user's entry must keep first place");
+  assert.match(installed["rxai-amp"].Stop[1].command, /adapters\/agy\/hooks\/stop\.mjs/);
+  assert.equal(installed["rxai-amp"].PreInvocation.length, 1);
+  assert.match(installed["rxai-amp"].PreInvocation[0].command, /adapters\/agy\/hooks\/pre-invocation\.mjs/);
+});
+
+
+// Weighted overlap: a title that shares only the project's everyday words with
+// the prompt must not expand (measured 2026-09-23: a Cloud Functions record
+// matched every task of a Firebase app, control task included); a Place token
+// or a store-rare word is evidence on its own.
+test("amp-recall matchPrompt weighs Place tokens and rare terms, and ignores everyday vocabulary", () => {
+  const store = [
+    { issue: 20, summary: "Google Workspace SMTP setup on Cloud Functions v2", region: "Acme", place: "email-auth", type: "pattern", weight: 0.4, source: "index" },
+    { issue: 21, summary: "Preserve fallback uploads; derive WebP source", region: "Acme", place: "image-pipeline", type: "pattern", weight: 0.4, source: "index" },
+    { issue: 22, summary: "Cloud Functions cold start on payments", region: "Acme", place: "payments", type: "facts", weight: 0.3, source: "index" },
+    { issue: 23, summary: "Cloud Functions region for scheduled jobs", region: "Acme", place: "jobs", type: "facts", weight: 0.3, source: "index" },
+    { issue: 24, summary: "Move image thumbnails to a Cloud Function", region: "Acme", place: "image-pipeline", type: "events", weight: 0.2, source: "index" },
+  ];
+  const freq = termFrequencies(store);
+  assert.equal(MATCH_THRESHOLD, 2);
+  const ids = (m) => m.matched.map((x) => x.issue);
+  // "cloud" and "function" are generic software vocabulary: 0.5 each, whatever the store says.
+  assert.deepEqual(ids(matchPrompt("How do the cloud functions handle refunds?", [store[0], store[1]], { freq })), []);
+  assert.deepEqual(ids(matchPrompt("How do the cloud functions handle refunds?", [store[0]])), [], "no corpus does not make generic words count");
+  // A Place token alone is enough.
+  assert.deepEqual(ids(matchPrompt("Where is the invitation email sent from?", [store[0], store[1]], { freq })), [20]);
+  // A rare title word alone is enough.
+  assert.deepEqual(ids(matchPrompt("Why do we keep a WebP copy?", [store[0], store[1]], { freq })), [21]);
+  // Four everyday words add up to the threshold; three do not.
+  const row = { issue: 30, summary: "cloud function region jobs", region: "Acme", place: "misc", type: "facts", weight: 0.3, source: "index" };
+  const dense = termFrequencies([...store, row, ...store.map((r, i) => ({ ...r, issue: 40 + i, summary: "cloud function region jobs" }))]);
+  assert.deepEqual(ids(matchPrompt("cloud function region", [row], { freq: dense })), []);
+  assert.deepEqual(ids(matchPrompt("cloud function region jobs", [row], { freq: dense })), [30]);
+  // A non-generic title word that is not rare in the store counts 1: two are needed.
+  const common = termFrequencies([...store, ...store.map((r, i) => ({ ...r, issue: 50 + i, summary: "nodemailer retry policy" }))]);
+  assert.deepEqual(ids(matchPrompt("does nodemailer retry?", [{ issue: 60, summary: "nodemailer retry policy", region: "Acme", place: "misc", type: "facts", weight: 0.3, source: "index" }], { freq: common })), [60]);
+  assert.deepEqual(ids(matchPrompt("does nodemailer work?", [{ issue: 60, summary: "nodemailer retry policy", region: "Acme", place: "misc", type: "facts", weight: 0.3, source: "index" }], { freq: common })), []);
 });

@@ -182,6 +182,11 @@ The Librarian should be instructed to:
 5. Return structured suggestions with evidence.
 6. Separate deterministic findings from LLM judgement.
 7. Say what verification was run.
+8. Read `artifacts/amp-librarian/manifest-findings.json` — the deterministic
+   §15.6 Recall manifest audit (`manifest_audit.ts`: non-numeric refs, refs to
+   issues that do not exist, `used → success|failure` claims with no `Outcome`
+   comment in the session window) — and report it under `manifest_findings`
+   verbatim, never re-derived or softened.
 
 ## Acceptance Standard
 

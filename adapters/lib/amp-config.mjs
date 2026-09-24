@@ -87,9 +87,14 @@ function slugFromClone(clonePath) {
  * Resolve adapter configuration. Returns null when AMP is disabled or no
  * memory repo can be located — callers MUST exit 0 silently in that case.
  *
- * Shape: { home, repoPath|null, repoSlug|null, agent }
+ * Shape: { home, repoPath|null, repoSlug|null, agent, runtime, recallTier }
  * (repoPath null is valid: a folderless setup can still ledger + remote-verify.)
  */
+export const RECALL_TIERS = ["pointer", "summary"];
+export const DEFAULT_RUNTIME = "claude-code";
+/** Runtimes whose adapter registers a prompt-stage recall hook. */
+export const PROMPT_STAGE_RUNTIMES = new Set(["claude-code"]);
+
 export function resolveConfig(cwd = process.cwd()) {
   if (process.env.AMP_DISABLE === "1") return null;
 
@@ -101,6 +106,17 @@ export function resolveConfig(cwd = process.cwd()) {
     process.env.RXAI_AMP_SLUG ||
     (fileRepo.owner && fileRepo.name ? `${fileRepo.owner}/${fileRepo.name}` : null);
   const agent = process.env.RXAI_AMP_AGENT || file?.agent_name_default || "claudecowork";
+  // Which adapter runtime is driving (the Codex shims set RXAI_AMP_RUNTIME).
+  // It picks the session-start recall tier (§15.1, v2.11): a runtime with a
+  // prompt-stage hook (Claude Code's UserPromptSubmit) starts at the pointer
+  // tier and expands to summaries once the prompt is known; one without
+  // starts at the summary tier. `recall_tier` in config.json or
+  // RXAI_AMP_RECALL_TIER overrides with `pointer` or `summary`.
+  const runtime = process.env.RXAI_AMP_RUNTIME || DEFAULT_RUNTIME;
+  const requested = process.env.RXAI_AMP_RECALL_TIER || file?.recall_tier;
+  const recallTier = RECALL_TIERS.includes(requested)
+    ? requested
+    : PROMPT_STAGE_RUNTIMES.has(runtime) ? "pointer" : "summary";
 
   if (repoPath) {
     try {
@@ -117,7 +133,7 @@ export function resolveConfig(cwd = process.cwd()) {
 
   if (!repoPath && !repoSlug) return null;
 
-  return { home: ampHome(), repoPath, repoSlug, agent };
+  return { home: ampHome(), repoPath, repoSlug, agent, runtime, recallTier };
 }
 
 /** First token found in the environment, same trio as cache_issues.ts. */

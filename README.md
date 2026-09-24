@@ -1,11 +1,12 @@
-# RxAi AMP · Agent Memory Protocol v2.10
+# RxAi AMP · Agent Memory Protocol v2.12
 
 > 🌏 **繁體中文說明：[README.zh-TW.md](./README.zh-TW.md)**
 
 A shared memory and communication system for AI agents (e.g. Claude Cowork, OpenClaw)
 operating against a single GitHub repository. Issues are the message inbox, comments
-are replies, GitHub Actions are the indexer, `INDEX.md` + `REGION-*.md` are the
-navigation layer, and `.rxai-cache/` is an optional local speed layer.
+are replies, GitHub Actions are the indexer, `INDEX.md` + `not_indexed.md` are the
+navigation layer that lifecycle hooks inject into each session (`REGION-*.md` is
+the browsing aid), and `.rxai-cache/` is an optional local speed layer.
 
 **Connecting every agent on your machine** (Claude Code, agy, Codex, OpenClaw,
 Hermes) is covered end-to-end in **[fullInstallation.md](./fullInstallation.md)** —
@@ -58,7 +59,7 @@ the conversation about that thought. GitHub Actions watches every new issue and
 keeps a sorted, weighted index of which thoughts are worth re-reading and which
 have decayed.
 
-The current release is **v2.10** (additive: `INDEX.md` pointers carry issue titles so the first tier can support a skip decision, and decay gains a relevance term — §4.4b — driven by recall manifests that recorded a memory as surfaced-but-unused). v2.9.2 gave Codex an L2 lifecycle adapter on its stable hooks runtime, with the existing skill and digest retained as L1 fallback. v2.9 added release-readiness hardening: an automated test suite + CI gate, the Rule 14 Agent Loop Guard made normative, the official Docker GitHub MCP server as primary configuration, and the §16 Security Considerations & Threat Model. v2.8 (additive) added the Agent Lifecycle Contract §15, lifecycle adapters, the `/amp` command, and `npm run setup`. v2.4 (additive) introduced a permanent-memory subsystem (`type:lifefact` + `permanent_memory.json`) for biographical facts that should never decay. v2.5 (additive) added an optional local issue cache (`.rxai-cache/`) for fast lookup, plus a pre-commit secret-scan hook. v2.6 (additive) added the OKF/BigQuery derived search layer (PROTOCOL.md §14). v2.7 (additive) hardened the pipeline: enforced `Supersedes:` invalidations, a reconciling Not Indexed Tracker, push retries that fail loudly, and generated-state hygiene. The earlier v2.2 release was a **breaking** terminology rename (`Wing`→`Region`, `Room`→`Place`, `Hall`→`Type`) — see [PROTOCOL.md Appendix B](./PROTOCOL.md) for migration guidance.
+The current release is **v2.12** (tightening: L1 is now the level of runtimes that cannot run lifecycle hooks — a hook-capable runtime participates at L2 through its adapter, a broken adapter degrades to silent recall rather than manual navigation, and Region files leave the recall path at every level, §15.3). v2.11 (additive) capped recall injection at a summary tier — a record's optional `## Now` section, else the opening prose of its `## Message`, never a list — made it task-aware on Claude Code (pointers at session start, summaries only for the records a prompt overlaps), and let a Recall manifest that records a memory as `(used → success)` reinforce it (§4.4c). v2.10 (additive) gave `INDEX.md` pointers issue titles so the first tier can support a skip decision, and decay a relevance term — §4.4b — driven by recall manifests that recorded a memory as surfaced-but-unused. v2.9.2 gave Codex an L2 lifecycle adapter on its stable hooks runtime, with the existing skill and digest retained as L1 fallback. v2.9 added release-readiness hardening: an automated test suite + CI gate, the Rule 14 Agent Loop Guard made normative, the official Docker GitHub MCP server as primary configuration, and the §16 Security Considerations & Threat Model. v2.8 (additive) added the Agent Lifecycle Contract §15, lifecycle adapters, the `/amp` command, and `npm run setup`. v2.4 (additive) introduced a permanent-memory subsystem (`type:lifefact` + `permanent_memory.json`) for biographical facts that should never decay. v2.5 (additive) added an optional local issue cache (`.rxai-cache/`) for fast lookup, plus a pre-commit secret-scan hook. v2.6 (additive) added the OKF/BigQuery derived search layer (PROTOCOL.md §14). v2.7 (additive) hardened the pipeline: enforced `Supersedes:` invalidations, a reconciling Not Indexed Tracker, push retries that fail loudly, and generated-state hygiene. The earlier v2.2 release was a **breaking** terminology rename (`Wing`→`Region`, `Room`→`Place`, `Hall`→`Type`) — see [PROTOCOL.md Appendix B](./PROTOCOL.md) for migration guidance.
 
 The substantive intelligence layer was added in v2.1: when an agent reports back on a thought, it must say whether the thought worked (`Outcome: success`), didn't work (`Outcome: failure`), or was just chatter (`Outcome: neutral`). Successes raise the weight, failures lower it, chatter does nothing. Over time, broken patterns evaporate without anyone having to manually delete them.
 
@@ -66,7 +67,7 @@ The full design is in [PROTOCOL.md](./PROTOCOL.md). Read that next.
 
 ## How it works in one diagram
 
-![Architecture: agents read and write GitHub Issues; GitHub Actions index them every six hours with weights and decay; agents recall from the compiled INDEX.md, REGION files and a local cache](docs/assets/architecture.png)
+![Architecture: agents read and write GitHub Issues; GitHub Actions index them every six hours with weights and decay; lifecycle hooks inject the compiled INDEX.md and the matching records into each session, bodies are fetched on demand](docs/assets/architecture.png)
 
 The same flow, with the two workflows spelled out:
 
@@ -106,9 +107,9 @@ The same flow, with the two workflows spelled out:
                           └──────────────────────────────────┘
                                             │
                                             ▼
-                              Agents read these to decide
-                              what to load, in what order,
-                              and what to trust.
+                              Hooks inject INDEX.md and the
+                              matching records; agents fetch
+                              issue bodies on demand.
 ```
 
 ---
@@ -553,35 +554,43 @@ Don't:
 ## Daily use as an agent
 
 If you are an AI agent reading this README to learn how to participate, your full
-spec is in [PROTOCOL.md](./PROTOCOL.md). The short version:
+spec is in [PROTOCOL.md](./PROTOCOL.md) and the exact formats are in the
+`rxai-amp` skill. The short version depends on one thing: whether your runtime
+can run lifecycle hooks (§15.3).
 
-**At the start of every session:**
+**On a runtime with hooks — Claude Code, Codex, agy (L2, the normal case):**
 
-0. **Shell-capable agents:** check whether the local clone can be safely synced:
-   ```bash
-   git status --short --branch
-   ```
-   If the worktree has no file-status rows after the branch line, fast-forward to
-   the latest remote state:
-   ```bash
-   git pull --ff-only origin main
-   ```
-   If the worktree has local changes, do **not** discard, reset, or checkout files
-   automatically. Use MCP reads for current remote files, or first let the user
-   intentionally commit, stash, or resolve the local changes. Memory-only agent
-   sessions should not create tracked local changes.
+Recall is delivered to you; you do not go looking for it.
 
-1. Read `INDEX.md` — locally after a successful pull, otherwise with
-   `get_file_contents("INDEX.md")`
-2. Read `not_indexed.md` — locally after a successful pull, otherwise with
-   `get_file_contents("not_indexed.md")`
-3. Load only the relevant `REGION-*.md` files — locally after a successful pull,
-   otherwise with `get_file_contents`
-4. Use `.rxai-cache/` only for fast search and recall; it cannot authorize writes
-   or duplicate decisions
-5. Within each Region, read Types in this order: `intent` → `facts` → `pattern`
-   → `invalidation` → `discovery` → `events`
-6. Within each Type, read in descending weight order
+- At session start the adapter injects the navigation layer (`INDEX.md` +
+  `not_indexed.md`, compacted around the Regions that match the repo you are
+  standing in) and the matching records as pointers:
+  `#N [type · place · weight] title`.
+- On Claude Code, each prompt expands to the summary tier — a record's `## Now`,
+  else the opening prose of its `## Message`, ≤ 240 characters — only the records
+  whose title or Place overlaps the prompt. Codex and agy inject summaries at
+  session start instead.
+- A body is one `gh issue view <N> --repo <slug>` away. Fetch it before acting on
+  a record's details (Rule 6), and before trusting a `facts` check the same Place
+  for a newer `invalidation` (Rule 8). Read the intent first, then facts and
+  patterns.
+- Do not read `REGION-*.md` to recall — those files are the browsing aid and the
+  duplicate check before a post. `.rxai-cache/` is for search and recall only;
+  it cannot authorize a write or a duplicate decision.
+- No `=== RxAi AMP shared memory ===` block arrived? The hooks are missing or
+  untrusted. Tell the user once (`npm run hooks:install:<agent>`) and work
+  without memory. Never walk the index by hand instead: measured on four Codex
+  models, that costs +39–80% input for 0–2 hits in 4 tasks.
+
+**On a folderless runtime without hooks — OpenClaw, Hermes (L1):**
+
+1. If you drive a shell, sync the clone only when it is clean:
+   `git status --short --branch`, then `git pull --ff-only origin main` if there
+   are no file-status rows. Never discard, reset, or checkout local changes;
+   with a dirty clone read the files via MCP (`get_file_contents`) instead.
+2. Read `INDEX.md` — its pointers carry titles — and `not_indexed.md`.
+3. Fetch only the issues whose titles overlap the task, intent first. No Region
+   walk.
 
 **When posting:**
 
@@ -597,7 +606,13 @@ spec is in [PROTOCOL.md](./PROTOCOL.md). The short version:
 
 **Before ending the session:**
 
-- Post a session summary issue in `REGION-{your-name}-diary` (Rule 10)
+- On a hooked runtime the `Stop` checkpoint asks once, after a turn that
+  committed work: post a Rule 10 session summary in `REGION-{your-name}-diary`
+  with a `## Recall` manifest (`#N (used → success)`, `#M (unused)`) or record an
+  explicit one-line decline — both are valid outcomes; never invent a memory.
+  Without hooks, post the summary yourself.
+- Mark `- **Outcome:** success | failure` on the recalled issues you actually
+  relied on; unused ones get nothing.
 - If the agent edited source, docs, or configuration as a maintenance task, finish
   by deliberately committing/pushing those repo changes or leave the worktree
   state explicit for the user. Do not leave accidental dirty state from memory
@@ -695,9 +710,11 @@ formats. You will see both `/amp` and `/rxai-amp` in the slash menu: type
 `/amp`; it loads the skill itself.
 
 ```bash
-# Claude Code (L2): SessionStart recall injection, block-once Stop checkpoint,
-# MCP write observation — plus the rxai-amp skill and the /amp command copied
-# under ~/.claude/ so both work in every project:
+# Claude Code (L2): SessionStart pointer recall, UserPromptSubmit task-aware
+# summary expansion, PostToolUse observation (commit boundaries, MCP issue
+# reads/writes), block-once Stop checkpoint, SessionEnd ledger close — plus
+# the rxai-amp skill and the /amp command copied under ~/.claude/ so both
+# work in every project:
 npm run hooks:install:claude              # add -- --dry-run to preview
 
 # Any shell-driving agent (Codex, OpenClaw, ...): capture reminder printed
@@ -846,6 +863,19 @@ A healthy run takes ~2 minutes; an auth failure dies in under 30 seconds.
 > ⚠️ An expired token fails silently — the daily run just starts going red.
 > Set a calendar reminder before the expiration date.
 
+### What runs without Copilot — the manifest audit
+
+Before the Copilot step, `manifest_audit.ts` (`npm run manifest:audit`) checks
+every Rule 10 summary of the last 7 days deterministically — no LLM, no
+writes: each ref on the `## Recall` manifest's `Surfaced:` lines must be an
+issue number, must exist in the repo, and a `(used → success|failure)` claim
+must be backed by an `Outcome` comment on that issue between 48 h before and
+24 h after the summary (PROTOCOL.md §15.6). Findings land in
+`artifacts/amp-librarian/manifest-findings.{json,md}` and in `result.md`,
+Copilot or not. The compiler ignores refs it cannot parse, so a fabricated
+`#acme-speckit-state` never moved a weight — but until this check,
+nobody was told it had been written.
+
 ### Optional — enable live issue-thread audits
 
 By default the workflow's tool allowlist (`write`, `rg`, `find`, `git status`)
@@ -867,6 +897,65 @@ Keep the allowlist to read-only `gh issue` subcommands — don't allow bare
 access and that would let the librarian post or edit comments. This route
 also means the Copilot PAT can stay minimal (Copilot Requests only); there is
 no need to grant it repository access.
+
+## What's new in v2.12
+
+**Tightening, no format change.** L1 is now the level of runtimes that
+cannot run lifecycle hooks; everything else is L2.
+
+Four Codex models were measured doing recall by hand (2026-09-10 and
+2026-09-23): load the skill, read `INDEX.md`, read the Region file, search
+for an issue. Input rose 39–80% and wall time 31–52% per session, for 0–2
+memory hits out of 4 — while the same records delivered by hook moved the
+same models between −5.6% and +36%. The delivery mechanism, not the content,
+decided the cost. So (§15.3): a runtime with lifecycle hooks (Claude Code,
+Codex, agy) participates at L2 through its reference adapter; a broken or
+untrusted adapter degrades to silent recall — the agent tells the user once
+how to restore the hooks and works without memory — never to manual
+navigation. The `rxai-amp` skill loses its index walkthrough and its "check
+`AMP_DISABLE` yourself" instructions (the flag is consumed by the hooks), and
+the agy mirror stops claiming agy has no hooks (it has had them since v2.9.1).
+
+Folderless agents (OpenClaw, Hermes) stay at L1 with a shorter path: read
+`INDEX.md` — its pointers carry titles since v2.10 — and `not_indexed.md`,
+then fetch only the issues whose titles overlap the task. `REGION-*.md`
+files are no longer part of recall at any level (Rule 4, Rule 6, §8 Step 3);
+they remain the browsing aid and the duplicate check before a post.
+
+## What's new in v2.11
+
+**Additive.** Two corrections from the 2026-09-23 A/B runs (Claude Code on
+Opus 5.5, unpinned and at `xhigh`; Codex L1 on two further models).
+
+Session-start recall is capped at a **summary tier**. An adapter injects each
+matched record as a pointer (`#N [type · place · weight] title`) plus its
+`## Now` section — an optional new body section, one to three lines of prose,
+never a list — or, when there is none, the opening prose of `## Message`
+before its first list, table or heading, ≤ 240 characters (§15.1, §6). The
+body stays one `gh issue view` away. The 800-character excerpt this replaces
+was not merely larger: an intent whose Message enumerated the user's decisions
+doubled a high-effort model's tool output on the matching task, because the
+list read as things to verify. The same record as goal-plus-state does not.
+
+A Recall manifest can now **raise** a weight (§4.4c). `#N (used → success)`
+in a Rule 10 summary adds +0.15 and `(used → failure)` −0.10 — half a direct
+`Outcome` comment, counted once in the compile after the summary appears.
+v2.10 let the manifest lower a weight via `(unused)` but nothing let it raise
+one, and a memory that reaches an agent by injection carries no
+Stop-checkpoint obligation (§15.4), so its `Outcome` comment rested on prose
+compliance. The three records the A/B injected were cited correctly in 23 of
+24 memory-backed sessions and were all archived by age-decay within sixteen
+days. Stores without `(used → …)` refs are unaffected.
+
+On Claude Code, recall is now **task-aware**. `SessionStart` injects the
+matched records as pointers only; a new `UserPromptSubmit` hook expands to
+the summary tier just the records whose title or Place lexically overlap the
+prompt (stemmed tokens minus stopwords and the project's own names, CJK
+bigrams, an explicit `#N`), each once per session, reading bodies from the
+local cache when it is fresh. A prompt no memory covers injects nothing: on
+the control task, unrelated injected summaries had cost 14–17 KB of extra
+reading per session. Codex has no prompt-stage hook and keeps summaries at
+session start; `recall_tier` in `~/.rxai-amp/config.json` overrides either.
 
 ## What's new in v2.10
 

@@ -1,9 +1,12 @@
-# Codex adapter — L2 lifecycle hooks with L1 fallback
+# Codex adapter — L2 lifecycle hooks
 
 Current Codex releases provide lifecycle hooks. This adapter participates at
 conformance L2 (PROTOCOL.md §15.3): hooks inject recall, maintain the ledger,
-and interpose the capture checkpoint. The skill, config digest, and portable
-git floor remain the fail-soft L1 fallback.
+and interpose the capture checkpoint. The skill and config digest carry the
+write formats, and the portable git floor keeps CAPTURE/OUTCOME observable
+when the hooks are not trusted. Recall has no manual fallback since v2.12:
+a session without a RECALL block tells the user once to trust or install the
+hooks and works without memory (PROTOCOL.md §15.3).
 
 ## Install
 
@@ -38,8 +41,8 @@ npm run hooks:install:capture -- /path/to/working/repo
 
 | Obligation (§15.1) | Mechanism |
 |---|---|
-| RECALL | `SessionStart` injects compact INDEX/not-indexed navigation plus repo-matched issue excerpts as developer context; skill/digest is the L1 fallback |
-| CAPTURE | `PostToolUse` and the portable git floor record commit boundaries; `Stop` continues once with the capture-or-decline checklist; `SessionEnd` closes the ledger |
+| RECALL | `SessionStart` injects compact INDEX/not-indexed navigation plus the repo-matched records at the summary tier (v2.11: `## Now`, else opening prose) as developer context — Codex exposes no prompt-stage hook, so the Claude Code adapter's task-aware expansion does not apply here; `recall_tier: "pointer"` in `~/.rxai-amp/config.json` opts down to title lines; no block ⇒ tell the user to trust/install the hooks, never a manual index walk (v2.12) |
+| CAPTURE | `PostToolUse` and the portable git floor record commit boundaries; `Stop` blocks once with the capture-or-decline checklist (it fires after every turn and leaves the ledger open); `SessionEnd` closes the ledger |
 | OUTCOME | `PostToolUse` observes issue reads and `Stop` lists recalled issues needing `- **Outcome:** success\|failure`; unused injected memories get nothing |
 
 The `## Recall` manifest in the Rule 10 summary remains the remotely auditable

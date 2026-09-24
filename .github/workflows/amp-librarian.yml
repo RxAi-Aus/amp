@@ -167,6 +167,20 @@ jobs:
             } > artifacts/amp-librarian/result.md
           fi
 
+      - name: Audit Recall manifests (§15.6, deterministic)
+        # LLM-free and report-only: a fabricated or unbacked manifest ref must
+        # surface even when the guard skips Copilot, so this runs whatever the
+        # guard decided. An API hiccup must not sink the Librarian run.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          node dist/manifest_audit.js \
+            --out artifacts/amp-librarian/manifest-findings.json \
+            --md artifacts/amp-librarian/manifest-findings.md
+
       - name: Build Copilot prompt
         if: steps.loop_guard.outputs.decision == 'allow'
         shell: bash
@@ -192,6 +206,9 @@ jobs:
           - agent_loop_guard.ts
           - INDEX.md
           - not_indexed.md
+          - artifacts/amp-librarian/manifest-findings.json — the deterministic
+            Recall manifest audit (§15.6). Report its findings verbatim under
+            manifest_findings; do not re-derive, soften or second-guess them.
 
           If REGION-*.md files exist, inspect only the ones relevant to the task.
 
@@ -212,7 +229,7 @@ jobs:
              Machine-readable JSON with keys:
              loop_risk, missing_outcomes, duplicate_candidates,
              pattern_promotions, invalidation_candidates, scoring_suggestions,
-             generated_state_touched.
+             manifest_findings, generated_state_touched.
 
           Use artifacts/amp-librarian/guard-input.json and
           artifacts/amp-librarian/guard-output.json as run context.
@@ -289,9 +306,16 @@ jobs:
             "pattern_promotions": [],
             "invalidation_candidates": [],
             "scoring_suggestions": [],
+            "manifest_findings": [],
             "generated_state_touched": false
           }
           JSON
+          fi
+
+          # The deterministic manifest audit is part of every report, Copilot
+          # or not; append it unless Copilot already embedded it.
+          if [ -s artifacts/amp-librarian/manifest-findings.md ] && ! grep -q "Recall manifest audit" artifacts/amp-librarian/result.md; then
+            { echo; cat artifacts/amp-librarian/manifest-findings.md; } >> artifacts/amp-librarian/result.md
           fi
 
           # Skip/hold and failure runs no longer comment on the issue, so

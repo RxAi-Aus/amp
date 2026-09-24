@@ -40,8 +40,8 @@ Agent name defaults to `claudecowork`. If no repo resolves, stop and tell the us
 ## The recall path (`/amp recall <topic>`)
 
 1. Resolve the repo and agent exactly as in step 1 below.
-2. Freshness: if the resolved `local_clone` exists and its worktree is clean, `git -C <clone> pull --ff-only` first. Then check the `Last Compiled` timestamp in `INDEX.md` — if it is older than ~6 h, say so and lean on `not_indexed.md` plus live reads rather than trusting REGION files alone. No clone → read the same files via `gh api -H "Accept: application/vnd.github.raw" repos/<slug>/contents/<file>`.
-3. Read `INDEX.md`, then `not_indexed.md`, then only the `REGION-*.md` files whose region plausibly matches the topic. Within a region follow the type order `intent → facts → pattern → invalidation → discovery → events`, descending weight — the useful entries are sorted to the top.
+2. Freshness: if the resolved `local_clone` exists and its worktree is clean, `git -C <clone> pull --ff-only` first. Then check the `Last Compiled` timestamp in `INDEX.md` — if it is older than ~6 h, say so and lean on `not_indexed.md` plus live reads. No clone → read the same files via `gh api -H "Accept: application/vnd.github.raw" repos/<slug>/contents/<file>`.
+3. If this session's hooks already injected an `=== RxAi AMP shared memory ===` block, start from its pointers. Otherwise read `INDEX.md` — its pointers carry titles — and `not_indexed.md`, and pick the issues whose titles or Place overlap the topic, `intent` first, then `facts`/`pattern`. That is the whole navigation: never walk the index by hand beyond it — `REGION-*.md` files are the browsing aid and the duplicate check before a post, not part of recall (v2.12, §15.3).
 4. If `.rxai-cache/` exists in the clone, also run `npm run cache:search -- "<topic>"` there for full-text candidates (advisory only — Rule 13).
 5. Fetch only the issues the index confirms relevant: `gh issue view <N> --comments --repo "$SLUG"`. Before trusting a `facts`, scan the same Place for a newer `invalidation` (Rule 8).
 6. Report what was found — issue numbers, weights, and any invalidation that applies — and keep note of which ones the session goes on to actually use, so outcomes can be marked at the end.
@@ -73,7 +73,7 @@ Title — must match the indexer regex exactly, short intent < 60 chars, no extr
 [FROM:{agent}→{recipient}][REGION:{region}][PLACE:{place}][TYPE:{kind}] short intent
 ```
 
-Recipient defaults to `all` (`self` for diary entries). Reuse an existing Region from `INDEX.md` when one fits; otherwise a new lowercase-hyphenated name. Body uses the `## Metadata` / `## Context Pointer` / `## Message` / `## Expected Action` sections from `examples/intent.md`, with `Posted:` from `date -u +%Y-%m-%dT%H:%M:%SZ`. Never put secrets in issue bodies or comments — issues bypass the pre-commit scan.
+Recipient defaults to `all` (`self` for diary entries). Reuse an existing Region from `INDEX.md` when one fits; otherwise a new lowercase-hyphenated name. Body uses the `## Metadata` / `## Context Pointer` / `## Now` (optional, one to three lines of prose, no lists — what session-start recall injects) / `## Message` / `## Expected Action` sections from `examples/intent.md`, with `Posted:` from `date -u +%Y-%m-%dT%H:%M:%SZ`. Never put secrets in issue bodies or comments — issues bypass the pre-commit scan.
 
 ## 5. Post
 

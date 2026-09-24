@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later OR LicenseRef-Commercial
 
 /**
- * compile_index.ts - Protocol v2.9.1
+ * compile_index.ts - Protocol v2.11
  *
  * Rebuilds INDEX.md and per-Region files from the current state of GitHub
  * issues. Implements the outcome-aware confidence weight system:
@@ -11,6 +11,10 @@
  *   success comment        -> weight += 0.30
  *   failure comment        -> weight -= 0.20
  *   neutral / no marker    -> no change
+ *   §15.2 manifest `#N (used -> success)` -> weight += 0.15   (§4.4c, v2.11;
+ *   §15.2 manifest `#N (used -> failure)` -> weight -= 0.10    once, when the
+ *                                             summary is new since last compile)
+ *   §15.2 manifest `#N (unused)`          -> extra x0.95 per record, standing (§4.4b)
  *   type:lifefact issue    -> fixed weight 1.0, no decay, never archived
  *   type:invalidation with `Supersedes: #N` -> #N's weight floored to 0
  *                             (immediate archive; lifefact targets are immune)
@@ -33,6 +37,7 @@ type GitHubIssue = {
   number?: number;
   comments?: number;
   updated_at?: string;
+  created_at?: string;
   body?: string | null;
   pull_request?: unknown;
 };
@@ -88,6 +93,18 @@ const ARCHIVE_THRESHOLD = 0.10;
  * exactly its previous arithmetic.
  */
 const UNUSED_DECAY = 0.95;
+/**
+ * §4.4c — reinforcement from a §15.2 Recall manifest ref `#N (used -> success)`
+ * or `(used -> failure)`. Half the value of a direct Outcome comment: the
+ * manifest is the session's own account in its diary, not a marker on the
+ * thread, so it is weaker evidence. It is, however, the artifact an injected
+ * memory actually receives — §15.4 puts no Stop-checkpoint obligation on
+ * `via: inject` entries, so their Outcome comment rests on prose compliance,
+ * and §4.4b alone could only lower such a record. Counted once, in the
+ * compile after the summary issue is created, like comment deltas.
+ */
+const MANIFEST_SUCCESS = 0.15;
+const MANIFEST_FAILURE = 0.10;
 const LIFEFACT_TYPE = "lifefact";
 
 const TYPE_ORDER = [
@@ -156,29 +173,65 @@ function getTag(title: string, tag: string): string | undefined {
  */
 /**
  * §15.2 Recall manifest: `- **Surfaced:** #47 (used -> success), #52 (unused)`.
- * Returns the records this manifest recorded as surfaced but not relied upon.
- * Only refs carrying an explicit `(unused)` marker count; `(used -> ...)` and
- * bare refs do not, so a malformed manifest costs a record nothing.
+ * The `Surfaced:` lines of the `## Recall` section, and nothing outside it.
  */
-function parseRecallUnused(body: string | null | undefined): number[] {
+function recallSurfacedLines(body: string | null | undefined): string[] {
   if (!body) {
     return [];
   }
-  const section = body.match(/^\s*#{1,6}\s*Recall\b[^\n]*\n([\s\S]*?)(?=^\s*#{1,6}\s|\Z)/im);
+  // The section runs to the next heading or the end of the body. JavaScript
+  // has no `\Z`; the previous `\Z` matched a literal Z, so a manifest that
+  // closed the body parsed as empty unless a timestamp happened to follow
+  // (fixed 2026-09-24; test/manifest.test.mjs).
+  const section = body.match(/^\s*#{1,6}\s*Recall\b[^\n]*\n([\s\S]*?)(?=^\s*#{1,6}\s|(?![\s\S]))/im);
   if (!section) {
     return [];
   }
-  const unused: number[] = [];
+  const lines: string[] = [];
   for (const line of section[1].split(/\r?\n/)) {
     const match = line.match(/^\s*-?\s*(?:\*\*)?Surfaced:(?:\*\*)?\s*(.+)$/i);
-    if (!match) {
-      continue;
+    if (match) {
+      lines.push(match[1]);
     }
-    for (const ref of match[1].matchAll(/#(\d+)\s*\(\s*unused\s*\)/gi)) {
+  }
+  return lines;
+}
+
+/**
+ * Returns the records a manifest recorded as surfaced but not relied upon
+ * (§4.4b). Only refs carrying an explicit `(unused)` marker count; `(used -> ...)`
+ * and bare refs do not, so a malformed manifest costs a record nothing.
+ */
+function parseRecallUnused(body: string | null | undefined): number[] {
+  const unused: number[] = [];
+  for (const line of recallSurfacedLines(body)) {
+    for (const ref of line.matchAll(/#(\d+)\s*\(\s*unused\s*\)/gi)) {
       unused.push(Number(ref[1]));
     }
   }
   return unused;
+}
+
+type ManifestRef = { issue: number; outcome: "success" | "failure" };
+
+/**
+ * Returns the records a manifest recorded as relied upon, with the outcome
+ * the session claimed (§4.4c). Accepts `->`, `→` and `=>` between `used` and
+ * the outcome. `(used -> neutral)`, `(used)` and bare refs contribute nothing.
+ */
+function parseRecallUsed(body: string | null | undefined): ManifestRef[] {
+  const used: ManifestRef[] = [];
+  for (const line of recallSurfacedLines(body)) {
+    for (const ref of line.matchAll(/#(\d+)\s*\(\s*used\s*(?:->|→|=>)\s*(success|failure)\s*\)/gi)) {
+      used.push({ issue: Number(ref[1]), outcome: ref[2].toLowerCase() as ManifestRef["outcome"] });
+    }
+  }
+  return used;
+}
+
+/** §4.4c delta for one manifest ref. */
+function manifestDelta(outcome: ManifestRef["outcome"]): number {
+  return outcome === "success" ? MANIFEST_SUCCESS : -MANIFEST_FAILURE;
 }
 
 function parseSupersededTargets(body: string | null | undefined): number[] {
@@ -508,6 +561,31 @@ async function main(): Promise<void> {
     }
   }
 
+  // §4.4c — reinforcement from the manifests of summaries created since the
+  // last compile. Additive like comment deltas, so it is counted once (in the
+  // compile after the summary appears), not standing like §4.4b: a standing
+  // additive term would pin any once-used record at 1.0 forever.
+  const sinceMs = Date.parse(lastCompileIso);
+  const manifestDeltas = new Map<string, number>();
+  let manifestRefs = 0;
+  for (const issue of issues) {
+    const createdMs = Date.parse(issue.created_at ?? "");
+    if (!Number.isFinite(createdMs) || createdMs <= sinceMs) {
+      continue;
+    }
+    for (const ref of parseRecallUsed(issue.body)) {
+      if (ref.issue === issue.number) {
+        continue;
+      }
+      const key = String(ref.issue);
+      manifestDeltas.set(key, (manifestDeltas.get(key) ?? 0) + manifestDelta(ref.outcome));
+      manifestRefs += 1;
+    }
+  }
+  if (manifestRefs > 0) {
+    console.log(`[info] §4.4c: ${manifestRefs} used-recall ref(s) in manifests posted since ${lastCompileIso}`);
+  }
+
   const structured: StructuredIndex = {};
   const archived: ArchivedIndex = {};
   let skippedForNoOutcome = 0;
@@ -559,6 +637,10 @@ async function main(): Promise<void> {
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
     }
+
+    // §4.4c manifest deltas add to the comment delta; computeIssueWeight
+    // ignores delta for pinned lifefacts and superseded records.
+    delta += manifestDeltas.get(n) ?? 0;
 
     const newWeight = computeIssueWeight(
       kind,
@@ -780,7 +862,11 @@ export {
   DECAY,
   computeCommentDelta,
   computeIssueWeight,
+  manifestDelta,
+  MANIFEST_FAILURE,
+  MANIFEST_SUCCESS,
   parseRecallUnused,
+  parseRecallUsed,
   UNUSED_DECAY,
   getTag,
   parseOutcome,

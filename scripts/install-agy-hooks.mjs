@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later OR LicenseRef-Commercial
 
 /**
- * install-agy-hooks.mjs — Protocol v2.9.1 (adapters/agy, L2)
+ * install-agy-hooks.mjs — Protocol v2.12 (adapters/agy, L2)
  *
  * One-command agy (Antigravity CLI) setup:
  *   1. Writes/merges ~/.rxai-amp/config.json (creates missing keys only —
@@ -16,7 +16,8 @@
  *   3. Merges the PreInvocation + Stop hooks into
  *      ~/.gemini/config/hooks.json under the single key "rxai-amp".
  *      Idempotent and chaining: foreign hook names are preserved untouched,
- *      and a backup is written before the first modification.
+ *      foreign entries inside the "rxai-amp" key are kept in place, and a
+ *      backup is written before the first modification.
  *
  * Flags:
  *   --dry-run              print planned changes, write nothing
@@ -117,8 +118,21 @@ const template = JSON.parse(
 const ours = JSON.parse(
   JSON.stringify(template).replaceAll("__AMP_ROOT__", memoryRoot).replaceAll("RXAI_AMP_AGENT=agy", `RXAI_AMP_AGENT=${agent}`)
 );
-// Chain, never clobber (§15.5): only our own named hook is replaced.
-const merged = { ...hooks, ...ours };
+// Chain, never clobber (§15.5). Foreign keys are untouched, and inside our
+// own "rxai-amp" key an entry whose command does not run one of our hook
+// scripts is kept where it is (a user may hang a sound hook on the same key):
+// only previous copies of our own entries are replaced, and ours go after
+// the foreign ones so the user's order survives a reinstall.
+const OURS = /adapters[/\\]agy[/\\]hooks[/\\]/;
+const ownKey = Object.keys(ours)[0];
+const existing = hooks[ownKey] && typeof hooks[ownKey] === "object" && !Array.isArray(hooks[ownKey]) ? hooks[ownKey] : {};
+const mergedGroup = { ...existing };
+for (const [event, entries] of Object.entries(ours[ownKey])) {
+  const prior = Array.isArray(existing[event]) ? existing[event] : [];
+  const foreign = prior.filter((e) => !(typeof e?.command === "string" && OURS.test(e.command)));
+  mergedGroup[event] = [...foreign, ...entries];
+}
+const merged = { ...hooks, [ownKey]: mergedGroup };
 
 apply(`merge PreInvocation/Stop hooks into ${hooksFile} under "rxai-amp" (backup first)`, () => {
   mkdirSync(configRoot, { recursive: true });

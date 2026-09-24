@@ -15,9 +15,13 @@
  *   3. If the memory clone is clean, git pull --ff-only (10 s timeout).
  *   4. Inject the navigation layer — INDEX.md + not_indexed.md (8 KB cap
  *      each) — then the repo-aware recall block (amp-recall.mjs, issue
- *      #442): bodies of the top open issues whose Region matches the cwd
- *      project, ledgered as surfaced `via: "inject"` (they never trigger the
- *      Stop checkpoint on their own). When a Region matched, INDEX.md is
+ *      #442): the top open issues whose Region matches the cwd project, at
+ *      `config.recallTier` (§15.1, v2.11) — "pointer" (title lines only) on
+ *      a runtime whose prompt-stage hook expands the matching ones once the
+ *      task is known (Claude Code: user-prompt-submit.mjs), "summary" on a
+ *      runtime without one (the Codex shims) — ledgered as surfaced
+ *      `via: "inject"` with that tier (they never trigger the Stop
+ *      checkpoint on their own). When a Region matched, INDEX.md is
  *      rendered around it (matched Regions verbatim, the others as one line)
  *      and an empty not_indexed.md collapses to one line: everything here is
  *      re-read on every turn as part of the cached prefix, so bytes matter.
@@ -78,7 +82,7 @@ if (config.repoPath) {
 // Fail-soft: any problem yields an empty block and the navigation layer
 // still stands verbatim.
 const recall = config.repoPath
-  ? buildRepoRecall({ cwd: input.cwd || process.cwd(), repoPath: config.repoPath, repoSlug: config.repoSlug })
+  ? buildRepoRecall({ cwd: input.cwd || process.cwd(), repoPath: config.repoPath, repoSlug: config.repoSlug, tier: config.recallTier })
   : { text: "", surfaced: [], regions: [] };
 
 const lines = [];
@@ -108,7 +112,7 @@ if (config.repoPath) {
 if (recall.text) {
   lines.push("", recall.text);
   for (const s of recall.surfaced) {
-    try { surfaceIssue(sessionId, s.issue, s.title, "inject"); } catch { /* ledger is best-effort */ }
+    try { surfaceIssue(sessionId, s.issue, s.title, "inject", config.recallTier); } catch { /* ledger is best-effort */ }
   }
 }
 

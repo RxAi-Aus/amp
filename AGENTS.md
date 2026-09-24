@@ -8,15 +8,21 @@ folder access; otherwise **everything you need to participate is right here** �
 you do not need the full `PROTOCOL.md` for normal read/write.
 
 **At the start of every session, before task work:**
-1. Folder access + clean worktree → `git pull --ff-only origin main`; otherwise
-   read files via the GitHub MCP `get_file_contents`.
-2. Read `INDEX.md`, then `not_indexed.md` (the small navigation layer — do NOT
-   fetch every issue).
-3. Load a `REGION-*.md` only if the task needs it. **Never edit** `INDEX.md`,
-   `REGION-*.md`, `not_indexed.md`, or `weights.json` — GitHub Actions owns them.
-4. Read order within a Region: `intent` → `facts` → `pattern` → `invalidation`
-   → `discovery` → `events`. Check `invalidation` before trusting a `fact`;
-   check `pattern` before solving from scratch.
+0. A **"RxAi AMP shared memory"** block already in your context means the
+   lifecycle hooks did steps 1–2 — do not re-read anything. On Claude Code,
+   Codex or agy a *missing* block means the hooks are not installed or trusted:
+   say so once (`npm run hooks:install:<agent>`) and work without recall —
+   never walk the index by hand (PROTOCOL.md §15.3, v2.12).
+1. Folderless only: read `INDEX.md`, then `not_indexed.md` via the GitHub MCP
+   `get_file_contents` (the small navigation layer — do NOT fetch every issue).
+2. Fetch (`issue_read`) only the pointers whose titles overlap the task.
+3. Do **not** load a `REGION-*.md` to find memories; it is for browsing a
+   Region on request and for the duplicate check before you post. **Never
+   edit** `INDEX.md`, `REGION-*.md`, `not_indexed.md`, or `weights.json` —
+   GitHub Actions owns them.
+4. When you do browse a Region: `intent` → `facts` → `pattern` →
+   `invalidation` → `discovery` → `events`. Check `invalidation` before
+   trusting a `fact`; check `pattern` before solving from scratch.
 
 **To store a memory** — a decision, durable fact, reusable pattern, goal, or
 invalidation (the *takeaway*, not the transcript) — post ONE issue via the
@@ -45,14 +51,22 @@ suggestions):**
 - The Rule 10 session summary body includes a `## Recall` manifest:
   `- **Surfaced:** #47 (used → success), #52 (unused)` and
   `- **Capture:** stored #91` or `- **Capture:** declined — "reason"`.
+  The compiler reads it: `(used → success)` reinforces the cited memory
+  (+0.15; `(used → failure)` −0.10; §4.4c) and `(unused)` decays it (§4.4b),
+  so record dispositions honestly — for a memory that reached you by
+  injection, the manifest is usually its only weight signal.
+- Issue bodies MAY carry a `## Now` section (v2.11): one to three lines of
+  prose — goal, current state, next step — never a list. Session-start recall
+  injects that (else the opening prose of `## Message` before its first
+  list); write one for every `intent`. Everything else stays in `## Message`.
 - Local `~/.rxai-amp/` ledger files (if present) are advisory adapter state —
   never authoritative, never committed. `[AMP]` lines in git-commit output are
   the capture prompt.
 
 ## Project Structure & Module Organization
-- `PROTOCOL.md` is the source of truth for the communication protocol. It currently describes RxAi AMP v2.10, including titled `INDEX.md` pointers and §4.4b unused-recall decay, `type:lifefact`, optional `permanent_memory.json` support, optional `.rxai-cache/` local issue caching, the OKF/BigQuery projection (§14), enforced `Supersedes:` invalidations, the Agent Lifecycle Contract (§15), the normative Agent Loop Guard (Rule 14), and the Security Considerations & Threat Model (§16).
+- `PROTOCOL.md` is the source of truth for the communication protocol. It currently describes RxAi AMP v2.12, including folderless-only L1 with title-driven recall and silent degradation for hook-capable runtimes (§15.3), summary-tier, task-aware recall injection with the optional `## Now` body section (§15.1, §6), §4.4c manifest reinforcement, titled `INDEX.md` pointers and §4.4b unused-recall decay, `type:lifefact`, optional `permanent_memory.json` support, optional `.rxai-cache/` local issue caching, the OKF/BigQuery projection (§14), enforced `Supersedes:` invalidations, the Agent Lifecycle Contract (§15), the normative Agent Loop Guard (Rule 14), and the Security Considerations & Threat Model (§16).
 - `agent_loop_guard.ts` (repo root, v2.9) is the Rule 14 deterministic loop guard. `test/` holds the `node:test` fixture/golden suite covering parsers, weight arithmetic, rendering, and guard decisions.
-- `adapters/` holds the lifecycle adapters: shared zero-dep lib (`adapters/lib/amp-config.mjs`, `amp-ledger.mjs`), Claude Code hooks (`adapters/claude-code/hooks/`), agy hooks + skill mirror (`adapters/agy/`, v2.9.1 — `gh` instead of MCP), the Codex L2 hooks (`adapters/codex/hooks/` — v2.9.2 shims that set the agent identity and delegate to the Claude Code implementation, so recall stays single-sourced) plus its skill mirror + `digest.md` as fail-soft L1 fallback, the OpenClaw/Hermes L1 digests (`adapters/openclaw/`, `adapters/hermes/` — installed by the shared `scripts/install-digest.mjs`), the portable git `post-commit` capture hook (`adapters/git-hooks/`), and per-agent READMEs. `adapters/README.md` carries the ledger/config schemas and conformance matrix.
+- `adapters/` holds the lifecycle adapters: shared zero-dep lib (`adapters/lib/amp-config.mjs`, `amp-ledger.mjs`), Claude Code hooks (`adapters/claude-code/hooks/` — `SessionStart` pointer recall, `UserPromptSubmit` task-aware summary expansion, `PostToolUse`, `Stop`), agy hooks + skill mirror (`adapters/agy/`, v2.9.1 — `gh` instead of MCP), the Codex L2 hooks (`adapters/codex/hooks/` — v2.9.2 shims that set the agent identity and delegate to the Claude Code implementation, so recall stays single-sourced) plus its skill mirror + `digest.md` as fail-soft L1 fallback, the OpenClaw/Hermes L1 digests (`adapters/openclaw/`, `adapters/hermes/` — installed by the shared `scripts/install-digest.mjs`), the portable git `post-commit` capture hook (`adapters/git-hooks/`), and per-agent READMEs. `adapters/README.md` carries the ledger/config schemas and conformance matrix.
 - `README.md` is the quickstart and may lag behind `PROTOCOL.md`; resolve conflicts in favor of `PROTOCOL.md`.
 - `compile_index.ts` rebuilds `INDEX.md`, creates `REGION-*.md` pointer tables, applies decay/outcome weight changes, persists weight state, and resets `not_indexed.md`.
 - `track_not_indexed.ts` rebuilds `not_indexed.md` from every issue created since the last compile (reconciliation — a cancelled or failed tracker run is repaired by the next one).
