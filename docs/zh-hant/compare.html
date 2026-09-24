@@ -224,9 +224,10 @@
     font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
     letter-spacing: 0.12em; color: var(--accent); white-space: nowrap;
   }
-  h2 { font-size: 21px; font-weight: 750; letter-spacing: -0.01em; margin: 0; }
+  h2 { font-size: 21px; font-weight: 750; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
   h3.sub { font-size: 16.5px; font-weight: 750; margin: 34px 0 10px; }
   .note { color: var(--muted); font-size: 14.5px; max-width: 70ch; margin: 0 0 18px; }
+  p, li, dd { text-wrap: pretty; }
   .prose { max-width: 70ch; }
   .prose p { margin: 0 0 14px; }
 
@@ -348,6 +349,7 @@
 
   footer { margin-top: 72px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
   footer p { margin: 6px 0 0; }
+  footer p a { white-space: nowrap; }
   footer .built { margin-top: 10px; font-weight: 600; color: var(--ink); }
 
   @media (max-width: 440px) {
@@ -369,7 +371,8 @@
   }
   @media (pointer: coarse) {
     .langbar .lang { min-height: 44px; padding-inline: 14px; }
-    .langbar .home, a.chip { min-height: 44px; display: inline-flex; align-items: center; }
+    .langbar .home, a.chip, .foot-nav a { min-height: 44px; display: inline-flex; align-items: center; }
+    .foot-nav a { min-width: 44px; }
   }
   @media (max-width: 640px) {
     .wrap { padding: 16px 16px 72px; }
@@ -405,7 +408,9 @@
   .fit li b { display: block; margin-bottom: 4px; }
   .srcs { margin: 0; padding-left: 20px; font-size: 14px; max-width: 74ch; }
   .srcs li { margin: 0 0 6px; overflow-wrap: anywhere; }
+  .tscroll + .note { margin-top: 14px; }
   .foot-nav { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 10px; }
+  .foot-nav a[aria-current="page"] { color: var(--ink); text-decoration: none; font-weight: 650; }
 </style>
 <script>document.documentElement.setAttribute("data-js", "on");</script>
 </head>
@@ -503,14 +508,14 @@
     <nav class="foot-nav" aria-label="Pages">
       <a href="./"><span class="t" lang="zh-Hant">總覽</span></a>
       <a href="quickstart.html"><span class="t" lang="zh-Hant">快速開始</span></a>
-      <a href="compare.html"><span class="t" lang="zh-Hant">比較</span></a>
+      <a href="compare.html" aria-current="page"><span class="t" lang="zh-Hant">比較</span></a>
       <a href="benchmark.html"><span class="t" lang="zh-Hant">基準測試</span></a>
     </nav>
     <span class="mono"><a href="./">RxAi AMP</a> · <a href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md</a>
       <span class="t" lang="zh-Hant">為唯一真相來源 · Issue 進，知識出。</span>
     </span>
     <p class="built">
-      <span class="t" lang="zh-Hant">由 <a href="https://rxai.com.au">RxAI</a> 打造</span>
+      <span class="t" lang="zh-Hant">由 <a href="https://rxai.com.au">RxAi</a> 打造</span>
     </p>
     <p>© 2026 James Ho · <a href="https://github.com/RxAi-Aus/amp/blob/main/LICENSE">Dual-licensed</a>: AGPL-3.0-or-later or commercial · patent pending (AU provisional 2026907694) · <a href="https://github.com/RxAi-Aus/amp">github.com/RxAi-Aus/amp</a></p>
   </footer>

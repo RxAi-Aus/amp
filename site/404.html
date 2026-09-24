@@ -43,8 +43,9 @@
   a { color: var(--ref); }
   a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
   .go { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 28px; padding: 0; list-style: none; }
-  .go a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border: 1px solid var(--accent); border-radius: 999px;
-    color: var(--accent); text-decoration: none; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; font-weight: 700; }
+  .go a { display: inline-flex; align-items: center; min-height: 32px; padding: 0 14px; border: 1px solid var(--accent); border-radius: 999px;
+    color: var(--accent); text-decoration: none; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; font-weight: 700; }
+  @media (pointer: coarse) { .go a, .langs a { min-height: 44px; display: inline-flex; align-items: center; } }
   .go a:hover { background: var(--accent-soft); }
   .langs { font-size: 14px; }
   .langs a { margin-right: 12px; }
@@ -60,8 +61,8 @@
   <ul class="go">
     <li><a href="/">Overview</a></li>
     <li><a href="/quickstart.html">Quickstart</a></li>
-    <li><a href="/benchmark.html">Benchmarks</a></li>
     <li><a href="/compare.html">Compare</a></li>
+    <li><a href="/benchmark.html">Benchmarks</a></li>
   </ul>
   <p class="langs">
     <a href="/zh-hant/" hreflang="zh-Hant" lang="zh-Hant">繁體中文</a>

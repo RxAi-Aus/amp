@@ -247,6 +247,7 @@
   a.chip {
     color: var(--accent); border-color: var(--accent); text-decoration: none; font-weight: 700;
   }
+  .chips.tags { margin-top: 10px; }
   a.chip:hover { background: var(--accent-soft); }
   .lede { max-width: 68ch; }
   .lede p { margin: 14px 0 0; }
@@ -258,8 +259,9 @@
     font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
     letter-spacing: 0.12em; color: var(--accent); white-space: nowrap;
   }
-  h2 { font-size: 21px; font-weight: 750; letter-spacing: -0.01em; margin: 0; }
+  h2 { font-size: 21px; font-weight: 750; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
   .note { color: var(--muted); font-size: 14.5px; max-width: 70ch; margin: 0 0 18px; }
+  p, li, dd { text-wrap: pretty; }
   .lvlres { margin-top: 20px; color: var(--muted); font-size: 14.5px; max-width: 70ch; }
   .lvlres p { margin: 0 0 8px; }
   .lvlres ul { margin: 0 0 10px; padding-left: 20px; }
@@ -412,6 +414,9 @@
   footer { margin-top: 72px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
   footer .mono { color: var(--muted); }
   footer p { margin: 6px 0 0; }
+  footer p a { white-space: nowrap; }
+  .foot-nav { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 10px; }
+  .foot-nav a[aria-current="page"] { color: var(--ink); text-decoration: none; font-weight: 650; }
   footer .built { margin-top: 10px; font-weight: 600; color: var(--ink); }
 
   /* Narrow screens: 16 px gutter, one scrollable row of languages, a table that fits. */
@@ -441,7 +446,8 @@
   }
   @media (pointer: coarse) {
     .langbar .lang { min-height: 44px; padding-inline: 14px; }
-    a.chip { min-height: 44px; display: inline-flex; align-items: center; }
+    a.chip, .foot-nav a { min-height: 44px; display: inline-flex; align-items: center; }
+    .foot-nav a { min-width: 44px; }
   }
   /* Five languages on one row at 320 px: narrower buttons, still 44 px targets. */
   @media (max-width: 440px) {
@@ -509,9 +515,11 @@
       <a class="chip" href="https://github.com/RxAi-Aus/amp">GitHub ↗</a>
       <a class="chip" href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md ↗</a>
       <a class="chip" href="https://github.com/RxAi-Aus/amp#readme">README ↗</a>
-      <a class="chip" href="benchmark.html">Benchmarks →</a>
       <a class="chip" href="quickstart.html">Quickstart →</a>
       <a class="chip" href="compare.html">Compare →</a>
+      <a class="chip" href="benchmark.html">Benchmarks →</a>
+    </div>
+    <div class="chips tags">
       <span class="chip t" lang="en">zero backend</span>
       <span class="chip t" lang="zh-Hant">零後端</span>
       <span class="chip t" lang="ja">バックエンドゼロ</span>
@@ -538,9 +546,9 @@
       <img class="hero-art" src="assets/hero-ant-trail.png" alt="A glowing trail of ants converging on a GitHub issue card; side trails that lead nowhere fade out" width="1456" height="720" fetchpriority="high" decoding="async">
     </picture>
     <div class="proof" aria-label="Measured results">
-      <div class="tile"><div class="v">−18%</div><div class="l"><span class="t" lang="en">less of the codebase read once memory is on: a model that reads heavily pulled 18% fewer bytes of files and command output, with identical prompts.</span><span class="t" lang="zh-Hant">開啟記憶後少挖 18% 的程式碼：閱讀量大的模型在相同提示的 A/B 測試中，從檔案與指令挖出的內容少了 18%。</span><span class="t" lang="ja">メモリ有効時、コードベースの読み込みが 18% 減。読み込み量の多いモデルが同一プロンプトの A/B で、ファイルやコマンド出力から掘り出した量が 18% 少なかった。</span><span class="t" lang="ko">메모리를 켜면 코드베이스를 18% 덜 파냄: 읽기가 많은 모델이 동일 프롬프트 A/B에서 파일과 명령 출력에서 파낸 양이 18% 감소.</span><span class="t" lang="es">18% menos código extraído con la memoria activada: un modelo de lectura intensiva sacó un 18% menos de archivos y salidas de comandos en un A/B con prompts idénticos.</span></div><div class="tsrc"><span class="t" lang="en">Opus 5 · 8 pairs · 6 Sep 2026</span><span class="t" lang="zh-Hant">Opus 5 · 8 組配對 · 2026-09-06</span><span class="t" lang="ja">Opus 5 · 8 ペア · 2026-09-06</span><span class="t" lang="ko">Opus 5 · 8쌍 · 2026-09-06</span><span class="t" lang="es">Opus 5 · 8 pares · 6 sep 2026</span></div></div>
-      <div class="tile"><div class="v">−14% · −5%</div><div class="l"><span class="t" lang="en">faster, and cheaper, end to end on the same tasks. The injected memory block costs about 1k tokens per call, so the net saving is smaller than the reading saving.</span><span class="t" lang="zh-Hant">同樣的任務端到端快 14%、成本低 5%。注入的記憶區塊每次呼叫約耗 1k token，所以淨節省比讀取節省小。</span><span class="t" lang="ja">同じタスクで端から端まで 14% 速く、5% 安い。注入するメモリブロックは呼び出しごとに約 1k トークンかかるため、純節約は読み込み削減より小さい。</span><span class="t" lang="ko">같은 작업에서 처음부터 끝까지 14% 빠르고 5% 저렴. 주입되는 기억 블록이 호출당 약 1k 토큰이므로 순절감은 읽기 절감보다 작음.</span><span class="t" lang="es">14% más rápido y 5% más barato de extremo a extremo en las mismas tareas. El bloque de memoria inyectado cuesta cerca de 1k tokens por llamada, así que el ahorro neto es menor que el de lectura.</span></div><div class="tsrc"><span class="t" lang="en">Opus 5 · 8 pairs · 6 Sep 2026</span><span class="t" lang="zh-Hant">Opus 5 · 8 組配對 · 2026-09-06</span><span class="t" lang="ja">Opus 5 · 8 ペア · 2026-09-06</span><span class="t" lang="ko">Opus 5 · 8쌍 · 2026-09-06</span><span class="t" lang="es">Opus 5 · 8 pares · 6 sep 2026</span></div></div>
-      <div class="tile"><div class="v">6.8 KB</div><div class="l"><span class="t" lang="en">read to find the right memory among 145, using the index, versus 914 KB and 58 API calls to read every issue.</span><span class="t" lang="zh-Hant">從 145 筆記憶的儲存庫回憶只需 6.8 KB；不用索引、逐一讀取每個 Issue 要 914 KB 與 58 次 API 呼叫。</span><span class="t" lang="ja">145 件の記憶からの想起は 6.8 KB。全 Issue の素朴な走査なら 914 KB・API 呼び出し 58 回。</span><span class="t" lang="ko">기억 145건 저장소에서 회상하는 데 6.8 KB. 모든 이슈를 단순 스캔하면 914 KB, API 호출 58회.</span><span class="t" lang="es">para recordar de un almacén de 145 memorias, frente a 914 KB y 58 llamadas a la API de un escaneo ingenuo de cada issue.</span></div><div class="tsrc"><span class="t" lang="en">Index vs reading every issue · 7 Sep 2026</span><span class="t" lang="zh-Hant">索引 vs 逐一讀取 · 2026-09-07</span><span class="t" lang="ja">インデックス vs 全件読み込み · 2026-09-07</span><span class="t" lang="ko">인덱스 vs 전체 읽기 · 2026-09-07</span><span class="t" lang="es">Índice vs leer cada issue · 7 sep 2026</span></div></div>
+      <div class="tile"><div class="v">−18%</div><div class="l"><span class="t" lang="en">less of the codebase read once memory is on: a model that reads heavily pulled 18% fewer bytes of files and command output, with identical prompts.</span><span class="t" lang="zh-Hant">開啟記憶後少挖 18% 的程式碼：閱讀量大的模型在相同提示的 A/B 測試中，從檔案與指令挖出的內容少了 18%。</span><span class="t" lang="ja">メモリ有効時、コードベースの読み込みが 18% 減。読み込み量の多いモデルが同一プロンプトの A/B で、ファイルやコマンド出力から掘り出した量が 18% 少なかった。</span><span class="t" lang="ko">메모리를 켜면 코드베이스를 18% 덜 파냄: 읽기가 많은 모델이 동일 프롬프트 A/B에서 파일과 명령 출력에서 파낸 양이 18% 감소.</span><span class="t" lang="es">18% menos código extraído con la memoria activada: un modelo de lectura intensiva sacó un 18% menos de archivos y salidas de comandos en un A/B con prompts idénticos.</span></div><div class="tsrc"><span class="t" lang="en">Opus 5 · 8 pairs · 6&nbsp;Sep&nbsp;2026</span><span class="t" lang="zh-Hant">Opus 5 · 8 組配對 · 2026-09-06</span><span class="t" lang="ja">Opus 5 · 8 ペア · 2026-09-06</span><span class="t" lang="ko">Opus 5 · 8쌍 · 2026-09-06</span><span class="t" lang="es">Opus 5 · 8 pares · 6&nbsp;sep&nbsp;2026</span></div></div>
+      <div class="tile"><div class="v">−14% · −5%</div><div class="l"><span class="t" lang="en">faster, and cheaper, end to end on the same tasks. The injected memory block costs about 1k tokens per call, so the net saving is smaller than the reading saving.</span><span class="t" lang="zh-Hant">同樣的任務端到端快 14%、成本低 5%。注入的記憶區塊每次呼叫約耗 1k token，所以淨節省比讀取節省小。</span><span class="t" lang="ja">同じタスクで端から端まで 14% 速く、5% 安い。注入するメモリブロックは呼び出しごとに約 1k トークンかかるため、純節約は読み込み削減より小さい。</span><span class="t" lang="ko">같은 작업에서 처음부터 끝까지 14% 빠르고 5% 저렴. 주입되는 기억 블록이 호출당 약 1k 토큰이므로 순절감은 읽기 절감보다 작음.</span><span class="t" lang="es">14% más rápido y 5% más barato de extremo a extremo en las mismas tareas. El bloque de memoria inyectado cuesta cerca de 1k tokens por llamada, así que el ahorro neto es menor que el de lectura.</span></div><div class="tsrc"><span class="t" lang="en">Opus 5 · 8 pairs · 6&nbsp;Sep&nbsp;2026</span><span class="t" lang="zh-Hant">Opus 5 · 8 組配對 · 2026-09-06</span><span class="t" lang="ja">Opus 5 · 8 ペア · 2026-09-06</span><span class="t" lang="ko">Opus 5 · 8쌍 · 2026-09-06</span><span class="t" lang="es">Opus 5 · 8 pares · 6&nbsp;sep&nbsp;2026</span></div></div>
+      <div class="tile"><div class="v">6.8 KB</div><div class="l"><span class="t" lang="en">read to find the right memory among 145, using the index, versus 914 KB and 58 API calls to read every issue.</span><span class="t" lang="zh-Hant">從 145 筆記憶的儲存庫回憶只需 6.8 KB；不用索引、逐一讀取每個 Issue 要 914 KB 與 58 次 API 呼叫。</span><span class="t" lang="ja">145 件の記憶からの想起は 6.8 KB。全 Issue の素朴な走査なら 914 KB・API 呼び出し 58 回。</span><span class="t" lang="ko">기억 145건 저장소에서 회상하는 데 6.8 KB. 모든 이슈를 단순 스캔하면 914 KB, API 호출 58회.</span><span class="t" lang="es">para recordar de un almacén de 145 memorias, frente a 914 KB y 58 llamadas a la API de un escaneo ingenuo de cada issue.</span></div><div class="tsrc"><span class="t" lang="en">Index vs reading every issue · 7&nbsp;Sep&nbsp;2026</span><span class="t" lang="zh-Hant">索引 vs 逐一讀取 · 2026-09-07</span><span class="t" lang="ja">インデックス vs 全件読み込み · 2026-09-07</span><span class="t" lang="ko">인덱스 vs 전체 읽기 · 2026-09-07</span><span class="t" lang="es">Índice vs leer cada issue · 7&nbsp;sep&nbsp;2026</span></div></div>
       <p class="src"><span class="t" lang="en">Each A/B pairs two fresh sessions on a live repository that differ only in whether memory is on, with identical prompts and tools. Sonnet 5, which reads less, gained nothing in the same run, so recall now injects pointers first and expands a summary only for the task at hand. <a href="benchmark.html">How we measure this →</a></span><span class="t" lang="zh-Hant">每組 A/B 是在真實儲存庫上的兩個全新工作階段，只差在記憶開或關，提示與工具完全相同。同一輪中讀得較少的 Sonnet 5 沒有得到好處，所以現在召回先只注入指標，只在題目相關時才展開摘要。 <a href="benchmark.html">我們如何量測 →</a></span><span class="t" lang="ja">各 A/B は、記憶の有無だけが異なる新規セッション 2 つを、同一のプロンプトとツールで実運用リポジトリ上で比べたものです。同じ回で読み込み量の少ない Sonnet 5 には効果がなかったため、想起はまずポインタだけを注入し、タスクに関係する記憶だけを要約に展開します。 <a href="benchmark.html">計測方法（英語）→</a></span><span class="t" lang="ko">각 A/B는 메모리 켬/끔만 다른 새 세션 두 개를 동일한 프롬프트와 도구로 실제 저장소에서 비교한 것입니다. 같은 회차에서 읽기가 적은 Sonnet 5는 이득이 없었기에, 이제 회상은 포인터부터 주입하고 작업과 관련된 기억만 요약으로 확장합니다. <a href="benchmark.html">측정 방법(영어) →</a></span><span class="t" lang="es">Cada A/B compara, sobre un repositorio real, dos sesiones nuevas que solo difieren en si la memoria está activada, con prompts y herramientas idénticos. Sonnet 5, que lee menos, no ganó nada en esa misma ronda, así que el recuerdo ahora inyecta primero punteros y solo expande un resumen para la tarea en curso. <a href="benchmark.html">Cómo lo medimos (en inglés) →</a></span></p>
     </div>
   </header>
@@ -1366,6 +1374,12 @@
   </section>
 
   <footer>
+    <nav class="foot-nav" aria-label="Pages">
+      <a href="index.html" aria-current="page"><span class="t" lang="en">Overview</span><span class="t" lang="zh-Hant">總覽</span><span class="t" lang="ja">概要</span><span class="t" lang="ko">개요</span><span class="t" lang="es">Resumen</span></a>
+      <a href="quickstart.html"><span class="t" lang="en">Quickstart</span><span class="t" lang="zh-Hant">快速開始</span><span class="t" lang="ja">Quickstart</span><span class="t" lang="ko">Quickstart</span><span class="t" lang="es">Quickstart</span></a>
+      <a href="compare.html"><span class="t" lang="en">Compare</span><span class="t" lang="zh-Hant">比較</span><span class="t" lang="ja">Compare</span><span class="t" lang="ko">Compare</span><span class="t" lang="es">Compare</span></a>
+      <a href="benchmark.html"><span class="t" lang="en">Benchmarks</span><span class="t" lang="zh-Hant">基準測試</span><span class="t" lang="ja">Benchmarks</span><span class="t" lang="ko">Benchmarks</span><span class="t" lang="es">Benchmarks</span></a>
+    </nav>
     <span class="mono">RxAi AMP v2.12 · <a href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md</a>
       <span class="t" lang="en">is the single source of truth · Issues in, knowledge out.</span>
       <span class="t" lang="zh-Hant">為唯一真相來源 · Issue 進，知識出。</span>
@@ -1374,11 +1388,11 @@
       <span class="t" lang="es">es la única fuente de verdad · Entran issues, sale conocimiento.</span>
     </span>
     <p class="built">
-      <span class="t" lang="en">Built by <a href="https://rxai.com.au">RxAI</a></span>
-      <span class="t" lang="zh-Hant">由 <a href="https://rxai.com.au">RxAI</a> 打造</span>
-      <span class="t" lang="ja"><a href="https://rxai.com.au">RxAI</a> が開発</span>
-      <span class="t" lang="ko"><a href="https://rxai.com.au">RxAI</a> 제작</span>
-      <span class="t" lang="es">Creado por <a href="https://rxai.com.au">RxAI</a></span>
+      <span class="t" lang="en">Built by <a href="https://rxai.com.au">RxAi</a></span>
+      <span class="t" lang="zh-Hant">由 <a href="https://rxai.com.au">RxAi</a> 打造</span>
+      <span class="t" lang="ja"><a href="https://rxai.com.au">RxAi</a> が開発</span>
+      <span class="t" lang="ko"><a href="https://rxai.com.au">RxAi</a> 제작</span>
+      <span class="t" lang="es">Creado por <a href="https://rxai.com.au">RxAi</a></span>
     </p>
     <p>© 2026 James Ho · <a href="https://github.com/RxAi-Aus/amp/blob/main/LICENSE">Dual-licensed</a>: AGPL-3.0-or-later or commercial · patent pending (AU provisional 2026907694) · <a href="https://github.com/RxAi-Aus/amp">github.com/RxAi-Aus/amp</a></p>
   </footer>

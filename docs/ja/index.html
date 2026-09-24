@@ -254,6 +254,7 @@
   a.chip {
     color: var(--accent); border-color: var(--accent); text-decoration: none; font-weight: 700;
   }
+  .chips.tags { margin-top: 10px; }
   a.chip:hover { background: var(--accent-soft); }
   .lede { max-width: 68ch; }
   .lede p { margin: 14px 0 0; }
@@ -265,8 +266,9 @@
     font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
     letter-spacing: 0.12em; color: var(--accent); white-space: nowrap;
   }
-  h2 { font-size: 21px; font-weight: 750; letter-spacing: -0.01em; margin: 0; }
+  h2 { font-size: 21px; font-weight: 750; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
   .note { color: var(--muted); font-size: 14.5px; max-width: 70ch; margin: 0 0 18px; }
+  p, li, dd { text-wrap: pretty; }
   .lvlres { margin-top: 20px; color: var(--muted); font-size: 14.5px; max-width: 70ch; }
   .lvlres p { margin: 0 0 8px; }
   .lvlres ul { margin: 0 0 10px; padding-left: 20px; }
@@ -419,6 +421,9 @@
   footer { margin-top: 72px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
   footer .mono { color: var(--muted); }
   footer p { margin: 6px 0 0; }
+  footer p a { white-space: nowrap; }
+  .foot-nav { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 10px; }
+  .foot-nav a[aria-current="page"] { color: var(--ink); text-decoration: none; font-weight: 650; }
   footer .built { margin-top: 10px; font-weight: 600; color: var(--ink); }
 
   /* Narrow screens: 16 px gutter, one scrollable row of languages, a table that fits. */
@@ -448,7 +453,8 @@
   }
   @media (pointer: coarse) {
     .langbar .lang { min-height: 44px; padding-inline: 14px; }
-    a.chip { min-height: 44px; display: inline-flex; align-items: center; }
+    a.chip, .foot-nav a { min-height: 44px; display: inline-flex; align-items: center; }
+    .foot-nav a { min-width: 44px; }
   }
   /* Five languages on one row at 320 px: narrower buttons, still 44 px targets. */
   @media (max-width: 440px) {
@@ -512,9 +518,11 @@
       <a class="chip" href="https://github.com/RxAi-Aus/amp">GitHub ↗</a>
       <a class="chip" href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md ↗</a>
       <a class="chip" href="https://github.com/RxAi-Aus/amp#readme">README ↗</a>
-      <a class="chip" href="../benchmark.html">Benchmarks →</a>
       <a class="chip" href="../quickstart.html">Quickstart →</a>
       <a class="chip" href="../compare.html">Compare →</a>
+      <a class="chip" href="../benchmark.html">Benchmarks →</a>
+    </div>
+    <div class="chips tags">
       <span class="chip t" lang="ja">バックエンドゼロ</span>
       <span class="chip t" lang="ja">Git で監査可能</span>
       <span class="chip t" lang="ja">マルチエージェント</span>
@@ -981,11 +989,17 @@
   </section>
 
   <footer>
+    <nav class="foot-nav" aria-label="Pages">
+      <a href="./" aria-current="page"><span class="t" lang="ja">概要</span></a>
+      <a href="../quickstart.html"><span class="t" lang="ja">Quickstart</span></a>
+      <a href="../compare.html"><span class="t" lang="ja">Compare</span></a>
+      <a href="../benchmark.html"><span class="t" lang="ja">Benchmarks</span></a>
+    </nav>
     <span class="mono">RxAi AMP v2.12 · <a href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md</a>
       <span class="t" lang="ja">が唯一の真実の源 · Issue が入り、知識が出る。</span>
     </span>
     <p class="built">
-      <span class="t" lang="ja"><a href="https://rxai.com.au">RxAI</a> が開発</span>
+      <span class="t" lang="ja"><a href="https://rxai.com.au">RxAi</a> が開発</span>
     </p>
     <p>© 2026 James Ho · <a href="https://github.com/RxAi-Aus/amp/blob/main/LICENSE">Dual-licensed</a>: AGPL-3.0-or-later or commercial · patent pending (AU provisional 2026907694) · <a href="https://github.com/RxAi-Aus/amp">github.com/RxAi-Aus/amp</a></p>
   </footer>
