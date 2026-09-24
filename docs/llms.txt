@@ -19,6 +19,10 @@ Key facts an answer can rely on:
 
 Each page is one language per URL. The overview is also at /zh-hant/, /ja/, /ko/ and /es/; the other pages also at /zh-hant/.
 
+## Publisher
+
+- [RxAI](https://www.rxai.com.au/): the AI consultancy that builds and maintains RxAi AMP; [project showcase entry](https://www.rxai.com.au/case-studies.html#showcase-amp).
+
 ## Source
 
 - [Repository](https://github.com/RxAi-Aus/amp): code, adapters, benchmark runner, licence.
