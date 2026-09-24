@@ -67,14 +67,14 @@
   var css =
     ".amp-consent{position:fixed;left:16px;right:16px;bottom:16px;z-index:60;max-width:680px;margin:0 auto;" +
     "background:var(--paper,#fff);color:var(--ink,#1a2334);border:1px solid var(--line,#d9e0ea);border-radius:12px;" +
-    "box-shadow:0 12px 32px rgba(0,0,0,.14);padding:14px 16px;font-size:14px;line-height:1.5;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}" +
+    "box-shadow:0 4px 8px rgba(0,0,0,.12);padding:14px 16px;font-size:14px;line-height:1.5;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}" +
     ".amp-consent[hidden]{display:none}" +
     ".amp-consent p{margin:0;flex:1 1 320px}" +
     ".amp-consent a{color:var(--ref,#2f5fa8)}" +
     ".amp-consent .amp-consent-actions{display:flex;gap:8px;flex-wrap:wrap}" +
     ".amp-consent button{font:inherit;font-size:13.5px;min-height:44px;padding:8px 16px;border-radius:999px;cursor:pointer;" +
     "border:1px solid var(--line,#d9e0ea);background:var(--panel,#f0f3f8);color:var(--ink,#1a2334)}" +
-    ".amp-consent button.primary{background:var(--accent,#8b5a0e);border-color:var(--accent,#8b5a0e);color:#fff;font-weight:700}" +
+    ".amp-consent button.primary{background:var(--accent,#8b5a0e);border-color:var(--accent,#8b5a0e);color:var(--paper,#fff);font-weight:700}" +
     ".amp-consent button:focus-visible{outline:2px solid var(--accent,#8b5a0e);outline-offset:2px}" +
     "@media (max-width:640px){.amp-consent{left:8px;right:8px;bottom:8px;padding:12px 14px}}";
 
@@ -89,7 +89,7 @@
     if (banner) return banner;
     banner = document.createElement("div");
     banner.className = "amp-consent";
-    banner.setAttribute("role", "dialog");
+    banner.setAttribute("role", "region");
     banner.setAttribute("aria-live", "polite");
     banner.setAttribute("aria-label", "Cookie consent");
     banner.innerHTML =

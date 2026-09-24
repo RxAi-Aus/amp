@@ -26,9 +26,9 @@
 <meta property="og:description" content="Twin AI sessions, one sticky note of memory, and a receipt for every token. How the AMP A/B benchmark is designed.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://amp.rxai.com.au/benchmark.html">
-<meta property="og:image" content="https://amp.rxai.com.au/assets/social-preview.png">
+<meta property="og:image" content="https://amp.rxai.com.au/assets/social-preview.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://amp.rxai.com.au/assets/social-preview.png">
+<meta name="twitter:image" content="https://amp.rxai.com.au/assets/social-preview.jpg">
 <link rel="canonical" href="https://amp.rxai.com.au/benchmark.html">
 <script type="application/ld+json">
 {
@@ -53,7 +53,7 @@
       "dateModified": "2026-09-24",
       "author": { "@type": "Person", "name": "James Ho" },
       "publisher": { "@id": "https://rxai.com.au/#organization" },
-      "image": "https://amp.rxai.com.au/assets/social-preview.png",
+      "image": "https://amp.rxai.com.au/assets/social-preview.jpg",
       "about": { "@id": "https://amp.rxai.com.au/#software" },
       "isPartOf": { "@id": "https://amp.rxai.com.au/#website" }
     },
@@ -77,9 +77,9 @@
     --panel: #F0F3F8;
     --accent: #8B5A0E;
     --accent-soft: #F5EAD4;
-    --ok: #2E7D4F;
+    --ok: #287046;
     --ok-soft: #E3F0E8;
-    --bad: #B3453F;
+    --bad: #A83E38;
     --bad-soft: #F6E5E4;
     --ref: #2F5FA8;
     --ref-soft: #E4ECF7;
@@ -172,7 +172,7 @@
   }
   .lede { max-width: 68ch; }
   .lede p { margin: 14px 0 0; }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
   .chip {
     font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
     border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; color: var(--muted);
@@ -269,7 +269,7 @@
   .sum .how code { font-size: 0.86em; }
 
   .callout {
-    border-left: 3px solid var(--ok); background: var(--ok-soft); border-radius: 0 8px 8px 0;
+    background: var(--ok-soft); border-radius: 8px;
     padding: 12px 16px; margin: 22px 0 0; font-size: 14.5px; max-width: 74ch;
   }
   .callout p { margin: 0; }
@@ -297,6 +297,10 @@
   footer p { margin: 6px 0 0; }
   footer .built { margin-top: 10px; font-weight: 600; color: var(--ink); }
 
+  @media (pointer: coarse) {
+    .langbar button { min-height: 44px; padding-inline: 14px; }
+    .langbar .home, a.chip { min-height: 44px; display: inline-flex; align-items: center; }
+  }
   @media (max-width: 640px) {
     .wrap { padding: 16px 16px 72px; }
     .sum { grid-template-columns: 1fr; gap: 2px; }
@@ -409,42 +413,42 @@
     </h3>
     <div class="steps">
       <div class="step">
-        <span class="k">01 · ONE SWITCH</span>
+        <span class="k">ONE SWITCH</span>
         <h3><span class="t" lang="en">Only one thing differs</span><span class="t" lang="zh-Hant">只有一個差別</span></h3>
         <p class="t" lang="en">Prompt, model, tool allowlist and project are identical. The only difference between the two helpers is the memory switch.</p>
         <p class="t" lang="zh-Hant">提示、模型、工具白名單、專案都一樣。兩個助手之間唯一的差別，就是記憶開關。</p>
         <span class="trigger">AMP_DISABLE=1</span>
       </div>
       <div class="step">
-        <span class="k">02 · TAKE TURNS</span>
+        <span class="k">TAKE TURNS</span>
         <h3><span class="t" lang="en">They take turns going first</span><span class="t" lang="zh-Hant">輪流先跑</span></h3>
         <p class="t" lang="en">In one pair the memory helper runs first, in the next pair the other one does. Neither side always gets the warm start of a filled prompt cache.</p>
         <p class="t" lang="zh-Hant">這一對由有記憶的助手先跑，下一對換另一個先跑。這樣沒有任何一方總是佔到「快取已經熱好」的便宜。</p>
         <span class="trigger">(pair + model) % 2</span>
       </div>
       <div class="step">
-        <span class="k">03 · REPEAT</span>
+        <span class="k">REPEAT</span>
         <h3><span class="t" lang="en">Do it many times</span><span class="t" lang="zh-Hant">重複很多次</span></h3>
         <p class="t" lang="en">One try could just be luck, so tasks rotate across pairs and every question is asked more than once.</p>
         <p class="t" lang="zh-Hant">只試一次可能只是運氣，所以題目在不同的配對之間輪替，每一題都會問不只一次。</p>
         <span class="trigger">--cases 16 → 8 pairs</span>
       </div>
       <div class="step">
-        <span class="k">04 · TRICK QUESTION</span>
+        <span class="k">TRICK QUESTION</span>
         <h3><span class="t" lang="en">One question has no answer in memory</span><span class="t" lang="zh-Hant">有一題是陷阱題</span></h3>
         <p class="t" lang="en">The control task is one no memory covers. It checks that memory stays quiet, and costs nothing, when it has nothing useful to say.</p>
         <p class="t" lang="zh-Hant">對照題是沒有任何記憶涵蓋的題目。它檢查記憶在幫不上忙的時候，會不會乖乖保持安靜、不多花成本。</p>
         <span class="trigger">"expectedIssue": null</span>
       </div>
       <div class="step">
-        <span class="k">05 · FROZEN MEMORY</span>
+        <span class="k">FROZEN MEMORY</span>
         <h3><span class="t" lang="en">The memory box is frozen</span><span class="t" lang="zh-Hant">記憶盒子是凍結的</span></h3>
         <p class="t" lang="en">Memories keep changing weight as the store compiles. The helpers read a pinned copy with its remote removed, so every run sees the same records.</p>
         <p class="t" lang="zh-Hant">記憶的權重會隨著每次編譯改變。助手讀的是一份固定的副本，並移除了遠端，所以每一輪看到的記憶都一樣。</p>
         <span class="trigger">--memory-repo &lt;snapshot&gt;</span>
       </div>
       <div class="step">
-        <span class="k">06 · HANDS OFF</span>
+        <span class="k">HANDS OFF</span>
         <h3><span class="t" lang="en">Look, don't touch</span><span class="t" lang="zh-Hant">只能看，不能動</span></h3>
         <p class="t" lang="en">Sessions may read files and run read-only commands, nothing else. Personal connectors are switched off, so AMP is the only memory under test.</p>
         <p class="t" lang="zh-Hant">工作階段只能讀檔、執行唯讀指令，其他一律不行。個人的外部連接器全部關閉，所以受測的記憶只有 AMP。</p>
@@ -648,7 +652,7 @@
       </table>
     </div>
     <div class="prose" style="margin-top:18px">
-      <p class="t" lang="en">The two "after" rows should agree and don't quite: with only two pairs per task, one control session that dug up 8 KB more and one cold-cache first session are enough to move cost by ten points. Read the direction — memory reads less and costs a little more — not the decimals.</p>
+      <p class="t" lang="en">The two "after" rows should agree and don't quite: with only two pairs per task, one control session that dug up 8 KB more and one cold-cache first session are enough to move cost by ten points. Read the direction (memory reads less and costs a little more), not the decimals.</p>
       <p class="t" lang="zh-Hant">兩列「之後」照理應該一致，卻有落差：每題只有兩對時，一個多挖了 8 KB 的對照題工作階段，加上一個快取還沒熱的第一個工作階段，就足以讓成本差十個百分點。請看方向——記憶讓它讀得少、成本略高——不要看小數點。</p>
       <p class="t" lang="en">The first sticky note listed a person's decisions one by one. The helper treated the list as homework of its own and went to check every item, so memory made it read <em>more</em>. The fix was to hand over only a short goal-and-status summary, and only for tasks the memory matches; the full record stays one fetch away. Same model, same questions: reading flipped from +28% to −14%.</p>
       <p class="t" lang="zh-Hant">第一版的便利貼把某人的決定一條一條列出來。助手把這張清單當成自己的作業，逐項去檢查，結果記憶反而讓它讀得<em>更多</em>。修正方法是只交出一段簡短的「目標加現況」摘要，而且只在題目和記憶相關時才給；完整紀錄需要時再去取。同一個模型、同樣的題目：閱讀量從 +28% 翻轉為 −14%。</p>
@@ -724,7 +728,7 @@
       </table>
     </div>
     <div class="prose" style="margin-top:18px">
-      <p class="t" lang="en">Four pairs per model is half a normal run. Sol's 4-pair −17% sits next to its 8-pair +0.7% from the day before, and Luna flips the other way, so neither is a headline yet; an 8-pair repeat with the isolation flags decides it. What holds across Codex is what held on Claude Code: the harder the model thinks, the more it reads, and the more there is for memory to replace — astra at xhigh dug up 13.6% less and finished 10.7% sooner, while at medium it broke even. Every session's ledger shows the same three notes delivered.</p>
+      <p class="t" lang="en">Four pairs per model is half a normal run. Sol's 4-pair −17% sits next to its 8-pair +0.7% from the day before, and Luna flips the other way, so neither is a headline yet; an 8-pair repeat with the isolation flags decides it. What holds across Codex is what held on Claude Code: the harder the model thinks, the more it reads, and the more there is for memory to replace. At xhigh, astra dug up 13.6% less and finished 10.7% sooner; at medium it broke even. Every session's ledger shows the same three notes delivered.</p>
       <p class="t" lang="zh-Hant">每個模型 4 對只有一般測試的一半。Sol 的 4 對 −17% 旁邊，就是前一天 8 對的 +0.7%，Luna 則往反方向翻轉，所以兩者都還不能當標題；要等加上隔離旗標重跑 8 對才能定案。在 Codex 上站得住的結論，和 Claude Code 上一樣：模型想得越用力就讀得越多，記憶能替代的探索也越多——astra 在 xhigh 時少挖 13.6%、早 10.7% 完成，在 medium 時打平。每個工作階段的日誌都顯示同樣三張便利貼確實送到。</p>
     </div>
   </section>

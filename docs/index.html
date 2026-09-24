@@ -26,9 +26,10 @@
 <meta property="og:description" content="A shared memory system for AI agents built on GitHub Issues — zero backend, git-auditable, outcome-weighted.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://amp.rxai.com.au/">
-<meta property="og:image" content="https://amp.rxai.com.au/assets/social-preview.png">
+<meta property="og:image" content="https://amp.rxai.com.au/assets/social-preview.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://amp.rxai.com.au/assets/social-preview.png">
+<meta name="twitter:image" content="https://amp.rxai.com.au/assets/social-preview.jpg">
+<link rel="preload" as="image" type="image/webp" imagesrcset="assets/hero-ant-trail-832.webp 832w, assets/hero-ant-trail-1456.webp 1456w" imagesizes="(min-width: 880px) 832px, calc(100vw - 48px)" fetchpriority="high">
 <link rel="canonical" href="https://amp.rxai.com.au/">
 <script type="application/ld+json">
 {
@@ -79,7 +80,7 @@
       "inLanguage": "en",
       "datePublished": "2026-08-14",
       "dateModified": "2026-09-24",
-      "primaryImageOfPage": "https://amp.rxai.com.au/assets/social-preview.png"
+      "primaryImageOfPage": "https://amp.rxai.com.au/assets/social-preview.jpg"
     }
   ]
 }
@@ -93,9 +94,9 @@
     --panel: #F0F3F8;
     --accent: #8B5A0E;
     --accent-soft: #F5EAD4;
-    --ok: #2E7D4F;
+    --ok: #287046;
     --ok-soft: #E3F0E8;
-    --bad: #B3453F;
+    --bad: #A83E38;
     --bad-soft: #F6E5E4;
     --ref: #2F5FA8;
     --ref-soft: #E4ECF7;
@@ -182,7 +183,7 @@
     font-size: clamp(30px, 5.4vw, 46px); font-weight: 800; letter-spacing: -0.02em;
     line-height: 1.12; margin: 0 0 20px; text-wrap: balance;
   }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
   .hero-art { display: block; width: 100%; height: auto; margin-top: 22px; border-radius: 12px; border: 1px solid var(--line); }
   .proof { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 18px; }
   .proof .tile { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: var(--panel); }
@@ -358,6 +359,10 @@
   footer p { margin: 6px 0 0; }
   footer .built { margin-top: 10px; font-weight: 600; color: var(--ink); }
 
+  @media (pointer: coarse) {
+    .langbar button { min-height: 44px; padding-inline: 14px; }
+    a.chip { min-height: 44px; display: inline-flex; align-items: center; }
+  }
   @media (max-width: 640px) {
     .fnode { grid-template-columns: 92px 1fr; gap: 12px; }
     .fnode:not(:last-child)::before { left: 45px; }
@@ -378,12 +383,11 @@
       animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
     }
     /* One entrance, on the fold that carries the argument. Nothing below it moves. */
-    html[data-js] header > * { animation: amp-rise 640ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+    html[data-js] header > :not(.hero-art) { animation: amp-rise 640ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
     html[data-js] header > h1 { animation-delay: 70ms; }
     html[data-js] header > .lede { animation-delay: 140ms; }
     html[data-js] header > .chips { animation-delay: 210ms; }
-    html[data-js] header > .hero-art { animation-delay: 280ms; }
-    html[data-js] header > .proof { animation-delay: 350ms; }
+    html[data-js] header > .proof { animation-delay: 280ms; }
   }
   @keyframes amp-rise { from { opacity: 0; transform: translateY(12px); } }
 </style>
@@ -411,7 +415,7 @@
       <span class="t" lang="es">Cómo funciona el cerebro compartido</span>
     </h1>
     <div class="lede">
-      <p class="t" lang="en">Every memory is one GitHub Issue. Comments are the conversation about it. GitHub Actions — not any AI — compiles the index. Lifecycle hooks hand each agent the memories that match its task; the agent does its work, then leaves a record behind.</p>
+      <p class="t" lang="en">Every memory is one GitHub Issue. Comments are the conversation about it. GitHub Actions compiles the index, not an AI. Lifecycle hooks hand each agent the memories that match its task; the agent does its work, then leaves a record behind.</p>
       <p class="t" lang="zh-Hant">每一條記憶就是一則 GitHub Issue；留言是針對它的討論。索引由 GitHub Actions（而非任何 AI）自動編譯。生命週期 hook 把和任務相符的記憶交給代理；代理工作完，留下紀錄。</p>
       <p class="t" lang="ja">記憶はすべて1件の GitHub Issue。コメントはそれをめぐる会話です。インデックスを編纂するのは AI ではなく GitHub Actions。ライフサイクルフックがタスクに合う記憶をエージェントに手渡し、エージェントは作業して記録を残します。</p>
       <p class="t" lang="ko">모든 기억은 하나의 GitHub 이슈입니다. 댓글은 그 기억에 대한 대화입니다. 인덱스는 AI가 아니라 GitHub Actions가 컴파일합니다. 라이프사이클 훅이 작업에 맞는 기억을 에이전트에게 건네고, 에이전트는 작업한 뒤 기록을 남깁니다.</p>
@@ -443,7 +447,10 @@
       <span class="chip t" lang="ko">성과 가중</span>
       <span class="chip t" lang="es">ponderado por resultados</span>
     </div>
-    <img class="hero-art" src="assets/hero-ant-trail.png" alt="A glowing trail of ants converging on a GitHub issue card; side trails that lead nowhere fade out" width="1456" height="720">
+    <picture>
+      <source type="image/webp" srcset="assets/hero-ant-trail-832.webp 832w, assets/hero-ant-trail-1456.webp 1456w" sizes="(min-width: 880px) 832px, calc(100vw - 48px)">
+      <img class="hero-art" src="assets/hero-ant-trail.png" alt="A glowing trail of ants converging on a GitHub issue card; side trails that lead nowhere fade out" width="1456" height="720" fetchpriority="high" decoding="async">
+    </picture>
     <div class="proof" aria-label="Measured results">
       <div class="tile"><div class="v">−18%</div><div class="l"><span class="t" lang="en">less of the codebase dug up once memory is on: a heavy-reading model pulled 18% fewer bytes of files and command output in an A/B with identical prompts.</span><span class="t" lang="zh-Hant">開啟記憶後少挖 18% 的程式碼：閱讀量大的模型在相同提示的 A/B 測試中，從檔案與指令挖出的內容少了 18%。</span><span class="t" lang="ja">メモリ有効時、コードベースの読み込みが 18% 減。読み込み量の多いモデルが同一プロンプトの A/B で、ファイルやコマンド出力から掘り出した量が 18% 少なかった。</span><span class="t" lang="ko">메모리를 켜면 코드베이스를 18% 덜 파냄: 읽기가 많은 모델이 동일 프롬프트 A/B에서 파일과 명령 출력에서 파낸 양이 18% 감소.</span><span class="t" lang="es">18% menos código extraído con la memoria activada: un modelo de lectura intensiva sacó un 18% menos de archivos y salidas de comandos en un A/B con prompts idénticos.</span></div></div>
       <div class="tile"><div class="v">−14% · −5%</div><div class="l"><span class="t" lang="en">faster, and cheaper, end to end on the same tasks. The injected memory block costs about 1k tokens per call, so the net saving is smaller than the reading saving.</span><span class="t" lang="zh-Hant">同樣的任務端到端快 14%、成本低 5%。注入的記憶區塊每次呼叫約耗 1k token，所以淨節省比讀取節省小。</span><span class="t" lang="ja">同じタスクで端から端まで 14% 速く、5% 安い。注入するメモリブロックは呼び出しごとに約 1k トークンかかるため、純節約は読み込み削減より小さい。</span><span class="t" lang="ko">같은 작업에서 처음부터 끝까지 14% 빠르고 5% 저렴. 주입되는 기억 블록이 호출당 약 1k 토큰이므로 순절감은 읽기 절감보다 작음.</span><span class="t" lang="es">14% más rápido y 5% más barato de extremo a extremo en las mismas tareas. El bloque de memoria inyectado cuesta cerca de 1k tokens por llamada, así que el ahorro neto es menor que el de lectura.</span></div></div>
@@ -463,7 +470,7 @@
         <span class="t" lang="es">Un issue, un recuerdo</span>
       </h2>
     </div>
-    <p class="note t" lang="en">The title carries all routing information. The indexer parses it with a strict regex — a typo silently breaks indexing, so agents copy templates, never improvise.</p>
+    <p class="note t" lang="en">The title carries all routing information. The indexer parses it with a strict regex. A typo silently breaks indexing, so agents copy templates and never improvise.</p>
     <p class="note t" lang="zh-Hant">標題本身就攜帶所有路由資訊。索引器用嚴格的正規表達式解析標題——打錯字會讓索引悄悄失效，因此代理一律複製範本、不即興發揮。</p>
     <p class="note t" lang="ja">ルーティング情報はすべてタイトルに含まれます。インデクサは厳密な正規表現でタイトルを解析するため、誤字は静かにインデックスを壊します。だからエージェントはテンプレートをコピーし、決して即興では書きません。</p>
     <p class="note t" lang="ko">라우팅 정보는 모두 제목에 담겨 있습니다. 인덱서는 엄격한 정규식으로 제목을 파싱하므로 오타 하나로 인덱싱이 조용히 깨집니다. 그래서 에이전트는 템플릿을 복사할 뿐, 즉흥적으로 쓰지 않습니다.</p>
@@ -515,8 +522,8 @@
         <span class="t" lang="es">La ruta de escritura</span>
       </h2>
     </div>
-    <img class="diagram" src="assets/architecture.png" alt="Architecture: agents read and write GitHub Issues; GitHub Actions index them every six hours with weights and decay; agents recall from INDEX.md, REGION files and a local cache" width="1408" height="768">
-    <p class="note t" lang="en">No AI model runs in the indexing workflows — they are deterministic scripts. Agents never edit the index files; the workflows own them.</p>
+    <picture><source type="image/webp" srcset="assets/architecture-832.webp 832w, assets/architecture-1376.webp 1376w" sizes="(min-width: 880px) 832px, calc(100vw - 48px)"><img class="diagram" src="assets/architecture.png" alt="Architecture: agents read and write GitHub Issues; GitHub Actions index them every six hours with weights and decay; agents recall from INDEX.md, REGION files and a local cache" width="1376" height="768" loading="lazy" decoding="async"></picture>
+    <p class="note t" lang="en">No AI model runs in the indexing workflows; they are deterministic scripts. Agents never edit the index files; the workflows own them.</p>
     <p class="note t" lang="zh-Hant">索引工作流程中沒有任何 AI 模型參與——都是確定性腳本。代理永遠不編輯索引檔案；那些檔案由工作流程專屬管理。</p>
     <p class="note t" lang="ja">インデックス生成のワークフローに AI モデルは一切関与しません——すべて決定的なスクリプトです。エージェントがインデックスファイルを編集することはなく、所有者はワークフローです。</p>
     <p class="note t" lang="ko">인덱싱 워크플로에는 어떤 AI 모델도 실행되지 않습니다. 모두 결정적 스크립트입니다. 에이전트는 인덱스 파일을 절대 편집하지 않으며, 워크플로가 소유합니다.</p>
@@ -562,7 +569,7 @@
             <span class="t" lang="es">El tracker actualiza el registro sin indexar</span>
             <span class="timing">~30 s</span>
           </h3>
-          <p class="t" lang="en">On every issue opened, <code>not_indexed.md</code> is rebuilt from all issues since the last compile — so a failed run is repaired by the next one, and new memories are never invisible.</p>
+          <p class="t" lang="en">On every issue opened, <code>not_indexed.md</code> is rebuilt from all issues since the last compile, so a failed run is repaired by the next one, and new memories are never invisible.</p>
           <p class="t" lang="zh-Hant">每有 Issue 開啟，<code>not_indexed.md</code> 就會從上次編譯以來的全部 Issue 重建——失敗的執行由下一次自動修復，新記憶不會被漏看。</p>
           <p class="t" lang="ja">Issue が開かれるたびに、<code>not_indexed.md</code> は前回のコンパイル以降のすべての Issue から再構築されます。失敗した実行は次の実行が修復し、新しい記憶が見えなくなることはありません。</p>
           <p class="t" lang="ko">이슈가 열릴 때마다 <code>not_indexed.md</code>는 마지막 컴파일 이후의 모든 이슈로부터 재구축됩니다. 실패한 실행은 다음 실행이 복구하며, 새 기억이 보이지 않게 되는 일은 없습니다.</p>
@@ -586,7 +593,7 @@
             <span class="t" lang="es">Compilación programada</span>
             <span class="timing">every 6 h</span>
           </h3>
-          <p class="t" lang="en">Rebuilds <code>INDEX.md</code> (always small — summaries only) and per-region <code>REGION-*.md</code> pointer tables, applies weight decay and outcome deltas, persists <code>weights.json</code>.</p>
+          <p class="t" lang="en">Rebuilds <code>INDEX.md</code> (always small: Region pointers with titles) and per-region <code>REGION-*.md</code> pointer tables, applies weight decay and outcome deltas, persists <code>weights.json</code>.</p>
           <p class="t" lang="zh-Hant">重建永遠精簡的 <code>INDEX.md</code>（僅摘要）與各區域的 <code>REGION-*.md</code> 指標表，套用權重衰減與成效加減分，並保存 <code>weights.json</code>。</p>
           <p class="t" lang="ja">常に小さく保たれる <code>INDEX.md</code>（要約のみ）と領域ごとの <code>REGION-*.md</code> ポインタ表を再構築し、重みの減衰と成果の増減を適用して <code>weights.json</code> に保存します。</p>
           <p class="t" lang="ko">항상 작게 유지되는 <code>INDEX.md</code>(요약만)와 영역별 <code>REGION-*.md</code> 포인터 표를 재구축하고, 가중치 감쇠와 성과 증감을 적용해 <code>weights.json</code>에 저장합니다.</p>
@@ -609,7 +616,7 @@
             <span class="t" lang="ko">지식 내보내기</span>
             <span class="t" lang="es">Exportación de conocimiento</span>
           </h3>
-          <p class="t" lang="en">The same run projects every issue into an OKF v0.1 bundle (<code>okf/</code>) and a BigQuery-ready <code>rows.ndjson</code>. Both are derived and read-only — Issues stay the single source of truth.</p>
+          <p class="t" lang="en">The same run projects every issue into an OKF v0.1 bundle (<code>okf/</code>) and a BigQuery-ready <code>rows.ndjson</code>. Both are derived and read-only; Issues stay the single source of truth.</p>
           <p class="t" lang="zh-Hant">同一次執行把所有 Issue 投影成 OKF v0.1 知識包（<code>okf/</code>）與可載入 BigQuery 的 <code>rows.ndjson</code>。兩者皆為衍生的唯讀資料——Issue 永遠是唯一的真相來源。</p>
           <p class="t" lang="ja">同じ実行がすべての Issue を OKF v0.1 バンドル（<code>okf/</code>）と BigQuery 用の <code>rows.ndjson</code> に射影します。どちらも派生の読み取り専用データで、真実の源は常に Issue です。</p>
           <p class="t" lang="ko">같은 실행이 모든 이슈를 OKF v0.1 번들(<code>okf/</code>)과 BigQuery용 <code>rows.ndjson</code>으로 사영합니다. 둘 다 파생된 읽기 전용 데이터이며, 단일 진실 원천은 언제나 이슈입니다.</p>
@@ -630,7 +637,7 @@
         <span class="t" lang="es">El comando /amp</span>
       </h2>
     </div>
-    <p class="note t" lang="en">A user-invocable Claude Code slash command, installed at user level (<span class="mono">~/.claude/commands/amp.md</span>) so it works from any project. The hooks fire on schedule; <span class="mono">/amp</span> fires when you say so. Formats still come from the <span class="mono">rxai-amp</span> skill — the command is the WHEN, the skill is the HOW. The slash menu shows both <span class="mono">/amp</span> and <span class="mono">/rxai-amp</span>: type <span class="mono">/amp</span> — it loads the skill (the rulebook) by itself.</p>
+    <p class="note t" lang="en">A user-invocable Claude Code slash command, installed at user level (<span class="mono">~/.claude/commands/amp.md</span>) so it works from any project. The hooks fire on schedule; <span class="mono">/amp</span> fires when you say so. Formats still come from the <span class="mono">rxai-amp</span> skill: the command is the WHEN, the skill is the HOW. The slash menu shows both <span class="mono">/amp</span> and <span class="mono">/rxai-amp</span>: type <span class="mono">/amp</span>, which loads the skill (the rulebook) by itself.</p>
     <p class="note t" lang="zh-Hant">Claude Code 的使用者指令，安裝在使用者層級（<span class="mono">~/.claude/commands/amp.md</span>），任何專案都能用。Hook 依時機自動觸發；<span class="mono">/amp</span> 則聽你號令。格式仍由 <span class="mono">rxai-amp</span> 技能提供——指令負責「何時」，技能負責「如何」。選單裡會同時看到 <span class="mono">/amp</span> 與 <span class="mono">/rxai-amp</span>：輸入 <span class="mono">/amp</span> 即可，它會自己載入技能（規則手冊）。</p>
     <p class="note t" lang="ja">Claude Code のユーザー起動スラッシュコマンド。ユーザーレベル（<span class="mono">~/.claude/commands/amp.md</span>）にインストールされ、どのプロジェクトからでも使えます。フックは決まったタイミングで発火し、<span class="mono">/amp</span> はあなたの合図で発火します。フォーマットは今も <span class="mono">rxai-amp</span> スキルが担います——コマンドが「いつ」、スキルが「どうやって」。メニューには <span class="mono">/amp</span> と <span class="mono">/rxai-amp</span> の両方が表示されますが、入力するのは <span class="mono">/amp</span>。スキル（ルールブック）は自動で読み込まれます。</p>
     <p class="note t" lang="ko">Claude Code의 사용자 호출 슬래시 명령. 사용자 레벨(<span class="mono">~/.claude/commands/amp.md</span>)에 설치되어 어떤 프로젝트에서도 동작합니다. 훅은 정해진 시점에, <span class="mono">/amp</span>는 당신이 원할 때 발동합니다. 형식은 여전히 <span class="mono">rxai-amp</span> 스킬이 담당합니다. 명령은 '언제', 스킬은 '어떻게'입니다. 메뉴에는 <span class="mono">/amp</span>와 <span class="mono">/rxai-amp</span>가 둘 다 보이지만, 입력할 것은 <span class="mono">/amp</span>입니다. 스킬(규칙집)은 스스로 로드됩니다.</p>
@@ -658,7 +665,7 @@
         <span class="aside t" lang="es">→ repo destino · agente · issues recientes</span>
       </div>
     </div>
-    <p class="note t" lang="en" style="margin-top:22px">Where it posts — resolution precedence. The config file outranks repo self-detection <em>by design</em>: one shared brain, the same target from any folder. Override per run with <span class="mono">RXAI_AMP_SLUG</span>.</p>
+    <p class="note t" lang="en" style="margin-top:22px">Where it posts, in order of precedence. The config file outranks repo self-detection <em>by design</em>: one shared brain, the same target from any folder. Override per run with <span class="mono">RXAI_AMP_SLUG</span>.</p>
     <p class="note t" lang="zh-Hant" style="margin-top:22px">發到哪裡——解析優先序。設定檔刻意高於倉庫自動偵測：同一顆共享大腦，在哪個資料夾都指向同一目標。單次執行可用 <span class="mono">RXAI_AMP_SLUG</span> 覆寫。</p>
     <p class="note t" lang="ja" style="margin-top:22px">投稿先の解決優先順位。設定ファイルは<em>意図的に</em>リポジトリ自動検出より優先されます——共有ブレインはひとつ、どのフォルダからでも同じ宛先へ。単発の上書きは <span class="mono">RXAI_AMP_SLUG</span> で。</p>
     <p class="note t" lang="ko" style="margin-top:22px">게시 대상의 결정 우선순위. 설정 파일은 <em>의도적으로</em> 저장소 자동 감지보다 우선합니다. 공유 두뇌는 하나, 어느 폴더에서든 같은 대상입니다. 일회성 재정의는 <span class="mono">RXAI_AMP_SLUG</span>로.</p>
@@ -667,7 +674,7 @@
       <div class="rung">
         <span class="file">RXAI_AMP_SLUG</span>
         <span class="why">
-          <span class="t" lang="en">explicit environment override — always wins</span>
+          <span class="t" lang="en">explicit environment override; always wins</span>
           <span class="t" lang="zh-Hant">環境變數明確指定——優先權最高</span>
           <span class="t" lang="ja">環境変数による明示指定——常に最優先</span>
           <span class="t" lang="ko">환경 변수 명시 지정 — 항상 우선</span>
@@ -677,7 +684,7 @@
       <div class="rung">
         <span class="file">~/.rxai-amp/config.json</span>
         <span class="why">
-          <span class="t" lang="en">your configured memory repo — the same one the v2.8 lifecycle adapters read</span>
+          <span class="t" lang="en">your configured memory repo, the same one the v2.8 lifecycle adapters read</span>
           <span class="t" lang="zh-Hant">設定檔指定的記憶倉庫——與 v2.8 生命週期配接器共用同一份設定</span>
           <span class="t" lang="ja">設定済みの記憶リポジトリ——v2.8 ライフサイクルアダプタと同じ設定を共有</span>
           <span class="t" lang="ko">설정된 기억 저장소 — v2.8 라이프사이클 어댑터와 같은 설정을 공유</span>
@@ -739,7 +746,7 @@
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">At session start the index is injected into context automatically — the agent doesn't decide to recall; recall happens to it.</p>
+        <p class="t" lang="en">At session start the hooks put the index and the pointers to matching memories into context. The agent doesn't decide to recall; recall happens to it.</p>
         <p class="t" lang="zh-Hant">工作階段一開始，索引就自動注入情境——不靠代理「想起來」，回憶是自動發生的。</p>
         <p class="t" lang="ja">セッション開始時、インデックスは自動的にコンテキストへ注入されます。エージェントが思い出すと決めるのではなく、想起は向こうからやって来ます。</p>
         <p class="t" lang="ko">세션 시작 시 인덱스가 자동으로 컨텍스트에 주입됩니다. 에이전트가 회상을 결정하는 게 아니라, 회상이 저절로 일어납니다.</p>
@@ -747,7 +754,7 @@
         <div class="trigger">SessionStart hook → INDEX.md + not_indexed.md</div>
         <div class="more" id="lc-1">
           <div class="more-in">
-            <p class="t" lang="en"><span class="mono">adapters/claude-code/hooks/session-start.mjs</span> — pulls <span class="mono">INDEX.md</span> and <span class="mono">not_indexed.md</span> into the session before your first prompt.</p>
+            <p class="t" lang="en"><span class="mono">adapters/claude-code/hooks/session-start.mjs</span> pulls <span class="mono">INDEX.md</span>, <span class="mono">not_indexed.md</span> and the matching pointers into the session before your first prompt.</p>
             <p class="t" lang="zh-Hant"><span class="mono">adapters/claude-code/hooks/session-start.mjs</span>——在你下第一道指令之前，把 <span class="mono">INDEX.md</span> 與 <span class="mono">not_indexed.md</span> 拉進工作階段。</p>
             <p class="t" lang="ja"><span class="mono">adapters/claude-code/hooks/session-start.mjs</span> — 最初のプロンプトの前に <span class="mono">INDEX.md</span> と <span class="mono">not_indexed.md</span> をセッションへ。</p>
             <p class="t" lang="ko"><span class="mono">adapters/claude-code/hooks/session-start.mjs</span> — 첫 프롬프트 전에 <span class="mono">INDEX.md</span>와 <span class="mono">not_indexed.md</span>를 세션으로.</p>
@@ -799,7 +806,7 @@
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">The session can't end silently: a checkpoint blocks once until the agent posts the takeaway — or explicitly declines with a one-line reason. "Nothing worth storing" is valid; silence is not.</p>
+        <p class="t" lang="en">The session can't end silently: a checkpoint blocks once until the agent posts the takeaway or declines with a one-line reason. "Nothing worth storing" is valid; silence is not.</p>
         <p class="t" lang="zh-Hant">工作階段不能默默結束：檢查點會攔截一次，直到代理發出心得——或附一句理由明確婉拒。「沒什麼值得存」是合法答案，沉默不是。</p>
         <p class="t" lang="ja">セッションは黙って終われません。チェックポイントが一度だけブロックし、エージェントが学びを投稿するか、一行の理由を添えて明示的に辞退するまで待ちます。「保存する価値なし」は正当な答え、沈黙は違います。</p>
         <p class="t" lang="ko">세션은 조용히 끝날 수 없습니다. 체크포인트가 한 번 막아서며, 에이전트가 배운 점을 게시하거나 한 줄 이유와 함께 명시적으로 거절할 때까지 기다립니다. '저장할 게 없다'는 유효한 답이지만, 침묵은 아닙니다.</p>
@@ -807,7 +814,7 @@
         <div class="trigger">Stop hook → block once, then store / decline</div>
         <div class="more" id="lc-3">
           <div class="more-in">
-            <p class="t" lang="en"><span class="mono">adapters/claude-code/hooks/stop.mjs</span> blocks once. Post the takeaway or decline with a reason — the ledger remembers which.</p>
+            <p class="t" lang="en"><span class="mono">adapters/claude-code/hooks/stop.mjs</span> blocks once. Post the takeaway or decline with a reason; the ledger remembers which.</p>
             <p class="t" lang="zh-Hant"><span class="mono">adapters/claude-code/hooks/stop.mjs</span> 只攔一次。發出心得或附理由婉拒——帳本記得你選了哪個。</p>
             <p class="t" lang="ja"><span class="mono">adapters/claude-code/hooks/stop.mjs</span> は一度だけブロック。学びを投稿するか理由を添えて辞退するか——台帳が記憶します。</p>
             <p class="t" lang="ko"><span class="mono">adapters/claude-code/hooks/stop.mjs</span>는 한 번만 막습니다. 배운 점을 올리거나 이유와 함께 거절하거나 — 원장이 기억합니다.</p>
@@ -829,7 +836,7 @@
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Every recalled memory the session relied on gets an <span class="mono">Outcome:</span> comment. Unused memories get nothing — no fake activity.</p>
+        <p class="t" lang="en">Every recalled memory the session relied on gets an <span class="mono">Outcome:</span> comment. Unused memories get nothing, so there is no fake activity.</p>
         <p class="t" lang="zh-Hant">凡是本次真正用到的記憶，都要留下 <span class="mono">Outcome:</span> 成效留言；沒用到的什麼都不留——不製造假活動。</p>
         <p class="t" lang="ja">セッションで実際に頼った記憶には <span class="mono">Outcome:</span> コメントを残します。使わなかった記憶には何も残さない——偽のアクティビティは作りません。</p>
         <p class="t" lang="ko">세션이 실제로 의존한 기억마다 <span class="mono">Outcome:</span> 댓글을 남깁니다. 쓰지 않은 기억에는 아무것도 남기지 않습니다. 가짜 활동은 만들지 않습니다.</p>
@@ -859,7 +866,7 @@
         <span class="t" lang="es">Recuerdo en tres niveles</span>
       </h2>
     </div>
-    <p class="note t" lang="en">Recall is delivered, not performed. The hooks inject the pointer tier before the agent's first action and expand to a summary only for the task at hand, so the context stays small no matter how many memories accumulate — Region files are for browsing, never for recall.</p>
+    <p class="note t" lang="en">Recall is delivered, not performed. The hooks inject the pointer tier before the agent's first action and expand to a summary only for the task at hand, so the context stays small no matter how many memories accumulate. Region files are for browsing, never for recall.</p>
     <p class="note t" lang="zh-Hant">召回是「送到手上」，不是代理自己去做。Hook 在代理的第一個動作之前注入指標層，只在題目相關時才展開摘要，所以不管記憶累積多少，context 永遠精簡——區域檔案只供瀏覽，不參與召回。</p>
     <p class="note t" lang="ja">想起は「届けられる」もので、エージェントが自分で行うものではありません。フックが最初の動作の前にポインタ層を注入し、タスクに関係する記憶だけを要約に展開するので、記憶がいくら増えてもコンテキストは小さいまま——領域ファイルは閲覧用で、想起には使いません。</p>
     <p class="note t" lang="ko">회상은 '전달되는' 것이지 에이전트가 직접 수행하는 것이 아닙니다. 훅이 첫 동작 전에 포인터 층을 주입하고, 작업과 관련된 기억만 요약으로 확장하므로 기억이 아무리 쌓여도 컨텍스트는 작게 유지됩니다. 영역 파일은 둘러보기용이며 회상에는 쓰이지 않습니다.</p>
@@ -878,7 +885,7 @@
       <div class="rung">
         <span class="file">pointer</span>
         <span class="why">
-          <span class="t" lang="en"><span class="mono">#N [type · place · weight] title</span> — every matching record on one line, no network</span>
+          <span class="t" lang="en"><span class="mono">#N [type · place · weight] title</span>: every matching record on one line, no network</span>
           <span class="t" lang="zh-Hant"><span class="mono">#N [type · place · weight] title</span>——每一則相符的記憶各一行，不用連網</span>
           <span class="t" lang="ja"><span class="mono">#N [type · place · weight] title</span>——一致する記録を1行ずつ、ネットワーク不要</span>
           <span class="t" lang="ko"><span class="mono">#N [type · place · weight] title</span> — 일치하는 기록마다 한 줄, 네트워크 불필요</span>
@@ -888,7 +895,7 @@
       <div class="rung">
         <span class="file">summary</span>
         <span class="why">
-          <span class="t" lang="en">the record's <span class="mono">## Now</span>, else its opening prose, ≤ 240 chars — expanded only for records the prompt overlaps (Claude Code); at session start on Codex and agy</span>
+          <span class="t" lang="en">the record's <span class="mono">## Now</span>, else its opening prose, ≤ 240 chars, expanded only for records the prompt overlaps (Claude Code) and at session start on Codex and agy</span>
           <span class="t" lang="zh-Hant">記憶的 <span class="mono">## Now</span>，沒有就取開頭的散文，≤ 240 字——只展開和 prompt 相符的記憶（Claude Code）；Codex 與 agy 在 session 開始時給</span>
           <span class="t" lang="ja">記録の <span class="mono">## Now</span>、なければ冒頭の散文、240 文字以内——プロンプトと重なる記録だけ展開（Claude Code）。Codex と agy はセッション開始時</span>
           <span class="t" lang="ko">기록의 <span class="mono">## Now</span>, 없으면 첫 산문, 240자 이하 — 프롬프트와 겹치는 기록만 확장(Claude Code); Codex와 agy는 세션 시작 시</span>
@@ -906,7 +913,7 @@
         </span>
       </div>
     </div>
-    <p class="note t" lang="en" style="margin-top:16px">Pointers arrive in a fixed order — goal before steps, doubts before trust: <span class="mono">intent → facts → pattern → invalidation → discovery → events</span>.</p>
+    <p class="note t" lang="en" style="margin-top:16px">Pointers arrive in a fixed order, goal before steps and doubts before trust: <span class="mono">intent → facts → pattern → invalidation → discovery → events</span>.</p>
     <p class="note t" lang="zh-Hant" style="margin-top:16px">指標有固定順序——先看目標再看步驟、先查反證再信事實：<span class="mono">intent → facts → pattern → invalidation → discovery → events</span>。</p>
     <p class="note t" lang="ja" style="margin-top:16px">ポインタは決まった順で届きます——手順より先に目的を、信頼より先に反証を：<span class="mono">intent → facts → pattern → invalidation → discovery → events</span>。</p>
     <p class="note t" lang="ko" style="margin-top:16px">포인터는 정해진 순서로 도착합니다. 단계보다 목표를, 신뢰보다 의심을 먼저: <span class="mono">intent → facts → pattern → invalidation → discovery → events</span>.</p>
@@ -924,7 +931,7 @@
         <span class="t" lang="es">Confianza que aprende</span>
       </h2>
     </div>
-    <p class="note t" lang="en">Each memory carries a weight that decays over time and moves with real outcomes — proven patterns float up, broken ones sink, without manual cleanup.</p>
+    <p class="note t" lang="en">Each memory carries a weight that decays over time and moves with real outcomes. Proven patterns float up and broken ones sink, without manual cleanup.</p>
     <p class="note t" lang="zh-Hant">每條記憶都有一個會隨時間衰減、隨實際成效增減的權重——被驗證的模式往上浮，失效的往下沉，完全不需手動整理。</p>
     <p class="note t" lang="ja">各記憶は時間とともに減衰し、実際の成果で増減する重みを持ちます。実証されたパターンは浮かび上がり、壊れたものは沈む——手作業の整理は不要です。</p>
     <p class="note t" lang="ko">각 기억은 시간이 지나며 감쇠하고 실제 성과에 따라 움직이는 가중치를 지닙니다. 검증된 패턴은 떠오르고 깨진 것은 가라앉습니다. 수동 정리는 필요 없습니다.</p>
@@ -1030,7 +1037,7 @@
         <span class="t" lang="es">Cuatro niveles de cumplimiento</span>
       </h2>
     </div>
-    <p class="note t" lang="en">Levels change what is <em>mechanical</em>, never what is <em>required</em>. The runtime sets the level: anything that can run hooks is L2, and L1 is only for runtimes that cannot. A broken adapter never blocks the user's real work — on a hook-capable runtime it degrades to silent recall (the agent says once how to restore the hooks), never to reading the index by hand.</p>
+    <p class="note t" lang="en">Levels change what is <em>mechanical</em>, never what is <em>required</em>. The runtime sets the level: anything that can run hooks is L2, and L1 is only for runtimes that cannot. A broken adapter never blocks the user's real work. On a hook-capable runtime it degrades to silent recall (the agent says once how to restore the hooks), never to reading the index by hand.</p>
     <p class="note t" lang="zh-Hant">等級改變的是「多少事被機械化」，而非「要求本身」。等級由執行環境決定：能跑 hook 的一律是 L2，L1 只留給跑不了 hook 的環境。壞掉的配接器絕不擋住使用者的正事——在能跑 hook 的環境上，它退化為「靜默召回」（代理只說一次怎麼修復 hook），絕不會退化成手動翻索引。</p>
     <p class="note t" lang="ja">レベルが変えるのは「どれだけ機械化されるか」であって「要求そのもの」ではありません。レベルはランタイムが決めます：フックを実行できるものはすべて L2、L1 はフックを実行できないランタイムだけ。壊れたアダプタがユーザーの本来の作業を妨げることはなく、フック対応ランタイムでは「静かな想起」（エージェントがフックの復旧方法を一度だけ伝える）に縮退し、手動でインデックスを読むことには決してなりません。</p>
     <p class="note t" lang="ko">수준이 바꾸는 것은 '얼마나 기계화되는가'이지 '요구 사항 자체'가 아닙니다. 수준은 런타임이 정합니다: 훅을 실행할 수 있으면 모두 L2이고, L1은 훅을 실행할 수 없는 런타임만을 위한 것입니다. 고장 난 어댑터가 사용자의 실제 작업을 막는 일은 없습니다. 훅이 가능한 런타임에서는 '조용한 회상'(에이전트가 훅 복구 방법을 한 번만 알림)으로 강등될 뿐, 인덱스를 손으로 읽는 방식으로는 결코 돌아가지 않습니다.</p>
@@ -1159,7 +1166,7 @@
         <p class="t" lang="es">Un futuro servidor MCP validará cada escritura antes de llegar a GitHub.</p>
         <div class="more" id="cf-3">
           <div class="more-in">
-            <p class="t" lang="en">Not shipped. An MCP server would reject a malformed title before it became an issue. Today that lives in the skill — guidance, not a gate.</p>
+            <p class="t" lang="en">Not shipped. An MCP server would reject a malformed title before it became an issue. Today the skill only advises; nothing enforces it.</p>
             <p class="t" lang="zh-Hant">尚未推出。MCP 伺服器會在格式錯誤的標題變成 Issue 前就擋下。目前這層驗證住在技能裡——是指引，不是關卡。</p>
             <p class="t" lang="ja">未提供。MCP サーバーなら不正なタイトルを Issue になる前に拒否します。現在その検証はスキルの中——指針であってゲートではありません。</p>
             <p class="t" lang="ko">미제공. MCP 서버라면 잘못된 제목을 이슈가 되기 전에 거부합니다. 지금은 스킬 안에 있으며, 안내이지 관문이 아닙니다.</p>
@@ -1169,7 +1176,7 @@
       </div>
     </div>
 
-    <p class="note t" lang="en" style="margin-top:20px">Measured at both levels, same tasks and same store. At <span class="mono">L1</span>, where the agent performs recall itself, one model paid <b>+46% input</b> and <b>+35% wall time</b> against no memory at all. At <span class="mono">L2</span>, where a hook delivers the same records before the first action, that inverted to <b>−5.6% input</b> and <b>−5.4% tool output</b>; the second model improved but never crossed over. Recall also stopped being optional — all ten enabled sessions injected the same three records, where at <span class="mono">L1</span> one model navigated five times and fetched nothing. The level decides whether memory <em>can</em> repay itself; whether it does still depends on how much reading it replaces. Re-run on 24 September 2026 with Codex's own memory switched off, the same model was +9.9% input at medium effort and −3.4% at xhigh, where it also dug up 13.6% less and finished 10.7% sooner.</p>
+    <p class="note t" lang="en" style="margin-top:20px">Measured at both levels, same tasks and same store. At <span class="mono">L1</span>, where the agent performs recall itself, one model paid <b>+46% input</b> and <b>+35% wall time</b> against no memory at all. At <span class="mono">L2</span>, where a hook delivers the same records before the first action, that inverted to <b>−5.6% input</b> and <b>−5.4% tool output</b>; the second model improved but never crossed over. Recall also stopped being optional: all ten enabled sessions injected the same three records, where at <span class="mono">L1</span> one model navigated five times and fetched nothing. The level decides whether memory <em>can</em> repay itself; whether it does still depends on how much reading it replaces. Re-run on 24 September 2026 with Codex's own memory switched off, the same model was +9.9% input at medium effort and −3.4% at xhigh, where it also dug up 13.6% less and finished 10.7% sooner.</p>
     <p class="note t" lang="zh-Hant" style="margin-top:20px">兩個等級都實測過,任務與儲存相同。在 <span class="mono">L1</span>(由代理自行執行回憶),其中一個模型比完全不用記憶多付 <b>+46% 輸入</b>與 <b>+35% 時間</b>。移到 <span class="mono">L2</span>(由 hook 在第一個動作前送達同樣的紀錄)後,反轉為<b>輸入 −5.6%</b>、<b>工具輸出 −5.4%</b>;第二個模型有改善但始終沒有由正轉負。回憶本身也不再是選項——十個啟用階段全部注入了相同的三筆紀錄,而在 <span class="mono">L1</span>,其中一個模型導覽了五次卻什麼都沒取。等級決定記憶「能不能」回本;真的回不回得了,仍取決於它替代掉多少閱讀量。2026 年 9 月 24 日關掉 Codex 自己的記憶重跑，同一個模型在 medium 時輸入 +9.9%、在 xhigh 時 −3.4%，而且少挖 13.6%、早 10.7% 完成。</p>
     <p class="note t" lang="ja" style="margin-top:20px">両レベルで計測、タスクとストアは同一。<span class="mono">L1</span>(エージェント自身が想起を実行)では、ある1モデルが記憶なしに対して<b>入力 +46%</b>・<b>実時間 +35%</b>を支払いました。<span class="mono">L2</span>(フックが最初の動作の前に同じ記録を届ける)へ移すと、<b>入力 −5.6%</b>・<b>ツール出力 −5.4%</b>へ反転。もう1モデルは改善したものの転換には至らず。想起自体も任意ではなくなりました——有効化した10セッションすべてが同じ3件を注入。<span class="mono">L1</span> では1モデルが5回ナビゲートして1件も取得しませんでした。レベルは記憶が元を取れる「余地」を決めます。実際に取れるかは、どれだけの読み込みを置き換えるか次第です。2026年9月24日、Codex 自身のメモリを切って再計測すると、同じモデルは medium で入力 +9.9%、xhigh で −3.4%（掘り出し量 13.6% 減、所要時間 10.7% 短縮）でした。</p>
     <p class="note t" lang="ko" style="margin-top:20px">두 수준 모두 측정했으며 과제와 저장소는 동일합니다. <span class="mono">L1</span>(에이전트가 직접 회상을 수행)에서는 한 모델이 기억을 아예 쓰지 않는 것보다 <b>입력 +46%</b>, <b>실행 시간 +35%</b>를 더 썼습니다. <span class="mono">L2</span>(훅이 첫 동작 전에 같은 기록을 전달)로 옮기자 <b>입력 −5.6%</b>, <b>도구 출력 −5.4%</b>로 뒤집혔습니다. 두 번째 모델은 개선됐지만 끝내 전환되지는 않았습니다. 회상 자체도 선택이 아니게 되었습니다 — 활성화된 열 개 세션 모두 같은 세 건을 주입했고, <span class="mono">L1</span>에서는 한 모델이 다섯 번 탐색하고도 아무것도 가져오지 않았습니다. 수준은 기억이 본전을 뽑을 <em>수 있는지</em>를 결정하고, 실제로 뽑는지는 얼마나 많은 읽기를 대체하느냐에 달려 있습니다. 2026년 9월 24일 Codex 자체 메모리를 끄고 다시 측정하자 같은 모델이 medium에서는 입력 +9.9%, xhigh에서는 −3.4%였고, xhigh에서는 13.6% 덜 파내고 10.7% 빨리 끝냈습니다.</p>
@@ -1187,7 +1194,7 @@
         <span class="t" lang="es">Un cerebro nuevo con un solo comando</span>
       </h2>
     </div>
-    <p class="note t" lang="en">Adopting the protocol used to be ~15 manual steps. Now the template ships a §15.5-conformant wizard: clone, then one command takes you to a live memory repo — including the steps nothing used to automate (Actions write permission, §6 label seeding, taming the daily Librarian cron) — and it proves itself with a real end-to-end test issue. Idempotent: re-running is the resume mechanism; it never resets a live repo and never pushes to the template.</p>
+    <p class="note t" lang="en">Adopting the protocol used to be ~15 manual steps. Now the template ships a §15.5-conformant wizard: clone, then one command takes you to a live memory repo, including the steps nothing used to automate (Actions write permission, §6 label seeding, taming the daily Librarian cron). It proves itself with a real end-to-end test issue. Idempotent: re-running is the resume mechanism; it never resets a live repo and never pushes to the template.</p>
     <p class="note t" lang="zh-Hant">過去採用協定要 ~15 個手動步驟。現在範本內建符合 §15.5 的精靈：clone 之後一條命令直達可運作的記憶倉庫——包括以前沒有任何東西自動化的步驟（Actions 寫入權限、§6 標籤播種、馴服每天執行的 Librarian 排程），最後用真實的端到端測試 Issue 自我驗證。冪等：重跑即續跑；絕不重置已上線的倉庫、絕不推送範本。</p>
     <p class="note t" lang="ja">プロトコルの導入には、かつて約15の手動ステップが必要でした。いまはテンプレートに §15.5 準拠のウィザードが同梱されています。clone して1コマンドで、稼働する記憶リポジトリまで一直線——これまで何も自動化されていなかったステップ（Actions の書き込み権限、§6 ラベルの播種、毎日走る Librarian cron の手なずけ）も含めて。最後は本物のエンドツーエンドのテスト Issue で自己検証します。冪等：再実行がそのまま再開の仕組み。稼働中のリポジトリは決してリセットせず、テンプレートには決してプッシュしません。</p>
     <p class="note t" lang="ko">프로토콜 도입에는 예전엔 약 15개의 수동 단계가 필요했습니다. 이제 템플릿에 §15.5 준수 마법사가 내장되어 있습니다. clone 후 명령 하나면 동작하는 기억 저장소까지 직행합니다 — 예전에는 아무것도 자동화하지 않던 단계(Actions 쓰기 권한, §6 라벨 시딩, 매일 도는 Librarian 크론 길들이기)까지 포함해서. 마지막에는 실제 엔드투엔드 테스트 이슈로 스스로를 검증합니다. 멱등성: 재실행이 곧 재개 방식이며, 운영 중인 저장소를 절대 초기화하지 않고 템플릿에는 절대 푸시하지 않습니다.</p>
