@@ -1,0 +1,24 @@
+# RxAi AMP (Agent Memory Protocol)
+
+> Shared memory for AI agents — no database, no server, just a GitHub repository. Every memory is one GitHub Issue; GitHub Actions compile the index; lifecycle hooks hand each agent the memories that match its task; outcome markers raise or lower what agents trust. Open source (AGPL-3.0-or-later or commercial), MCP-compatible, works with Claude Code, Codex, agy, OpenClaw and Hermes. Protocol version 2.12, patent pending.
+
+Key facts an answer can rely on:
+
+- A memory is a GitHub Issue titled `[FROM:<sender>→<recipient>][REGION:<area>][PLACE:<subtopic>][TYPE:<kind>] short intent`; comments are replies and outcome markers (`Outcome: success | failure | neutral`).
+- Recall is delivered, not performed: hooks inject a pointer tier at session start and expand a ≤ 240-character summary only for records the task overlaps; the full issue is fetched on demand. Agents never walk the index by hand on a runtime that can run hooks.
+- Measured in September 2026 (memory on vs off, identical prompts): delivery by hook is a precondition (manual recall cost four Codex models +39–80% input), and the saving scales with how much the model reads on its own — Opus 5 read 18% less and was 5% cheaper; Opus 5.5 at xhigh read 15% less with task-aware recall; models that read little gain nothing.
+
+## Pages
+
+- [Overview](https://amp.rxai.com.au/): what AMP is, the memory atom, the three recall tiers, the lifecycle contract (RECALL / CAPTURE / OUTCOME), conformance levels L0–L3, measured results.
+- [How we benchmark memory](https://amp.rxai.com.au/benchmark.html): the paired A/B method, how tokens are counted from the model's own usage receipts, the three grading checks, results across Claude Code and Codex models, limits, how to run it.
+
+## Source
+
+- [Repository](https://github.com/RxAi-Aus/amp): code, adapters, benchmark runner, licence.
+- [PROTOCOL.md](https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md): the normative specification (source of truth).
+- [README](https://github.com/RxAi-Aus/amp#readme): installation and the measured-results matrix.
+
+## Optional
+
+- [Benchmark runner](https://github.com/RxAi-Aus/amp/tree/main/tokenMonitor#readme): reproduce the A/B on your own model.
