@@ -38,7 +38,7 @@ export function protocolVersion(packageVersion) {
 // A file marked optional may be absent -- a private fork of this template does
 // not necessarily publish a landing page. Absent is fine; present and stale is
 // not, so if the file exists its claims are checked like any other.
-const OPTIONAL_FILES = new Set(["docs/index.html"]);
+const OPTIONAL_FILES = new Set(["site/index.html"]);
 
 const CLAIMS = [
   ["PROTOCOL.md", "spec header", /^\*\*RxAi AMP (v[\d.]+)\*\*/m],
@@ -47,8 +47,8 @@ const CLAIMS = [
   ["README.zh-TW.md", "title", /^# RxAi AMP · 代理程式記憶協定 (v[\d.]+)/m],
   ["CLAUDE.md", "source-of-truth note", /source of truth\*\* \(currently (v[\d.]+)\)/],
   ["AGENTS.md", "spec description", /It currently describes RxAi AMP (v[\d.]+)/],
-  ["docs/index.html", "landing page eyebrow", /Agent Memory Protocol · (v[\d.]+) · patent pending/],
-  ["docs/index.html", "landing page footer", /RxAi AMP (v[\d.]+) · <a/],
+  ["site/index.html", "landing page eyebrow", /Agent Memory Protocol · (v[\d.]+) · patent pending/],
+  ["site/index.html", "landing page footer", /RxAi AMP (v[\d.]+) · <a/],
 ];
 
 const expected = protocolVersion(JSON.parse(read("package.json")).version);

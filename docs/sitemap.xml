@@ -1,11 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://amp.rxai.com.au/</loc>
     <lastmod>2026-09-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://amp.rxai.com.au/ja/"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://amp.rxai.com.au/ko/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://amp.rxai.com.au/es/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/"/>
+  </url>
+  <url>
+    <loc>https://amp.rxai.com.au/zh-hant/</loc>
+    <lastmod>2026-09-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://amp.rxai.com.au/ja/"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://amp.rxai.com.au/ko/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://amp.rxai.com.au/es/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/"/>
+  </url>
+  <url>
+    <loc>https://amp.rxai.com.au/ja/</loc>
+    <lastmod>2026-09-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://amp.rxai.com.au/ja/"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://amp.rxai.com.au/ko/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://amp.rxai.com.au/es/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/"/>
+  </url>
+  <url>
+    <loc>https://amp.rxai.com.au/ko/</loc>
+    <lastmod>2026-09-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://amp.rxai.com.au/ja/"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://amp.rxai.com.au/ko/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://amp.rxai.com.au/es/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/"/>
+  </url>
+  <url>
+    <loc>https://amp.rxai.com.au/es/</loc>
+    <lastmod>2026-09-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://amp.rxai.com.au/ja/"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://amp.rxai.com.au/ko/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://amp.rxai.com.au/es/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/"/>
   </url>
   <url>
     <loc>https://amp.rxai.com.au/benchmark.html</loc>
     <lastmod>2026-09-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/benchmark.html"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/benchmark.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/benchmark.html"/>
+  </url>
+  <url>
+    <loc>https://amp.rxai.com.au/zh-hant/benchmark.html</loc>
+    <lastmod>2026-09-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/benchmark.html"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/benchmark.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/benchmark.html"/>
+  </url>
+  <url>
+    <loc>https://amp.rxai.com.au/quickstart.html</loc>
+    <lastmod>2026-09-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/quickstart.html"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/quickstart.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/quickstart.html"/>
+  </url>
+  <url>
+    <loc>https://amp.rxai.com.au/zh-hant/quickstart.html</loc>
+    <lastmod>2026-09-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/quickstart.html"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/quickstart.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/quickstart.html"/>
+  </url>
+  <url>
+    <loc>https://amp.rxai.com.au/compare.html</loc>
+    <lastmod>2026-09-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/compare.html"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/compare.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/compare.html"/>
+  </url>
+  <url>
+    <loc>https://amp.rxai.com.au/zh-hant/compare.html</loc>
+    <lastmod>2026-09-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/compare.html"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/compare.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/compare.html"/>
   </url>
 </urlset>

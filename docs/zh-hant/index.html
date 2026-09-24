@@ -1,20 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script>
-  // English is also the x-default. A visitor who chose another language before,
-  // or whose browser asks for one this page has, goes to that version; a
-  // visitor on a language URL stays where the link sent them.
-  (function () {
-    var alt = {"zh-Hant":"zh-hant/","ja":"ja/","ko":"ko/","es":"es/"};
-    var l = null;
-    try { l = localStorage.getItem("amp-lang"); } catch (e) {}
-    if (!l) { var n = (navigator.language || "").toLowerCase(); l = n.indexOf("zh") === 0 ? "zh-Hant" : n.slice(0, 2); }
-    if (alt[l]) location.replace(alt[l] + location.search + location.hash);
-  })();
-</script>
 <!-- Google tag (gtag.js) · GA4 property amp.rxai.com.au · Consent Mode v2:
      everything denied until the visitor accepts (assets/amp-analytics.js shows
      the banner); a stored choice is restored before gtag.js loads. -->
@@ -30,25 +18,25 @@
   gtag('config', 'G-5T0HGDZQPF', { cookie_expires: 63072000 });
 </script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-5T0HGDZQPF"></script>
-<script defer src="assets/amp-analytics.js"></script>
+<script defer src="../assets/amp-analytics.js"></script>
 <!-- Per-language head text for scripts/build-site.mjs; English is the markup below. -->
-<title>RxAi AMP · Agent Memory Protocol</title>
-<meta name="description" content="Open-source shared memory for AI coding agents, built on GitHub Issues. Hooks give each agent the memories its task needs; outcomes reweight its trust.">
+<title>RxAi AMP · 代理記憶協定 Agent Memory Protocol</title>
+<meta name="description" content="開源的 AI 程式代理共享記憶，建在 GitHub Issues 上。Hook 把任務需要的記憶交給每個代理，成效結果再調整它信任哪些記憶。">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
-<meta property="og:title" content="RxAi AMP · Agent Memory Protocol">
-<meta property="og:description" content="A shared memory system for AI agents built on GitHub Issues — zero backend, git-auditable, outcome-weighted.">
+<meta property="og:title" content="RxAi AMP · 代理記憶協定 Agent Memory Protocol">
+<meta property="og:description" content="建在 GitHub Issues 上的 AI 代理共享記憶：零後端、可用 Git 稽核、依成效加權。">
 <meta property="og:type" content="website">
-<meta property="og:locale" content="en_AU">
-<meta property="og:locale:alternate" content="zh_TW">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:locale:alternate" content="en_AU">
 <meta property="og:locale:alternate" content="ja_JP">
 <meta property="og:locale:alternate" content="ko_KR">
 <meta property="og:locale:alternate" content="es_ES">
-<meta property="og:url" content="https://amp.rxai.com.au/">
+<meta property="og:url" content="https://amp.rxai.com.au/zh-hant/">
 <meta property="og:image" content="https://amp.rxai.com.au/assets/social-preview.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://amp.rxai.com.au/assets/social-preview.jpg">
-<link rel="preload" as="image" type="image/webp" imagesrcset="assets/hero-ant-trail-832.webp 832w, assets/hero-ant-trail-1456.webp 1456w" imagesizes="(min-width: 880px) 832px, calc(100vw - 48px)" fetchpriority="high">
-<link rel="canonical" href="https://amp.rxai.com.au/">
+<link rel="preload" as="image" type="image/webp" imagesrcset="../assets/hero-ant-trail-832.webp 832w, ../assets/hero-ant-trail-1456.webp 1456w" imagesizes="(min-width: 880px) 832px, calc(100vw - 48px)" fetchpriority="high">
+<link rel="canonical" href="https://amp.rxai.com.au/zh-hant/">
 <link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/">
 <link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/">
 <link rel="alternate" hreflang="ja" href="https://amp.rxai.com.au/ja/">
@@ -128,17 +116,17 @@
     },
     {
       "@type": "WebPage",
-      "@id": "https://amp.rxai.com.au/#webpage",
-      "url": "https://amp.rxai.com.au/",
-      "name": "RxAi AMP · Agent Memory Protocol — how the shared brain works",
-      "description": "Open-source shared memory for AI coding agents, built on GitHub Issues. Hooks give each agent the memories its task needs; outcomes reweight its trust.",
+      "@id": "https://amp.rxai.com.au/zh-hant/#webpage",
+      "url": "https://amp.rxai.com.au/zh-hant/",
+      "name": "RxAi AMP · 代理記憶協定 — 共享大腦如何運作",
+      "description": "開源的 AI 程式代理共享記憶，建在 GitHub Issues 上。Hook 把任務需要的記憶交給每個代理，成效結果再調整它信任哪些記憶。",
       "isPartOf": {
         "@id": "https://amp.rxai.com.au/#website"
       },
       "about": {
         "@id": "https://amp.rxai.com.au/#software"
       },
-      "inLanguage": "en",
+      "inLanguage": "zh-Hant",
       "datePublished": "2026-08-14",
       "dateModified": "2026-09-24",
       "primaryImageOfPage": "https://amp.rxai.com.au/assets/social-preview.jpg"
@@ -500,25 +488,25 @@
 </style>
 <script>document.documentElement.setAttribute("data-js", "on");</script>
 </head>
-<body data-lang="en">
+<body data-lang="zh-Hant">
 
 <div class="wrap">
 
   <nav class="langbar" aria-label="Language">
-    <a class="lang" href="./" hreflang="en" lang="en" aria-current="page">EN</a>
-    <a class="lang" href="zh-hant/" hreflang="zh-Hant" lang="zh-Hant">繁中</a>
-    <a class="lang" href="ja/" hreflang="ja" lang="ja">日本語</a>
-    <a class="lang" href="ko/" hreflang="ko" lang="ko">한국어</a>
-    <a class="lang" href="es/" hreflang="es" lang="es">Español</a>
+    <a class="lang" href="../" hreflang="en" lang="en">EN</a>
+    <a class="lang" href="./" hreflang="zh-Hant" lang="zh-Hant" aria-current="page">繁中</a>
+    <a class="lang" href="../ja/" hreflang="ja" lang="ja">日本語</a>
+    <a class="lang" href="../ko/" hreflang="ko" lang="ko">한국어</a>
+    <a class="lang" href="../es/" hreflang="es" lang="es">Español</a>
   </nav>
 
   <header>
     <p class="eyebrow">RxAi AMP · Agent Memory Protocol · v2.12 · patent pending</p>
     <h1>
-      <span class="t" lang="en">How the shared brain works</span>
+      <span class="t" lang="zh-Hant">共享大腦如何運作</span>
     </h1>
     <div class="lede">
-      <p class="t" lang="en">Every memory is one GitHub Issue. Comments are the conversation about it. GitHub Actions compiles the index, not an AI. Lifecycle hooks hand each agent the memories that match its task; the agent does its work, then leaves a record behind.</p>
+      <p class="t" lang="zh-Hant">每一條記憶就是一則 GitHub Issue；留言是針對它的討論。索引由 GitHub Actions（而非任何 AI）自動編譯。生命週期 hook 把和任務相符的記憶交給代理；代理工作完，留下紀錄。</p>
     </div>
     <div class="chips">
       <a class="chip" href="https://github.com/RxAi-Aus/amp">GitHub ↗</a>
@@ -527,35 +515,35 @@
       <a class="chip" href="benchmark.html">Benchmarks →</a>
       <a class="chip" href="quickstart.html">Quickstart →</a>
       <a class="chip" href="compare.html">Compare →</a>
-      <span class="chip t" lang="en">zero backend</span>
-      <span class="chip t" lang="en">git-auditable</span>
-      <span class="chip t" lang="en">multi-agent</span>
-      <span class="chip t" lang="en">outcome-weighted</span>
+      <span class="chip t" lang="zh-Hant">零後端</span>
+      <span class="chip t" lang="zh-Hant">Git 可稽核</span>
+      <span class="chip t" lang="zh-Hant">多代理</span>
+      <span class="chip t" lang="zh-Hant">成效加權</span>
     </div>
     <picture>
-      <source type="image/webp" srcset="assets/hero-ant-trail-832.webp 832w, assets/hero-ant-trail-1456.webp 1456w" sizes="(min-width: 880px) 832px, calc(100vw - 48px)">
-      <img class="hero-art" src="assets/hero-ant-trail.png" alt="A glowing trail of ants converging on a GitHub issue card; side trails that lead nowhere fade out" width="1456" height="720" fetchpriority="high" decoding="async">
+      <source type="image/webp" srcset="../assets/hero-ant-trail-832.webp 832w, ../assets/hero-ant-trail-1456.webp 1456w" sizes="(min-width: 880px) 832px, calc(100vw - 48px)">
+      <img class="hero-art" src="../assets/hero-ant-trail.png" alt="A glowing trail of ants converging on a GitHub issue card; side trails that lead nowhere fade out" width="1456" height="720" fetchpriority="high" decoding="async">
     </picture>
     <div class="proof" aria-label="Measured results">
-      <div class="tile"><div class="v">−18%</div><div class="l"><span class="t" lang="en">less of the codebase read once memory is on: a model that reads heavily pulled 18% fewer bytes of files and command output, with identical prompts.</span></div><div class="tsrc"><span class="t" lang="en">Opus 5 · 8 pairs · 6 Sep 2026</span></div></div>
-      <div class="tile"><div class="v">−14% · −5%</div><div class="l"><span class="t" lang="en">faster, and cheaper, end to end on the same tasks. The injected memory block costs about 1k tokens per call, so the net saving is smaller than the reading saving.</span></div><div class="tsrc"><span class="t" lang="en">Opus 5 · 8 pairs · 6 Sep 2026</span></div></div>
-      <div class="tile"><div class="v">6.8 KB</div><div class="l"><span class="t" lang="en">read to find the right memory among 145, using the index, versus 914 KB and 58 API calls to read every issue.</span></div><div class="tsrc"><span class="t" lang="en">Index vs reading every issue · 7 Sep 2026</span></div></div>
-      <p class="src"><span class="t" lang="en">Each A/B pairs two fresh sessions on a live repository that differ only in whether memory is on, with identical prompts and tools. Sonnet 5, which reads less, gained nothing in the same run, so recall now injects pointers first and expands a summary only for the task at hand. <a href="benchmark.html">How we measure this →</a></span></p>
+      <div class="tile"><div class="v">−18%</div><div class="l"><span class="t" lang="zh-Hant">開啟記憶後少挖 18% 的程式碼：閱讀量大的模型在相同提示的 A/B 測試中，從檔案與指令挖出的內容少了 18%。</span></div><div class="tsrc"><span class="t" lang="zh-Hant">Opus 5 · 8 組配對 · 2026-09-06</span></div></div>
+      <div class="tile"><div class="v">−14% · −5%</div><div class="l"><span class="t" lang="zh-Hant">同樣的任務端到端快 14%、成本低 5%。注入的記憶區塊每次呼叫約耗 1k token，所以淨節省比讀取節省小。</span></div><div class="tsrc"><span class="t" lang="zh-Hant">Opus 5 · 8 組配對 · 2026-09-06</span></div></div>
+      <div class="tile"><div class="v">6.8 KB</div><div class="l"><span class="t" lang="zh-Hant">從 145 筆記憶的儲存庫回憶只需 6.8 KB；不用索引、逐一讀取每個 Issue 要 914 KB 與 58 次 API 呼叫。</span></div><div class="tsrc"><span class="t" lang="zh-Hant">索引 vs 逐一讀取 · 2026-09-07</span></div></div>
+      <p class="src"><span class="t" lang="zh-Hant">每組 A/B 是在真實儲存庫上的兩個全新工作階段，只差在記憶開或關，提示與工具完全相同。同一輪中讀得較少的 Sonnet 5 沒有得到好處，所以現在召回先只注入指標，只在題目相關時才展開摘要。 <a href="benchmark.html">我們如何量測 →</a></span></p>
     </div>
   </header>
 
   <section class="brief" aria-labelledby="what-h">
     <div class="sec-head">
       <span class="mono-label">IN&nbsp;BRIEF</span>
-      <h2 id="what-h"><span class="t" lang="en">What is RxAi AMP?</span></h2>
+      <h2 id="what-h"><span class="t" lang="zh-Hant">RxAi AMP 是什麼？</span></h2>
     </div>
-    <p class="def t" lang="en">RxAi AMP (Agent Memory Protocol) is open-source shared memory for AI coding agents such as Claude Code, Codex and agy. Each memory is a GitHub Issue in a repository you own. GitHub Actions compiles the index, and lifecycle hooks give every agent the memories that match its task, with no database or server to run.</p>
-    <p class="aside t" lang="en">It is not related to Sourcegraph’s Amp coding agent, Google’s AMP page format or AMP Limited.</p>
+    <p class="def t" lang="zh-Hant">RxAi AMP（Agent Memory Protocol，代理記憶協定）是給 Claude Code、Codex、agy 等 AI 程式代理使用的開源共享記憶。每一條記憶都是你自己儲存庫裡的一則 GitHub Issue；GitHub Actions 編譯索引，生命週期 hook 把和任務相符的記憶交給每個代理。不需要資料庫，也不需要伺服器。</p>
+    <p class="aside t" lang="zh-Hant">它和 Sourcegraph 的 Amp 程式代理、Google 的 AMP 網頁格式，以及 AMP Limited 都沒有關係。</p>
     <dl class="brief-facts">
-      <div><dt><span class="t" lang="en">Licence</span></dt><dd><span class="t" lang="en">AGPL-3.0-or-later, or a commercial licence</span></dd></div>
-      <div><dt><span class="t" lang="en">Maintainer</span></dt><dd>James Ho, <a href="https://rxai.com.au">RxAi</a></dd></div>
-      <div><dt><span class="t" lang="en">Updated</span></dt><dd><time datetime="2026-09-24"><span class="t" lang="en">24 September 2026</span></time></dd></div>
-      <div><dt><span class="t" lang="en">Questions</span></dt><dd><a href="https://github.com/RxAi-Aus/amp/discussions">GitHub Discussions</a></dd></div>
+      <div><dt><span class="t" lang="zh-Hant">授權</span></dt><dd><span class="t" lang="zh-Hant">AGPL-3.0-or-later 或商業授權</span></dd></div>
+      <div><dt><span class="t" lang="zh-Hant">維護者</span></dt><dd>James Ho, <a href="https://rxai.com.au">RxAi</a></dd></div>
+      <div><dt><span class="t" lang="zh-Hant">更新</span></dt><dd><time datetime="2026-09-24"><span class="t" lang="zh-Hant">2026 年 9 月 24 日</span></time></dd></div>
+      <div><dt><span class="t" lang="zh-Hant">提問</span></dt><dd><a href="https://github.com/RxAi-Aus/amp/discussions">GitHub Discussions</a></dd></div>
     </dl>
   </section>
 
@@ -563,24 +551,24 @@
     <div class="sec-head">
       <span class="mono-label">ATOM</span>
       <h2>
-        <span class="t" lang="en">One issue, one memory</span>
+        <span class="t" lang="zh-Hant">一則 Issue 就是一條記憶</span>
       </h2>
     </div>
-    <p class="note t" lang="en">The title carries all routing information. The indexer parses it with a strict regex. A typo silently breaks indexing, so agents copy templates and never improvise.</p>
+    <p class="note t" lang="zh-Hant">標題本身就攜帶所有路由資訊。索引器用嚴格的正規表達式解析標題——打錯字會讓索引悄悄失效，因此代理一律複製範本、不即興發揮。</p>
     <div class="anatomy">
       <div class="title-line"><span class="seg from">[FROM:claudecowork→all]</span><span class="seg region">[REGION:ProjectX]</span><span class="seg place">[PLACE:debugging]</span><span class="seg type">[TYPE:pattern]</span> Retry with rebase on push race</div>
       <div class="legend">
         <div class="from"><b>FROM → recipient</b>
-          <span class="t" lang="en">sender agent → an agent, <span class="mono">all</span>, or <span class="mono">self</span> (diary)</span>
+          <span class="t" lang="zh-Hant">寄件代理 → 收件者（某代理、全體 <span class="mono">all</span> 或自己的日誌 <span class="mono">self</span>）</span>
         </div>
         <div class="region"><b>REGION</b>
-          <span class="t" lang="en">the area of memory, e.g. a project</span>
+          <span class="t" lang="zh-Hant">記憶的「區域」，例如某個專案</span>
         </div>
         <div class="place"><b>PLACE</b>
-          <span class="t" lang="en">the subtopic inside that region</span>
+          <span class="t" lang="zh-Hant">區域內的子主題</span>
         </div>
         <div class="type"><b>TYPE</b>
-          <span class="t" lang="en">the seven memory kinds: </span>
+          <span class="t" lang="zh-Hant">七種記憶類型：</span>
           <span class="mono">intent · facts · pattern · invalidation · discovery · events · lifefact</span>
         </div>
       </div>
@@ -591,56 +579,56 @@
     <div class="sec-head">
       <span class="mono-label">MACHINE&nbsp;LOOP</span>
       <h2>
-        <span class="t" lang="en">The write path</span>
+        <span class="t" lang="zh-Hant">寫入流程（機器迴圈）</span>
       </h2>
     </div>
-    <picture><source type="image/webp" srcset="assets/architecture-832.webp 832w, assets/architecture-1376.webp 1376w" sizes="(min-width: 880px) 832px, calc(100vw - 48px)"><img class="diagram" src="assets/architecture.png" alt="Architecture: agents read and write GitHub Issues; GitHub Actions index them every six hours with weights and decay; agents recall from INDEX.md, REGION files and a local cache" width="1376" height="768" loading="lazy" decoding="async"></picture>
-    <p class="note t" lang="en">No AI model runs in the indexing workflows; they are deterministic scripts. Agents never edit the index files; the workflows own them.</p>
+    <picture><source type="image/webp" srcset="../assets/architecture-832.webp 832w, ../assets/architecture-1376.webp 1376w" sizes="(min-width: 880px) 832px, calc(100vw - 48px)"><img class="diagram" src="../assets/architecture.png" alt="Architecture: agents read and write GitHub Issues; GitHub Actions index them every six hours with weights and decay; agents recall from INDEX.md, REGION files and a local cache" width="1376" height="768" loading="lazy" decoding="async"></picture>
+    <p class="note t" lang="zh-Hant">索引工作流程中沒有任何 AI 模型參與——都是確定性腳本。代理永遠不編輯索引檔案；那些檔案由工作流程專屬管理。</p>
     <div class="flow">
       <div class="fnode">
         <div class="actor agent">
-          <span class="t" lang="en">Agent</span>
+          <span class="t" lang="zh-Hant">代理</span>
         </div>
         <div class="fbody">
           <h3>
-            <span class="t" lang="en">Post one issue via GitHub MCP</span>
+            <span class="t" lang="zh-Hant">透過 MCP 發一則 Issue</span>
           </h3>
-          <p class="t" lang="en">New topic → new issue. Reply → a comment on the existing thread. Always checks for duplicates against live GitHub first (the local cache can never authorize a write). The user can trigger the same write on demand with the <code>/amp</code> command below.</p>
+          <p class="t" lang="zh-Hant">新主題開新 Issue；回覆則在原討論串留言。寫入前一定先向 GitHub 即時確認是否重複（本地快取不能授權寫入）。使用者也能隨時用下方的 <code>/amp</code> 指令觸發同樣的寫入。</p>
         </div>
       </div>
       <div class="fnode">
         <div class="actor robot">
-          <span class="t" lang="en">Workflow</span>
+          <span class="t" lang="zh-Hant">工作流程</span>
         </div>
         <div class="fbody">
           <h3>
-            <span class="t" lang="en">Tracker updates the unindexed register</span>
+            <span class="t" lang="zh-Hant">追蹤器更新未索引清單</span>
             <span class="timing">~30 s</span>
           </h3>
-          <p class="t" lang="en">On every issue opened, <code>not_indexed.md</code> is rebuilt from all issues since the last compile, so a failed run is repaired by the next one, and new memories are never invisible.</p>
+          <p class="t" lang="zh-Hant">每有 Issue 開啟，<code>not_indexed.md</code> 就會從上次編譯以來的全部 Issue 重建——失敗的執行由下一次自動修復，新記憶不會被漏看。</p>
         </div>
       </div>
       <div class="fnode">
         <div class="actor robot">
-          <span class="t" lang="en">Workflow</span>
+          <span class="t" lang="zh-Hant">工作流程</span>
         </div>
         <div class="fbody">
           <h3>
-            <span class="t" lang="en">Scheduled compile</span>
+            <span class="t" lang="zh-Hant">排程編譯</span>
             <span class="timing">every 6 h</span>
           </h3>
-          <p class="t" lang="en">Rebuilds <code>INDEX.md</code> (always small: Region pointers with titles) and per-region <code>REGION-*.md</code> pointer tables, applies weight decay and outcome deltas, persists <code>weights.json</code>.</p>
+          <p class="t" lang="zh-Hant">重建永遠精簡的 <code>INDEX.md</code>（僅摘要）與各區域的 <code>REGION-*.md</code> 指標表，套用權重衰減與成效加減分，並保存 <code>weights.json</code>。</p>
         </div>
       </div>
       <div class="fnode">
         <div class="actor robot">
-          <span class="t" lang="en">Workflow</span>
+          <span class="t" lang="zh-Hant">工作流程</span>
         </div>
         <div class="fbody">
           <h3>
-            <span class="t" lang="en">Knowledge export</span>
+            <span class="t" lang="zh-Hant">知識匯出</span>
           </h3>
-          <p class="t" lang="en">The same run projects every issue into an OKF v0.1 bundle (<code>okf/</code>) and a BigQuery-ready <code>rows.ndjson</code>. Both are derived and read-only; Issues stay the single source of truth.</p>
+          <p class="t" lang="zh-Hant">同一次執行把所有 Issue 投影成 OKF v0.1 知識包（<code>okf/</code>）與可載入 BigQuery 的 <code>rows.ndjson</code>。兩者皆為衍生的唯讀資料——Issue 永遠是唯一的真相來源。</p>
         </div>
       </div>
     </div>
@@ -650,71 +638,71 @@
     <div class="sec-head">
       <span class="mono-label">ENTRY&nbsp;POINT</span>
       <h2>
-        <span class="t" lang="en">The /amp command</span>
+        <span class="t" lang="zh-Hant">/amp 指令：隨處可用的記憶入口</span>
       </h2>
     </div>
-    <p class="note t" lang="en">A user-invocable Claude Code slash command, installed at user level (<span class="mono">~/.claude/commands/amp.md</span>) so it works from any project. The hooks fire on schedule; <span class="mono">/amp</span> fires when you say so. Formats still come from the <span class="mono">rxai-amp</span> skill: the command is the WHEN, the skill is the HOW. The slash menu shows both <span class="mono">/amp</span> and <span class="mono">/rxai-amp</span>: type <span class="mono">/amp</span>, which loads the skill (the rulebook) by itself.</p>
+    <p class="note t" lang="zh-Hant">Claude Code 的使用者指令，安裝在使用者層級（<span class="mono">~/.claude/commands/amp.md</span>），任何專案都能用。Hook 依時機自動觸發；<span class="mono">/amp</span> 則聽你號令。格式仍由 <span class="mono">rxai-amp</span> 技能提供——指令負責「何時」，技能負責「如何」。選單裡會同時看到 <span class="mono">/amp</span> 與 <span class="mono">/rxai-amp</span>：輸入 <span class="mono">/amp</span> 即可，它會自己載入技能（規則手冊）。</p>
     <div class="anatomy">
       <div class="title-line"><span class="seg type">/amp update</span> &lt;text&gt;
-        <span class="aside t" lang="en">→ post a memory issue, or an Outcome: comment</span>
+        <span class="aside t" lang="zh-Hant">→ 發記憶 Issue 或成效留言</span>
       </div>
       <div class="title-line"><span class="seg type">/amp update</span>
-        <span class="aside t" lang="en">→ store a summary of this session's work</span>
+        <span class="aside t" lang="zh-Hant">→ 存下本次工作摘要</span>
       </div>
       <div class="title-line"><span class="seg type">/amp status</span>
-        <span class="aside t" lang="en">→ target repo · agent · recent issues</span>
+        <span class="aside t" lang="zh-Hant">→ 目標倉庫、代理身分與近期 Issue</span>
       </div>
     </div>
-    <p class="note t" lang="en" style="margin-top:22px">Where it posts, in order of precedence. The config file outranks repo self-detection <em>by design</em>: one shared brain, the same target from any folder. Override per run with <span class="mono">RXAI_AMP_SLUG</span>.</p>
+    <p class="note t" lang="zh-Hant" style="margin-top:22px">發到哪裡——解析優先序。設定檔刻意高於倉庫自動偵測：同一顆共享大腦，在哪個資料夾都指向同一目標。單次執行可用 <span class="mono">RXAI_AMP_SLUG</span> 覆寫。</p>
     <div class="ladder">
       <div class="rung">
         <span class="file">RXAI_AMP_SLUG</span>
         <span class="why">
-          <span class="t" lang="en">explicit environment override; always wins</span>
+          <span class="t" lang="zh-Hant">環境變數明確指定——優先權最高</span>
         </span>
       </div>
       <div class="rung">
         <span class="file">~/.rxai-amp/config.json</span>
         <span class="why">
-          <span class="t" lang="en">your configured memory repo, the same one the v2.8 lifecycle adapters read</span>
+          <span class="t" lang="zh-Hant">設定檔指定的記憶倉庫——與 v2.8 生命週期配接器共用同一份設定</span>
         </span>
       </div>
       <div class="rung">
         <span class="file">
-          <span class="t" lang="en">repo self-detection</span>
+          <span class="t" lang="zh-Hant">倉庫自動偵測</span>
         </span>
         <span class="why">
-          <span class="t" lang="en">fallback: the memory repo you are standing in (PROTOCOL.md + weights.json)</span>
+          <span class="t" lang="zh-Hant">後備方案：偵測你目前所在的記憶倉庫（PROTOCOL.md + weights.json）</span>
         </span>
       </div>
     </div>
-    <p class="note t" lang="en" style="margin-top:16px">Before every write it refreshes live GitHub state for duplicates, then posts a canonically-tagged issue through the <span class="mono">gh</span> CLI with <span class="mono">from:</span> / <span class="mono">type:</span> / <span class="mono">unindexed</span> labels. <span class="mono">npm run hooks:install:claude</span> installs the command, the skill, and the config in one step.</p>
+    <p class="note t" lang="zh-Hant" style="margin-top:16px">每次寫入前都先向 GitHub 即時查重，再透過 <span class="mono">gh</span> CLI 發出符合規範標籤的 Issue（附 <span class="mono">from:</span>／<span class="mono">type:</span>／<span class="mono">unindexed</span> 標籤）。<span class="mono">npm run hooks:install:claude</span> 一步安裝指令、技能與設定檔。</p>
   </section>
 
   <section>
     <div class="sec-head">
       <span class="mono-label">SESSION&nbsp;LOOP</span>
       <h2>
-        <span class="t" lang="en">The agent lifecycle</span>
+        <span class="t" lang="zh-Hant">代理工作階段（v2.8 生命週期）</span>
       </h2>
     </div>
-    <p class="note t" lang="en">v2.8 makes the three obligations (recall, capture, outcome) mechanical: hooks decide <em>when</em> (deterministic triggers the model can't forget), the <span class="mono">rxai-amp</span> skill teaches <em>how</em> (exact formats), and a local session ledger connects them. The work itself happens between recall and capture.</p>
+    <p class="note t" lang="zh-Hant">v2.8 把三大義務（召回、記錄、成效）機械化：Hook 負責「何時」（模型忘不掉的確定性觸發），<span class="mono">rxai-amp</span> 技能負責「如何」（精確格式），本地工作階段帳本把兩者串起來。</p>
     <div class="steps">
       <div class="step">
         <span class="k">1 · RECALL</span>
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="lc-1">
             <span class="dl">
-            <span class="t" lang="en">Remember first</span>
+            <span class="t" lang="zh-Hant">先回憶</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">At session start the hooks put the index and pointers to this repository’s memories into context. When you type a prompt, the records it touches expand to a short summary. The agent doesn't decide to recall; recall happens to it.</p>
+        <p class="t" lang="zh-Hant">工作階段一開始，hook 就把索引和這個儲存庫記憶的指標放進情境；你輸入提示時，和提示相關的記憶會展開成簡短摘要。不靠代理「想起來」，回憶是自動發生的。</p>
         <div class="trigger">SessionStart → pointers · UserPromptSubmit → summaries</div>
         <div class="more" id="lc-1">
           <div class="more-in">
-            <p class="t" lang="en"><span class="mono">session-start.mjs</span> puts <span class="mono">INDEX.md</span>, <span class="mono">not_indexed.md</span> and the matching pointers into the session before your first prompt; <span class="mono">user-prompt-submit.mjs</span> expands the records each prompt touches, each at most once per session.</p>
+            <p class="t" lang="zh-Hant"><span class="mono">session-start.mjs</span> 在你下第一道指令之前，把 <span class="mono">INDEX.md</span>、<span class="mono">not_indexed.md</span> 和相符的指標放進工作階段；<span class="mono">user-prompt-submit.mjs</span> 則展開每道提示相關的記憶，每則每個工作階段最多一次。</p>
           </div>
         </div>
       </div>
@@ -723,16 +711,16 @@
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="lc-2">
             <span class="dl">
-            <span class="t" lang="en">Do the work</span>
+            <span class="t" lang="zh-Hant">執行工作</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Every git commit is recorded as a work boundary; an <span class="mono">[AMP]</span> reminder appears right in the commit output. Five commits = one obligation, not five.</p>
+        <p class="t" lang="zh-Hant">每次 git commit 都被記為工作邊界，<span class="mono">[AMP]</span> 提醒直接出現在 commit 輸出中。五次 commit 只產生一次義務。</p>
         <div class="trigger">post-commit hook → ledger boundary</div>
         <div class="more" id="lc-2">
           <div class="more-in">
-            <p class="t" lang="en"><span class="mono">adapters/git-hooks/post-commit</span> prints it; <span class="mono">post-tool-use.mjs</span> logs the boundary. Only a real <span class="mono">git commit</span> counts.</p>
+            <p class="t" lang="zh-Hant"><span class="mono">adapters/git-hooks/post-commit</span> 負責印出；<span class="mono">post-tool-use.mjs</span> 記錄邊界。只有真正的 <span class="mono">git commit</span> 算數。</p>
           </div>
         </div>
       </div>
@@ -741,16 +729,16 @@
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="lc-3">
             <span class="dl">
-            <span class="t" lang="en">Store or decline</span>
+            <span class="t" lang="zh-Hant">記錄或婉拒</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">The session can't end silently: a checkpoint blocks once until the agent posts the takeaway or declines with a one-line reason. "Nothing worth storing" is valid; silence is not.</p>
+        <p class="t" lang="zh-Hant">工作階段不能默默結束：檢查點會攔截一次，直到代理發出心得——或附一句理由明確婉拒。「沒什麼值得存」是合法答案，沉默不是。</p>
         <div class="trigger">Stop hook → block once, then store / decline</div>
         <div class="more" id="lc-3">
           <div class="more-in">
-            <p class="t" lang="en"><span class="mono">adapters/claude-code/hooks/stop.mjs</span> blocks once. Post the takeaway or decline with a reason; the ledger remembers which.</p>
+            <p class="t" lang="zh-Hant"><span class="mono">adapters/claude-code/hooks/stop.mjs</span> 只攔一次。發出心得或附理由婉拒——帳本記得你選了哪個。</p>
           </div>
         </div>
       </div>
@@ -759,16 +747,16 @@
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="lc-4">
             <span class="dl">
-            <span class="t" lang="en">Grade what you used</span>
+            <span class="t" lang="zh-Hant">評分用過的記憶</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Every recalled memory the session relied on gets an <span class="mono">Outcome:</span> comment. Unused memories get nothing, so there is no fake activity.</p>
+        <p class="t" lang="zh-Hant">凡是本次真正用到的記憶，都要留下 <span class="mono">Outcome:</span> 成效留言；沒用到的什麼都不留——不製造假活動。</p>
         <div class="trigger">## Recall manifest → Librarian audits</div>
         <div class="more" id="lc-4">
           <div class="more-in">
-            <p class="t" lang="en">The summary’s <span class="mono">## Recall</span> manifest lists what the session used; <span class="mono">amp-librarian.yml</span> audits it daily.</p>
+            <p class="t" lang="zh-Hant">摘要中的 <span class="mono">## Recall</span> 清單列出本次用過的記憶；<span class="mono">amp-librarian.yml</span> 每天稽核。</p>
           </div>
         </div>
       </div>
@@ -779,91 +767,91 @@
     <div class="sec-head">
       <span class="mono-label">READ&nbsp;PATH</span>
       <h2>
-        <span class="t" lang="en">Three-tier recall</span>
+        <span class="t" lang="zh-Hant">三層式召回（讀取流程）</span>
       </h2>
     </div>
-    <p class="note t" lang="en">Recall is delivered, not performed. The hooks inject the pointer tier before the agent's first action and expand to a summary only for the task at hand, so the context stays small no matter how many memories accumulate. Region files are for browsing, never for recall.</p>
+    <p class="note t" lang="zh-Hant">召回是「送到手上」，不是代理自己去做。Hook 在代理的第一個動作之前注入指標層，只在題目相關時才展開摘要，所以不管記憶累積多少，context 永遠精簡——區域檔案只供瀏覽，不參與召回。</p>
     <div class="ladder">
       <div class="rung">
         <span class="file">INDEX.md + not_indexed.md</span>
         <span class="why">
-          <span class="t" lang="en">the navigation layer, injected at session start and compacted around the repo's Region</span>
+          <span class="t" lang="zh-Hant">導覽層：session 開始時注入，並依此儲存庫的區域壓縮</span>
         </span>
       </div>
       <div class="rung">
         <span class="file">pointer</span>
         <span class="why">
-          <span class="t" lang="en"><span class="mono">#N [type · place · weight] title</span>: every matching record on one line, no network</span>
+          <span class="t" lang="zh-Hant"><span class="mono">#N [type · place · weight] title</span>——每一則相符的記憶各一行，不用連網</span>
         </span>
       </div>
       <div class="rung">
         <span class="file">summary</span>
         <span class="why">
-          <span class="t" lang="en">the record's <span class="mono">## Now</span>, else its opening prose, ≤ 240 chars, expanded only for records the prompt overlaps (Claude Code) and at session start on Codex and agy</span>
+          <span class="t" lang="zh-Hant">記憶的 <span class="mono">## Now</span>，沒有就取開頭的散文，≤ 240 字——只展開和 prompt 相符的記憶（Claude Code）；Codex 與 agy 在 session 開始時給</span>
         </span>
       </div>
       <div class="rung">
         <span class="file">issue + comments</span>
         <span class="why">
-          <span class="t" lang="en">the full thread, fetched only when the agent acts on a record's details</span>
+          <span class="t" lang="zh-Hant">完整討論串，只在代理要依據細節行動時才抓取</span>
         </span>
       </div>
     </div>
-    <p class="note t" lang="en" style="margin-top:16px">Pointers arrive in a fixed order, goal before steps and doubts before trust: <span class="mono">intent → facts → pattern → invalidation → discovery → events</span>.</p>
+    <p class="note t" lang="zh-Hant" style="margin-top:16px">指標有固定順序——先看目標再看步驟、先查反證再信事實：<span class="mono">intent → facts → pattern → invalidation → discovery → events</span>。</p>
   </section>
 
   <section>
     <div class="sec-head">
       <span class="mono-label">WEIGHTS</span>
       <h2>
-        <span class="t" lang="en">Confidence that learns</span>
+        <span class="t" lang="zh-Hant">會學習的信心權重</span>
       </h2>
     </div>
-    <p class="note t" lang="en">Each memory carries a weight that decays over time and moves with real outcomes. Proven patterns float up and broken ones sink, without manual cleanup.</p>
+    <p class="note t" lang="zh-Hant">每條記憶都有一個會隨時間衰減、隨實際成效增減的權重——被驗證的模式往上浮，失效的往下沉，完全不需手動整理。</p>
     <div style="overflow-x:auto">
       <table class="wtable">
         <tr>
           <th>
-            <span class="t" lang="en">Signal</span>
+            <span class="t" lang="zh-Hant">訊號</span>
           </th>
           <th>
-            <span class="t" lang="en">Effect</span>
+            <span class="t" lang="zh-Hant">效果</span>
           </th>
         </tr>
         <tr>
           <td>
-            <span class="t" lang="en"><span class="mono">Outcome: success</span> comment</span>
+            <span class="t" lang="zh-Hant">成效留言 <span class="mono">Outcome: success</span></span>
           </td>
           <td><span class="delta up">+0.30</span></td>
         </tr>
         <tr>
           <td>
-            <span class="t" lang="en"><span class="mono">Outcome: failure</span> comment</span>
+            <span class="t" lang="zh-Hant">成效留言 <span class="mono">Outcome: failure</span></span>
           </td>
           <td><span class="delta down">−0.20</span></td>
         </tr>
         <tr>
           <td>
-            <span class="t" lang="en">no marker / neutral</span>
+            <span class="t" lang="zh-Hant">沒有標記或中性</span>
           </td>
           <td><span class="delta flat">
-            <span class="t" lang="en">0, decay only</span>
+            <span class="t" lang="zh-Hant">0，僅衰減</span>
           </span></td>
         </tr>
         <tr>
           <td>
-            <span class="t" lang="en"><span class="mono">type:lifefact</span> (permanent personal fact)</span>
+            <span class="t" lang="zh-Hant"><span class="mono">type:lifefact</span>（永久個人記憶）</span>
           </td>
           <td><span class="delta pin">
-            <span class="t" lang="en">pinned 1.0, never decays</span>
+            <span class="t" lang="zh-Hant">固定 1.0，永不衰減</span>
           </span></td>
         </tr>
         <tr>
           <td>
-            <span class="t" lang="en"><span class="mono">Supersedes: #N</span> in an invalidation</span>
+            <span class="t" lang="zh-Hant">反證聲明中的 <span class="mono">Supersedes: #N</span></span>
           </td>
           <td><span class="delta down">
-            <span class="t" lang="en">→ 0, archived immediately</span>
+            <span class="t" lang="zh-Hant">→ 0，立即封存</span>
           </span></td>
         </tr>
       </table>
@@ -874,10 +862,10 @@
     <div class="sec-head">
       <span class="mono-label">CONFORMANCE</span>
       <h2>
-        <span class="t" lang="en">Four levels of enforcement</span>
+        <span class="t" lang="zh-Hant">四級遵循等級</span>
       </h2>
     </div>
-    <p class="note t" lang="en">Levels change what is <em>mechanical</em>, never what is <em>required</em>. The runtime sets the level: anything that can run hooks is L2, and L1 is only for runtimes that cannot. A broken adapter never blocks the user's real work. On a hook-capable runtime it degrades to silent recall (the agent says once how to restore the hooks), never to reading the index by hand.</p>
+    <p class="note t" lang="zh-Hant">等級改變的是「多少事被機械化」，而非「要求本身」。等級由執行環境決定：能跑 hook 的一律是 L2，L1 只留給跑不了 hook 的環境。壞掉的配接器絕不擋住使用者的正事——在能跑 hook 的環境上，它退化為「靜默召回」（代理只說一次怎麼修復 hook），絕不會退化成手動翻索引。</p>
     <div class="levels">
       <div class="level">
         <div class="lvhead">
@@ -886,15 +874,15 @@
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="cf-0">
             <span class="dl">
-            <span class="t" lang="en">Prose</span>
+            <span class="t" lang="zh-Hant">純文件</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Agent follows the written protocol voluntarily.</p>
+        <p class="t" lang="zh-Hant">代理自律遵守文件規範。</p>
         <div class="more" id="cf-0">
           <div class="more-in">
-            <p class="t" lang="en">No install. The agent reads <span class="mono">PROTOCOL.md</span> and complies because it was asked to. Every agent starts here.</p>
+            <p class="t" lang="zh-Hant">不用安裝。代理讀 <span class="mono">PROTOCOL.md</span>，因為被要求所以遵守。所有代理都從這裡開始。</p>
           </div>
         </div>
       </div>
@@ -905,15 +893,15 @@
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="cf-1">
             <span class="dl">
-            <span class="t" lang="en">Assisted</span>
+            <span class="t" lang="zh-Hant">輔助</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Checklists loaded into context: the skill, or a config digest.</p>
+        <p class="t" lang="zh-Hant">檢查清單載入情境：技能或設定摘要。</p>
         <div class="more" id="cf-1">
           <div class="more-in">
-            <p class="t" lang="en"><span class="mono">OpenClaw</span> · <span class="mono">Hermes</span>. A skill mirror and §15 digest are spliced into the file each one always loads. Context, not enforcement.</p>
+            <p class="t" lang="zh-Hant"><span class="mono">OpenClaw</span>、<span class="mono">Hermes</span>。技能鏡像與 §15 摘要被接進每個執行環境必載的檔案。是情境，不是強制。</p>
           </div>
         </div>
       </div>
@@ -921,21 +909,21 @@
         <div class="lvhead">
           <span class="lv">L2</span>
           <span class="now">
-            <span class="t" lang="en">where AMP is today</span>
+            <span class="t" lang="zh-Hant">AMP 目前所在</span>
           </span>
         </div>
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="cf-2">
             <span class="dl">
-            <span class="t" lang="en">Enforced</span>
+            <span class="t" lang="zh-Hant">強制</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Deterministic hooks + session ledger interpose real checkpoints.</p>
+        <p class="t" lang="zh-Hant">確定性 Hook 加帳本，設置真正的檢查點。</p>
         <div class="more" id="cf-2">
           <div class="more-in">
-            <p class="t" lang="en"><span class="mono">Claude Code</span> · <span class="mono">Codex</span> · <span class="mono">agy</span>. Hooks fire outside the model, so forgetting is not an option. The ledger under <span class="mono">~/.rxai-amp/</span> is advisory only.</p>
+            <p class="t" lang="zh-Hant"><span class="mono">Claude Code</span>、<span class="mono">Codex</span>、<span class="mono">agy</span>。Hook 在模型之外觸發，「忘記」不是選項。<span class="mono">~/.rxai-amp/</span> 下的帳本僅供參考。</p>
           </div>
         </div>
       </div>
@@ -946,28 +934,28 @@
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="cf-3">
             <span class="dl">
-            <span class="t" lang="en">Tool-boundary</span>
+            <span class="t" lang="zh-Hant">工具邊界</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Future MCP server validates every write before it reaches GitHub.</p>
+        <p class="t" lang="zh-Hant">未來的 MCP 伺服器在寫入前就攔截格式錯誤。</p>
         <div class="more" id="cf-3">
           <div class="more-in">
-            <p class="t" lang="en">Not shipped. An MCP server would reject a malformed title before it became an issue. Today the skill only advises; nothing enforces it.</p>
+            <p class="t" lang="zh-Hant">尚未推出。MCP 伺服器會在格式錯誤的標題變成 Issue 前就擋下。目前這層驗證住在技能裡——是指引，不是關卡。</p>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="lvlres t" lang="en">
-      <p>Measured at both levels with Codex, on the same tasks and memory store:</p>
+    <div class="lvlres t" lang="zh-Hant">
+      <p>兩個等級都在相同任務與記憶庫上用 Codex 實測：</p>
       <ul>
-        <li><b>L1</b>, the agent recalls by itself: gpt-6-astra used 46% more input and 35% more wall time than with no memory. One model searched the index five times and fetched nothing.</li>
-        <li><b>L2</b>, a hook delivers the same records before the first action: the same model used 5.6% less input and 5.4% less tool output. A second model improved but still used more than with no memory. All ten enabled sessions received the same three records.</li>
-        <li><b>L2, 24 Sep 2026</b>, Codex’s own memory off: input rose 9.9% at medium effort and fell 3.4% at xhigh, where the model also read 13.6% less and finished 10.7% sooner (gpt-6-astra, 4 pairs each).</li>
+        <li><b>L1</b>（代理自行回憶）：gpt-6-astra 比完全不用記憶多用 46% 輸入、多花 35% 時間。其中一個模型翻了索引五次，一筆也沒取。</li>
+        <li><b>L2</b>（hook 在第一個動作前送達同樣的紀錄）：同一個模型輸入少 5.6%、工具輸出少 5.4%。第二個模型有改善，但仍比不用記憶時用得多。十個啟用的工作階段全部收到相同的三筆紀錄。</li>
+        <li><b>L2，2026-09-24</b>（關掉 Codex 自己的記憶）：medium 時輸入多 9.9%；xhigh 時少 3.4%，而且少挖 13.6%、早 10.7% 完成（gpt-6-astra，各 4 組配對）。</li>
       </ul>
-      <p>The level decides whether memory can pay for itself; how much reading it replaces decides whether it does.</p>
+      <p>等級決定記憶「能不能」回本；真的回不回得了，取決於它替代掉多少閱讀量。</p>
     </div>
   </section>
 
@@ -975,29 +963,29 @@
     <div class="sec-head">
       <span class="mono-label">BOOTSTRAP</span>
       <h2>
-        <span class="t" lang="en">One command to a new brain</span>
+        <span class="t" lang="zh-Hant">一鍵長出新大腦</span>
       </h2>
     </div>
-    <p class="note t" lang="en">Adopting the protocol used to take about 15 manual steps. The template now ships a setup wizard (it follows §15.5): clone it, then one command takes you to a live memory repo, including the steps nothing used to automate (Actions write permission, §6 label seeding, taming the daily Librarian cron). It proves the result with a real end-to-end test issue. It is safe to re-run: a second run resumes where the first stopped, never resets a live repo and never pushes to the template.</p>
+    <p class="note t" lang="zh-Hant">過去採用協定要 ~15 個手動步驟。現在範本內建符合 §15.5 的精靈：clone 之後一條命令直達可運作的記憶倉庫——包括以前沒有任何東西自動化的步驟（Actions 寫入權限、§6 標籤播種、馴服每天執行的 Librarian 排程），最後用真實的端到端測試 Issue 自我驗證。冪等：重跑即續跑；絕不重置已上線的倉庫、絕不推送範本。</p>
     <div class="anatomy">
       <div class="title-line"><span class="seg type">npm run setup</span>
-        <span class="aside t" lang="en">→ repo · permissions · labels · hooks · first compile</span>
+        <span class="aside t" lang="zh-Hant">→ 建倉庫、權限、標籤、hooks、首次編譯</span>
       </div>
       <div class="title-line"><span class="seg type">npm run setup</span> -- --dry-run
-        <span class="aside t" lang="en">→ print the full plan, change nothing</span>
+        <span class="aside t" lang="zh-Hant">→ 只看計畫，不動任何東西</span>
       </div>
       <div class="title-line"><span class="seg type">npm run setup:verify</span>
-        <span class="aside t" lang="en">→ re-assert the checklist any time</span>
+        <span class="aside t" lang="zh-Hant">→ 隨時重新體檢部署</span>
       </div>
     </div>
   </section>
 
   <footer>
     <span class="mono">RxAi AMP v2.12 · <a href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md</a>
-      <span class="t" lang="en">is the single source of truth · Issues in, knowledge out.</span>
+      <span class="t" lang="zh-Hant">為唯一真相來源 · Issue 進，知識出。</span>
     </span>
     <p class="built">
-      <span class="t" lang="en">Built by <a href="https://rxai.com.au">RxAI</a></span>
+      <span class="t" lang="zh-Hant">由 <a href="https://rxai.com.au">RxAI</a> 打造</span>
     </p>
     <p>© 2026 James Ho · <a href="https://github.com/RxAi-Aus/amp/blob/main/LICENSE">Dual-licensed</a>: AGPL-3.0-or-later or commercial · patent pending (AU provisional 2026907694) · <a href="https://github.com/RxAi-Aus/amp">github.com/RxAi-Aus/amp</a></p>
   </footer>

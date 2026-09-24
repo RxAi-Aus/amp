@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  // English is also the x-default. A visitor who chose another language before,
+  // or whose browser asks for one this page has, goes to that version; a
+  // visitor on a language URL stays where the link sent them.
+  (function () {
+    var alt = {"zh-Hant":"zh-hant/compare.html"};
+    var l = null;
+    try { l = localStorage.getItem("amp-lang"); } catch (e) {}
+    if (!l) { var n = (navigator.language || "").toLowerCase(); l = n.indexOf("zh") === 0 ? "zh-Hant" : n.slice(0, 2); }
+    if (alt[l]) location.replace(alt[l] + location.search + location.hash);
+  })();
+</script>
+<!-- Google tag (gtag.js) · GA4 property amp.rxai.com.au · Consent Mode v2:
+     everything denied until the visitor accepts (assets/amp-analytics.js shows
+     the banner); a stored choice is restored before gtag.js loads. -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied',
+    analytics_storage: 'denied', wait_for_update: 500
+  });
+  try { if (localStorage.getItem('amp-consent') === 'granted') gtag('consent', 'update', { analytics_storage: 'granted' }); } catch (e) {}
+  gtag('js', new Date());
+  gtag('config', 'G-5T0HGDZQPF', { cookie_expires: 63072000 });
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5T0HGDZQPF"></script>
+<script defer src="assets/amp-analytics.js"></script>
+<!-- Per-language head text for scripts/build-site.mjs; English is the markup below. -->
+<title>RxAi AMP vs Mem0, Zep, Letta and the MCP memory server</title>
+<meta name="description" content="How RxAi AMP compares with Mem0, Zep and Graphiti, Letta and the MCP memory server: where memory lives, how agents get it, what you run, licences.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+<meta property="og:title" content="RxAi AMP vs Mem0, Zep, Letta and the MCP memory server">
+<meta property="og:description" content="Five ways to give AI agents memory: where it lives, how it reaches the agent, and what you have to run.">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_AU">
+<meta property="og:locale:alternate" content="zh_TW">
+<meta property="og:url" content="https://amp.rxai.com.au/compare.html">
+<meta property="og:image" content="https://amp.rxai.com.au/assets/social-preview.jpg">
+<meta property="article:published_time" content="2026-09-24">
+<meta property="article:modified_time" content="2026-09-24">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://amp.rxai.com.au/assets/social-preview.jpg">
+<link rel="canonical" href="https://amp.rxai.com.au/compare.html">
+<link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/compare.html">
+<link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/compare.html">
+<link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/compare.html">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://rxai.com.au/#organization",
+      "name": "RxAi",
+      "url": "https://www.rxai.com.au/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://amp.rxai.com.au/assets/rxai-logo-512.jpg",
+        "width": 512,
+        "height": 512
+      },
+      "sameAs": [
+        "https://github.com/RxAi-Aus"
+      ]
+    },
+    {
+      "@type": "TechArticle",
+      "@id": "https://amp.rxai.com.au/compare.html#article",
+      "headline": "RxAi AMP compared with Mem0, Zep, Letta and the MCP memory server",
+      "description": "How RxAi AMP compares with Mem0, Zep and Graphiti, Letta and the MCP memory server: where memory lives, how agents get it, what you run, licences.",
+      "url": "https://amp.rxai.com.au/compare.html",
+      "mainEntityOfPage": "https://amp.rxai.com.au/compare.html",
+      "inLanguage": "en",
+      "datePublished": "2026-09-24",
+      "dateModified": "2026-09-24",
+      "author": {
+        "@type": "Person",
+        "name": "James Ho"
+      },
+      "publisher": {
+        "@id": "https://rxai.com.au/#organization"
+      },
+      "image": "https://amp.rxai.com.au/assets/social-preview.jpg",
+      "about": {
+        "@id": "https://amp.rxai.com.au/#software"
+      },
+      "isPartOf": {
+        "@id": "https://amp.rxai.com.au/#website"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RxAi AMP",
+          "item": "https://amp.rxai.com.au/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Compare",
+          "item": "https://amp.rxai.com.au/compare.html"
+        }
+      ]
+    }
+  ]
+}
+</script>
+<style>
+  /* Tokens and components follow index.html so the two pages read as one site. */
+  :root {
+    --paper: #FAFBFD;
+    --ink: #1A2334;
+    --muted: #55637A;
+    --line: #D9E0EA;
+    --panel: #F0F3F8;
+    --accent: #8B5A0E;
+    --accent-soft: #F5EAD4;
+    --ok: #287046;
+    --ok-soft: #E3F0E8;
+    --bad: #A83E38;
+    --bad-soft: #F6E5E4;
+    --ref: #2F5FA8;
+    --ref-soft: #E4ECF7;
+    --tag-place: #1F7A72;
+    --seg-cached: #BFD0EA;
+    --seg-new: #D99A2B;
+    --seg-out: #2E7D4F;
+    --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+    --shade: rgba(26, 35, 52, 0.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0E1420;
+      --ink: #E8ECF4;
+      --muted: #93A1B8;
+      --line: #263248;
+      --panel: #161F30;
+      --accent: #E0A83C;
+      --accent-soft: #2B2415;
+      --ok: #5BBF87;
+      --ok-soft: #14261C;
+      --bad: #E08078;
+      --bad-soft: #2C1817;
+      --ref: #7EA6E8;
+      --ref-soft: #15202F;
+      --tag-place: #5FBDB4;
+      --seg-cached: #2E4466;
+      --seg-new: #C98F2A;
+      --seg-out: #4FAE7A;
+      --shade: rgba(0, 0, 0, 0.55);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    line-height: 1.62;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 20px 24px 96px; }
+  code, .mono {
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.86em;
+  }
+  p code, li code, td code, .note code {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px;
+    overflow-wrap: anywhere;
+  }
+  a { color: var(--ref); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+  /* ---------- language switching ---------- */
+  .t { display: none; }
+  body[data-lang="en"]      .t[lang="en"],
+  body[data-lang="zh-Hant"] .t[lang="zh-Hant"] { display: revert; }
+
+  .langbar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+    padding: 14px 0 12px; margin-bottom: 22px;
+    background: var(--paper); border-bottom: 1px solid var(--line);
+  }
+  .langbar .home {
+    margin-right: auto; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;
+    color: var(--muted); text-decoration: none;
+  }
+  .langbar .home:hover { color: var(--accent); }
+  .langbar .lang {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;
+    border: 1px solid var(--line); background: var(--paper); color: var(--muted);
+    border-radius: 999px; padding: 4px 13px; text-decoration: none; display: inline-flex; align-items: center;
+  }
+  .langbar .lang:hover { border-color: var(--accent); color: var(--accent); }
+  .langbar .lang[aria-current="page"] {
+    color: var(--accent); border-color: var(--accent); background: var(--accent-soft); font-weight: 700;
+  }
+
+  /* ---------- header ---------- */
+  header { border-bottom: 2px solid var(--ink); padding-bottom: 28px; margin-bottom: 12px; }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 14px;
+  }
+  h1 {
+    font-size: clamp(30px, 5.4vw, 46px); font-weight: 800; letter-spacing: -0.02em;
+    line-height: 1.12; margin: 0 0 20px; text-wrap: balance;
+  }
+  .lede { max-width: 68ch; }
+  .lede p { margin: 14px 0 0; }
+  .chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
+  .chip {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
+    border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; color: var(--muted);
+  }
+  a.chip { color: var(--accent); border-color: var(--accent); text-decoration: none; font-weight: 700; }
+  a.chip:hover { background: var(--accent-soft); }
+
+  /* ---------- sections ---------- */
+  section { margin-top: 64px; }
+  .sec-head { display: flex; align-items: baseline; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 22px; }
+  .sec-head .mono-label {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
+    letter-spacing: 0.12em; color: var(--accent); white-space: nowrap;
+  }
+  h2 { font-size: 21px; font-weight: 750; letter-spacing: -0.01em; margin: 0; }
+  h3.sub { font-size: 16.5px; font-weight: 750; margin: 34px 0 10px; }
+  .note { color: var(--muted); font-size: 14.5px; max-width: 70ch; margin: 0 0 18px; }
+  .prose { max-width: 70ch; }
+  .prose p { margin: 0 0 14px; }
+
+  /* ---------- twins ---------- */
+  .twins { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 30px; }
+  .twin { border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; background: var(--panel); }
+  .twin.on { border-color: var(--accent); background: var(--accent-soft); }
+  .twin .k {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; color: var(--muted);
+  }
+  .twin.on .k { color: var(--accent); }
+  .twin h3 { margin: 4px 0 8px; font-size: 17px; font-weight: 750; }
+  .twin ul { margin: 0; padding-left: 18px; font-size: 14px; color: var(--muted); }
+  .twin li + li { margin-top: 2px; }
+  .twin li.diff { color: var(--ink); font-weight: 650; }
+
+  /* ---------- cards ---------- */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  .step { border: 1px solid var(--line); border-radius: 10px; padding: 16px 16px 14px; background: var(--panel); display: flex; flex-direction: column; gap: 8px; }
+  .step .k {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; color: var(--accent);
+  }
+  .step h3 { margin: 0; font-size: 16px; font-weight: 750; }
+  .step p { margin: 0; font-size: 13.5px; color: var(--muted); }
+  .step .trigger {
+    margin-top: auto; padding-top: 8px; border-top: 1px dashed var(--line);
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--tag-place);
+    overflow-wrap: anywhere;
+  }
+
+  /* ---------- call bars ---------- */
+  .calls {
+    border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px 16px;
+    background: var(--panel); margin: 4px 0 12px;
+  }
+  .callrow { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; }
+  .callrow + .callrow { margin-top: 9px; }
+  .callrow .lbl { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .bar { display: flex; height: 18px; }
+  .bar span { display: block; height: 100%; }
+  .bar span:first-child { border-radius: 4px 0 0 4px; }
+  .bar span:last-child { border-radius: 0 4px 4px 0; }
+  .bar .c { background: var(--seg-cached); }
+  .bar .n { background: var(--seg-new); }
+  .bar .o { background: var(--seg-out); }
+  .keys { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 16px; padding-top: 12px; border-top: 1px dashed var(--line); font-size: 13px; color: var(--muted); }
+  .keys i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 7px; vertical-align: -1px; }
+  .keys .c { background: var(--seg-cached); } .keys .n { background: var(--seg-new); } .keys .o { background: var(--seg-out); }
+  .caption { font-size: 13.5px; color: var(--muted); max-width: 70ch; margin: 0 0 8px; }
+
+  /* ---------- tables ---------- */
+  .tscroll { overflow-x: auto; }
+  /* Anything that scrolls sideways shows a soft shadow on the clipped edge: the
+     local layers cover it at the start and end, the scroll layers stay put. */
+  .tscroll, pre.cmd, .formula { --sbg: var(--paper); }
+  pre.cmd, .formula { --sbg: var(--panel); }
+  .tscroll, pre.cmd, .formula {
+    background:
+      linear-gradient(to right, var(--sbg) 30%, transparent) left center / 28px 100% no-repeat local,
+      linear-gradient(to left, var(--sbg) 30%, transparent) right center / 28px 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%, var(--shade), transparent) left center / 12px 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, var(--shade), transparent) right center / 12px 100% no-repeat scroll,
+      var(--sbg);
+  }
+  /* The row label stays put while the numbers slide under it. */
+  .tscroll th:first-child, .tscroll td:first-child { position: sticky; left: 0; z-index: 1; background: var(--paper); }
+  .tscroll { overscroll-behavior-x: contain; }
+  .scroll-hint { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--muted); text-align: right; margin: 0 0 6px; }
+  .wtable { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .wtable th {
+    text-align: left; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 2px solid var(--ink); padding: 6px 12px 8px 0;
+  }
+  .wtable td { border-bottom: 1px solid var(--line); padding: 10px 12px 10px 0; vertical-align: top; }
+  .wtable td.field { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; font-weight: 600; overflow-wrap: anywhere; }
+  .wtable td.num { white-space: nowrap; text-align: right; }
+  .wtable th.num { text-align: right; }
+  .wtable .sub { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .delta { font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .delta.good { color: var(--ok); background: var(--ok-soft); border-radius: 4px; padding: 1px 8px; }
+  .delta.bad { color: var(--bad); background: var(--bad-soft); border-radius: 4px; padding: 1px 8px; }
+  .delta.flat { color: var(--muted); }
+
+  /* ---------- sums ---------- */
+  .sums { display: flex; flex-direction: column; }
+  .sum { display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: baseline; padding: 11px 4px; border-bottom: 1px dashed var(--line); }
+  .sum:last-child { border-bottom: none; }
+  .sum .name { font-weight: 700; font-size: 14.5px; }
+  .sum .how { font-size: 14px; color: var(--muted); }
+  .sum .how code { font-size: 0.86em; }
+
+  .callout {
+    background: var(--ok-soft); border-radius: 8px;
+    padding: 12px 16px; margin: 22px 0 0; font-size: 14.5px; max-width: 74ch;
+  }
+  .callout p { margin: 0; }
+  .formula {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 15px; font-weight: 600;
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 20px; margin: 0 0 14px; overflow-x: auto; white-space: nowrap;
+  }
+  .formula .g { color: var(--ok); } .formula .b { color: var(--bad); }
+
+  /* ---------- commands ---------- */
+  pre.cmd {
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.55;
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 18px; margin: 10px 0 16px; overflow-x: auto;
+  }
+  pre.cmd .c { color: var(--muted); }
+  ol.run { margin: 0; padding-left: 22px; max-width: 74ch; }
+  ol.run > li { margin: 0 0 14px; padding-left: 4px; }
+  ol.run > li::marker { font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 700; color: var(--accent); }
+  ul.plain { margin: 0; padding-left: 20px; max-width: 72ch; }
+  ul.plain li { margin: 0 0 10px; }
+
+  footer { margin-top: 72px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  footer p { margin: 6px 0 0; }
+  footer .built { margin-top: 10px; font-weight: 600; color: var(--ink); }
+
+  @media (max-width: 440px) {
+    .formula { white-space: normal; }
+  }
+  @media (max-height: 500px) {
+    .langbar { position: static; }
+  }
+  @media print {
+    .langbar, .amp-consent, .amp-consent-open, .scroll-hint, .chev { display: none !important; }
+    body { background: #fff; color: #000; }
+    .wrap { max-width: none; padding: 0; }
+    html[data-js] .more { height: auto !important; }
+    section { margin-top: 28px; }
+    .step, .level, .tile, .fnode, .rung, .twin, .sum, tr, pre.cmd, .formula { break-inside: avoid; }
+    h2, h3 { break-after: avoid; }
+    a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #444; overflow-wrap: anywhere; }
+    .chips a::after, .langbar a::after { content: none; }
+  }
+  @media (pointer: coarse) {
+    .langbar .lang { min-height: 44px; padding-inline: 14px; }
+    .langbar .home, a.chip { min-height: 44px; display: inline-flex; align-items: center; }
+  }
+  @media (max-width: 640px) {
+    .wrap { padding: 16px 16px 72px; }
+    .sum { grid-template-columns: 1fr; gap: 2px; }
+    .callrow { grid-template-columns: 52px 1fr; gap: 8px; }
+    .calls { padding: 14px 14px 12px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .langbar .lang {
+      transition: color 160ms var(--ease-out-quart), border-color 160ms var(--ease-out-quart),
+                  background-color 160ms var(--ease-out-quart);
+    }
+    /* Each language, and each page, is its own URL; cross-fade the move. */
+    @view-transition { navigation: auto; }
+    ::view-transition-old(root), ::view-transition-new(root) {
+      animation-duration: 220ms;
+      animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    html[data-js] header > * { animation: amp-rise 640ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+    html[data-js] header > h1 { animation-delay: 70ms; }
+    html[data-js] header > .lede { animation-delay: 140ms; }
+    html[data-js] header > .chips { animation-delay: 210ms; }
+  }
+  @keyframes amp-rise { from { opacity: 0; transform: translateY(12px); } }
+
+  /* ---------- quickstart / compare ---------- */
+  .cmp th:not(:first-child), .cmp td:not(:first-child) { min-width: 136px; }
+  .cmp th:first-child, .cmp td:first-child { min-width: 118px; font-weight: 650; }
+  .cmp th.amp, .cmp td.amp { background: var(--accent-soft); padding-left: 10px; }
+  .agents td:nth-child(2) { white-space: nowrap; }
+  .fit { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; max-width: 74ch; }
+  .fit li { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; background: var(--panel); }
+  .fit li b { display: block; margin-bottom: 4px; }
+  .srcs { margin: 0; padding-left: 20px; font-size: 14px; max-width: 74ch; }
+  .srcs li { margin: 0 0 6px; overflow-wrap: anywhere; }
+  .foot-nav { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 10px; }
+</style>
+<script>document.documentElement.setAttribute("data-js", "on");</script>
+</head>
+<body data-lang="en">
+
+<div class="wrap">
+
+  <nav class="langbar" aria-label="Language">
+    <a class="home" href="./">
+      <span class="t" lang="en">← AMP overview</span>
+    </a>
+    <a class="lang" href="compare.html" hreflang="en" lang="en" aria-current="page">EN</a>
+    <a class="lang" href="zh-hant/compare.html" hreflang="zh-Hant" lang="zh-Hant">繁中</a>
+  </nav>
+
+  <header>
+    <p class="eyebrow">RxAi AMP · Compare · <time datetime="2026-09-24">24 Sep 2026</time></p>
+    <h1>
+      <span class="t" lang="en">RxAi AMP compared with Mem0, Zep, Letta and the MCP memory server</span>
+    </h1>
+    <div class="lede">
+      <p class="t" lang="en">All five give an AI agent memory that outlasts a session. They differ in where that memory lives, how it reaches the agent, and what you have to run. This page compares how each is designed, as its own documentation describes it on 24 September 2026. It does not rank them; each fits a different job.</p>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">IN SHORT</span>
+      <h2><span class="t" lang="en">The one-line difference</span></h2>
+    </div>
+    <div class="sums">
+      <div class="sum"><div class="name">RxAi AMP</div><div class="how"><span class="t" lang="en">Memories are GitHub Issues in a repository you own. Hooks give each agent the ones that match its task, and outcome comments reweight what agents trust. No database or server.</span></div></div>
+      <div class="sum"><div class="name">Mem0</div><div class="how"><span class="t" lang="en">A memory layer your code calls: it stores memories in a vector store and your app searches them. Open source, or the hosted Mem0 Platform.</span></div></div>
+      <div class="sum"><div class="name">Zep / Graphiti</div><div class="how"><span class="t" lang="en">A temporal knowledge graph. Graphiti is the open-source framework and needs a graph database; Zep is the hosted service.</span></div></div>
+      <div class="sum"><div class="name">Letta</div><div class="how"><span class="t" lang="en">An agent framework, formerly MemGPT, in which the agent edits its own memory through tool calls. Runs on Postgres, or as Letta Cloud.</span></div></div>
+      <div class="sum"><div class="name"><span class="t" lang="en">MCP memory server</span></div><div class="how"><span class="t" lang="en">The reference knowledge graph from the Model Context Protocol project, kept in one local JSONL file and used through MCP tools.</span></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">SIDE BY SIDE</span>
+      <h2><span class="t" lang="en">How they are built</span></h2>
+    </div>
+    <div class="tscroll">
+      <table class="wtable cmp">
+        <thead><tr><th></th><th class="amp">RxAi AMP</th><th>Mem0</th><th>Zep / Graphiti</th><th>Letta</th><th><span class="t" lang="en">MCP memory server</span></th></tr></thead>
+        <tbody>
+          <tr><td><span class="t" lang="en">Where memory lives</span></td><td class="amp"><span class="t" lang="en">GitHub Issues in your repository; the index is Markdown compiled by GitHub Actions</span></td><td><span class="t" lang="en">A vector store (their quickstarts use Qdrant, or Postgres with pgvector); graph memory is on the hosted platform only</span></td><td><span class="t" lang="en">A graph database for Graphiti: Neo4j, FalkorDB or Amazon Neptune. Zep keeps it for you</span></td><td><span class="t" lang="en">Postgres with pgvector</span></td><td><span class="t" lang="en">One local JSONL file</span></td></tr>
+          <tr><td><span class="t" lang="en">What you run</span></td><td class="amp"><span class="t" lang="en">Nothing beyond GitHub</span></td><td><span class="t" lang="en">The vector store, or the hosted platform</span></td><td><span class="t" lang="en">A graph database and an LLM provider (Graphiti); Zep is hosted only</span></td><td><span class="t" lang="en">The Letta server and Postgres, or Letta Cloud</span></td><td><span class="t" lang="en">One Node process (npx or Docker)</span></td></tr>
+          <tr><td><span class="t" lang="en">How memory reaches the agent</span></td><td class="amp"><span class="t" lang="en">Lifecycle hooks inject pointers at session start and summaries matched to each prompt; the agent does not have to ask</span></td><td><span class="t" lang="en">Your code calls search and puts the results in the prompt; a hosted MCP server is also offered</span></td><td><span class="t" lang="en">An API, or MCP tools the model calls; hybrid search over the graph</span></td><td><span class="t" lang="en">The agent reads and edits its memory tiers through tool calls</span></td><td><span class="t" lang="en">MCP tools the model calls, such as <code>search_nodes</code></span></td></tr>
+          <tr><td><span class="t" lang="en">Learns from outcomes</span></td><td class="amp"><span class="t" lang="en">Yes: success and failure comments raise or lower a memory’s weight, and recalls that went unused decay</span></td><td><span class="t" lang="en">Not documented as a feature</span></td><td><span class="t" lang="en">Not documented; facts carry validity times and are invalidated when contradicted</span></td><td><span class="t" lang="en">Not documented</span></td><td><span class="t" lang="en">Not documented</span></td></tr>
+          <tr><td><span class="t" lang="en">Sharing between agents</span></td><td class="amp"><span class="t" lang="en">One repository shared by every agent and person with access; each memory records who sent it to whom</span></td><td><span class="t" lang="en">Scoped by <code>user_id</code>, <code>agent_id</code> and <code>run_id</code></span></td><td><span class="t" lang="en">Namespaces through <code>group_id</code></span></td><td><span class="t" lang="en">Moving from shared memory blocks to git-backed shared memory repositories (MemFS)</span></td><td><span class="t" lang="en">Only by pointing clients at the same file; not a documented feature</span></td></tr>
+          <tr><td><span class="t" lang="en">Reading and editing by people</span></td><td class="amp"><span class="t" lang="en">Every memory is an issue you can read, comment on or close, with GitHub’s history</span></td><td><span class="t" lang="en">Through the API or the platform</span></td><td><span class="t" lang="en">Through graph queries</span></td><td><span class="t" lang="en">In the Agent Development Environment (ADE)</span></td><td><span class="t" lang="en">Plain JSONL you can open and edit</span></td></tr>
+          <tr><td><span class="t" lang="en">Licence</span></td><td class="amp"><span class="t" lang="en">AGPL-3.0-or-later, or commercial</span></td><td><span class="t" lang="en">Apache-2.0; the hosted platform is paid</span></td><td><span class="t" lang="en">Graphiti: Apache-2.0; Zep is a hosted service</span></td><td><span class="t" lang="en">Apache-2.0; Letta Cloud is hosted</span></td><td><span class="t" lang="en">Open source; the repository licence mixes Apache-2.0 and MIT</span></td></tr>
+          <tr><td><span class="t" lang="en">Languages</span></td><td class="amp"><span class="t" lang="en">Node.js 22, no runtime dependencies</span></td><td><span class="t" lang="en">Python, TypeScript</span></td><td><span class="t" lang="en">Python (Graphiti); Python, TypeScript and Go SDKs (Zep)</span></td><td><span class="t" lang="en">Python and TypeScript SDKs</span></td><td><span class="t" lang="en">TypeScript</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note t" lang="en">Changed recently: Zep stopped maintaining its self-hosted Community Edition in April 2025, and its open-source work continues as Graphiti. Mem0’s graph memory moved to the hosted platform. Letta’s docs now recommend git-backed memory repositories over shared memory blocks.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">WHEN TO CHOOSE</span>
+      <h2><span class="t" lang="en">Which one fits</span></h2>
+    </div>
+    <ul class="fit">
+      <li><b>RxAi AMP</b><span class="t" lang="en">Several coding agents, and the people working with them, share the same repositories. You want every memory reviewable as a GitHub issue with its history, and you would rather not run a database.</span></li>
+      <li><b>Mem0 · Zep</b><span class="t" lang="en">An application needs semantic search over a large amount of user or conversation memory, and you are fine running a vector or graph store, or paying for a hosted one.</span></li>
+      <li><b>Letta</b><span class="t" lang="en">You are building the agent itself and want memory management to be part of the framework it runs in.</span></li>
+      <li><b><span class="t" lang="en">MCP memory server</span></b><span class="t" lang="en">One person wants a small local knowledge graph inside an MCP client, with nothing else to set up.</span></li>
+    </ul>
+    <div class="callout">
+      <p class="t" lang="en">What AMP does not try to do: its recall matches memories by title and place, not by embeddings, so semantic search across thousands of memories is not its goal. It needs GitHub. How much it saves depends on the model; the <a href="benchmark.html">benchmarks</a> show where it pays for itself and where it does not.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">SOURCES</span>
+      <h2><span class="t" lang="en">Where these facts come from</span></h2>
+    </div>
+    <p class="note t" lang="en">Each project’s own repository and documentation, checked on 24 September 2026. Projects change; if something here is out of date, say so in <a href="https://github.com/RxAi-Aus/amp/discussions">GitHub Discussions</a>.</p>
+    <ul class="srcs">
+      <li><b>Mem0</b>: <a href="https://github.com/mem0ai/mem0">github.com/mem0ai/mem0</a> · <a href="https://docs.mem0.ai/open-source/python-quickstart">Python quickstart</a> · <a href="https://docs.mem0.ai/open-source/quickstart">Open-source quickstart</a> · <a href="https://docs.mem0.ai/open-source/graph_memory/overview">Graph memory</a> · <a href="https://docs.mem0.ai/platform/features/entity-scoped-memory">Entity-scoped memory</a> · <a href="https://docs.mem0.ai/platform/mem0-mcp">Mem0 MCP</a></li>
+      <li><b>Zep / Graphiti</b>: <a href="https://blog.getzep.com/announcing-a-new-direction-for-zeps-open-source-strategy/">Zep’s open-source strategy, April 2025</a> · <a href="https://github.com/getzep/zep">github.com/getzep/zep</a> · <a href="https://github.com/getzep/graphiti">github.com/getzep/graphiti</a> · <a href="https://github.com/getzep/graphiti/blob/main/mcp_server/README.md">Graphiti MCP server</a></li>
+      <li><b>Letta</b>: <a href="https://github.com/letta-ai/letta">github.com/letta-ai/letta</a> · <a href="https://docs.letta.com/guides/docker/postgres/">Postgres setup</a> · <a href="https://docs.letta.com/guides/agents/multi-agent-shared-memory/">Multi-agent shared memory</a> · <a href="https://docs.letta.com/guides/ade/core-memory/">Core memory in the ADE</a></li>
+      <li><b>MCP memory server</b>: <a href="https://github.com/modelcontextprotocol/servers/blob/main/src/memory/README.md">src/memory README</a> · <a href="https://github.com/modelcontextprotocol/servers/blob/main/LICENSE">Repository LICENSE</a></li>
+      <li><b>RxAi AMP</b>: <a href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md</a> · <a href="https://github.com/RxAi-Aus/amp#readme">README</a></li>
+    </ul>
+  </section>
+
+  <footer>
+    <nav class="foot-nav" aria-label="Pages">
+      <a href="./"><span class="t" lang="en">Overview</span></a>
+      <a href="quickstart.html"><span class="t" lang="en">Quickstart</span></a>
+      <a href="compare.html"><span class="t" lang="en">Compare</span></a>
+      <a href="benchmark.html"><span class="t" lang="en">Benchmarks</span></a>
+    </nav>
+    <span class="mono"><a href="./">RxAi AMP</a> · <a href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md</a>
+      <span class="t" lang="en">is the single source of truth · Issues in, knowledge out.</span>
+    </span>
+    <p class="built">
+      <span class="t" lang="en">Built by <a href="https://rxai.com.au">RxAI</a></span>
+    </p>
+    <p>© 2026 James Ho · <a href="https://github.com/RxAi-Aus/amp/blob/main/LICENSE">Dual-licensed</a>: AGPL-3.0-or-later or commercial · patent pending (AU provisional 2026907694) · <a href="https://github.com/RxAi-Aus/amp">github.com/RxAi-Aus/amp</a></p>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  // A results table wider than the screen scrolls sideways; say so above the ones that do.
+  var HINT = { "en": "Swipe sideways for more columns →", "zh-Hant": "左右滑動看更多欄位 →" };
+  function mark() {
+    document.querySelectorAll(".tscroll").forEach(function (el) {
+      var over = el.scrollWidth > el.clientWidth + 1;
+      var prev = el.previousElementSibling;
+      var has = prev && prev.classList.contains("scroll-hint");
+      if (over && !has) {
+        var p = document.createElement("p");
+        p.className = "scroll-hint";
+        p.textContent = HINT[document.body.getAttribute("data-lang")] || HINT.en;
+        el.parentNode.insertBefore(p, el);
+      } else if (!over && has) {
+        prev.remove();
+      }
+    });
+  }
+  var queued = false;
+  window.addEventListener("resize", function () {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function () { queued = false; mark(); });
+  });
+  mark();
+})();
+</script>
+
+<script>
+  // Remember a language picked here, so the English page can send a returning
+  // visitor straight to it.
+  (function () {
+    function keep(e) {
+      var a = e.target.closest(".langbar a[hreflang]");
+      if (a) try { localStorage.setItem("amp-lang", a.getAttribute("hreflang")); } catch (err) {}
+    }
+    document.addEventListener("click", keep);
+    document.addEventListener("auxclick", keep);
+  })();
+</script>
+<script type="speculationrules">
+{"prefetch": [{"where": {"href_matches": "/*"}, "eagerness": "moderate"}]}
+</script>
+</body>
+</html>

@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  // English is also the x-default. A visitor who chose another language before,
+  // or whose browser asks for one this page has, goes to that version; a
+  // visitor on a language URL stays where the link sent them.
+  (function () {
+    var alt = {"zh-Hant":"zh-hant/quickstart.html"};
+    var l = null;
+    try { l = localStorage.getItem("amp-lang"); } catch (e) {}
+    if (!l) { var n = (navigator.language || "").toLowerCase(); l = n.indexOf("zh") === 0 ? "zh-Hant" : n.slice(0, 2); }
+    if (alt[l]) location.replace(alt[l] + location.search + location.hash);
+  })();
+</script>
+<!-- Google tag (gtag.js) · GA4 property amp.rxai.com.au · Consent Mode v2:
+     everything denied until the visitor accepts (assets/amp-analytics.js shows
+     the banner); a stored choice is restored before gtag.js loads. -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied',
+    analytics_storage: 'denied', wait_for_update: 500
+  });
+  try { if (localStorage.getItem('amp-consent') === 'granted') gtag('consent', 'update', { analytics_storage: 'granted' }); } catch (e) {}
+  gtag('js', new Date());
+  gtag('config', 'G-5T0HGDZQPF', { cookie_expires: 63072000 });
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5T0HGDZQPF"></script>
+<script defer src="assets/amp-analytics.js"></script>
+<!-- Per-language head text for scripts/build-site.mjs; English is the markup below. -->
+<title>Quickstart: shared memory for Claude Code, Codex and agy · RxAi AMP</title>
+<meta name="description" content="Set up RxAi AMP in about ten minutes: one command creates your private memory repo, then hooks connect Claude Code, Codex, agy, OpenClaw and Hermes.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+<meta property="og:title" content="Quickstart: shared memory for Claude Code, Codex and agy · RxAi AMP">
+<meta property="og:description" content="One command creates a private memory repository; one more connects each agent. The RxAi AMP quickstart.">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_AU">
+<meta property="og:locale:alternate" content="zh_TW">
+<meta property="og:url" content="https://amp.rxai.com.au/quickstart.html">
+<meta property="og:image" content="https://amp.rxai.com.au/assets/social-preview.jpg">
+<meta property="article:published_time" content="2026-09-24">
+<meta property="article:modified_time" content="2026-09-24">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://amp.rxai.com.au/assets/social-preview.jpg">
+<link rel="canonical" href="https://amp.rxai.com.au/quickstart.html">
+<link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/quickstart.html">
+<link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/quickstart.html">
+<link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/quickstart.html">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://rxai.com.au/#organization",
+      "name": "RxAi",
+      "url": "https://www.rxai.com.au/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://amp.rxai.com.au/assets/rxai-logo-512.jpg",
+        "width": 512,
+        "height": 512
+      },
+      "sameAs": [
+        "https://github.com/RxAi-Aus"
+      ]
+    },
+    {
+      "@type": "TechArticle",
+      "@id": "https://amp.rxai.com.au/quickstart.html#article",
+      "headline": "Quickstart: shared memory for Claude Code, Codex and agy",
+      "description": "Set up RxAi AMP in about ten minutes: one command creates your private memory repo, then hooks connect Claude Code, Codex, agy, OpenClaw and Hermes.",
+      "url": "https://amp.rxai.com.au/quickstart.html",
+      "mainEntityOfPage": "https://amp.rxai.com.au/quickstart.html",
+      "inLanguage": "en",
+      "datePublished": "2026-09-24",
+      "dateModified": "2026-09-24",
+      "author": {
+        "@type": "Person",
+        "name": "James Ho"
+      },
+      "publisher": {
+        "@id": "https://rxai.com.au/#organization"
+      },
+      "image": "https://amp.rxai.com.au/assets/social-preview.jpg",
+      "about": {
+        "@id": "https://amp.rxai.com.au/#software"
+      },
+      "isPartOf": {
+        "@id": "https://amp.rxai.com.au/#website"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RxAi AMP",
+          "item": "https://amp.rxai.com.au/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Quickstart",
+          "item": "https://amp.rxai.com.au/quickstart.html"
+        }
+      ]
+    }
+  ]
+}
+</script>
+<style>
+  /* Tokens and components follow index.html so the two pages read as one site. */
+  :root {
+    --paper: #FAFBFD;
+    --ink: #1A2334;
+    --muted: #55637A;
+    --line: #D9E0EA;
+    --panel: #F0F3F8;
+    --accent: #8B5A0E;
+    --accent-soft: #F5EAD4;
+    --ok: #287046;
+    --ok-soft: #E3F0E8;
+    --bad: #A83E38;
+    --bad-soft: #F6E5E4;
+    --ref: #2F5FA8;
+    --ref-soft: #E4ECF7;
+    --tag-place: #1F7A72;
+    --seg-cached: #BFD0EA;
+    --seg-new: #D99A2B;
+    --seg-out: #2E7D4F;
+    --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+    --shade: rgba(26, 35, 52, 0.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0E1420;
+      --ink: #E8ECF4;
+      --muted: #93A1B8;
+      --line: #263248;
+      --panel: #161F30;
+      --accent: #E0A83C;
+      --accent-soft: #2B2415;
+      --ok: #5BBF87;
+      --ok-soft: #14261C;
+      --bad: #E08078;
+      --bad-soft: #2C1817;
+      --ref: #7EA6E8;
+      --ref-soft: #15202F;
+      --tag-place: #5FBDB4;
+      --seg-cached: #2E4466;
+      --seg-new: #C98F2A;
+      --seg-out: #4FAE7A;
+      --shade: rgba(0, 0, 0, 0.55);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    line-height: 1.62;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 20px 24px 96px; }
+  code, .mono {
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.86em;
+  }
+  p code, li code, td code, .note code {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px;
+    overflow-wrap: anywhere;
+  }
+  a { color: var(--ref); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+  /* ---------- language switching ---------- */
+  .t { display: none; }
+  body[data-lang="en"]      .t[lang="en"],
+  body[data-lang="zh-Hant"] .t[lang="zh-Hant"] { display: revert; }
+
+  .langbar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+    padding: 14px 0 12px; margin-bottom: 22px;
+    background: var(--paper); border-bottom: 1px solid var(--line);
+  }
+  .langbar .home {
+    margin-right: auto; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;
+    color: var(--muted); text-decoration: none;
+  }
+  .langbar .home:hover { color: var(--accent); }
+  .langbar .lang {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;
+    border: 1px solid var(--line); background: var(--paper); color: var(--muted);
+    border-radius: 999px; padding: 4px 13px; text-decoration: none; display: inline-flex; align-items: center;
+  }
+  .langbar .lang:hover { border-color: var(--accent); color: var(--accent); }
+  .langbar .lang[aria-current="page"] {
+    color: var(--accent); border-color: var(--accent); background: var(--accent-soft); font-weight: 700;
+  }
+
+  /* ---------- header ---------- */
+  header { border-bottom: 2px solid var(--ink); padding-bottom: 28px; margin-bottom: 12px; }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 14px;
+  }
+  h1 {
+    font-size: clamp(30px, 5.4vw, 46px); font-weight: 800; letter-spacing: -0.02em;
+    line-height: 1.12; margin: 0 0 20px; text-wrap: balance;
+  }
+  .lede { max-width: 68ch; }
+  .lede p { margin: 14px 0 0; }
+  .chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
+  .chip {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
+    border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; color: var(--muted);
+  }
+  a.chip { color: var(--accent); border-color: var(--accent); text-decoration: none; font-weight: 700; }
+  a.chip:hover { background: var(--accent-soft); }
+
+  /* ---------- sections ---------- */
+  section { margin-top: 64px; }
+  .sec-head { display: flex; align-items: baseline; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 22px; }
+  .sec-head .mono-label {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
+    letter-spacing: 0.12em; color: var(--accent); white-space: nowrap;
+  }
+  h2 { font-size: 21px; font-weight: 750; letter-spacing: -0.01em; margin: 0; }
+  h3.sub { font-size: 16.5px; font-weight: 750; margin: 34px 0 10px; }
+  .note { color: var(--muted); font-size: 14.5px; max-width: 70ch; margin: 0 0 18px; }
+  .prose { max-width: 70ch; }
+  .prose p { margin: 0 0 14px; }
+
+  /* ---------- twins ---------- */
+  .twins { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 30px; }
+  .twin { border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; background: var(--panel); }
+  .twin.on { border-color: var(--accent); background: var(--accent-soft); }
+  .twin .k {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; color: var(--muted);
+  }
+  .twin.on .k { color: var(--accent); }
+  .twin h3 { margin: 4px 0 8px; font-size: 17px; font-weight: 750; }
+  .twin ul { margin: 0; padding-left: 18px; font-size: 14px; color: var(--muted); }
+  .twin li + li { margin-top: 2px; }
+  .twin li.diff { color: var(--ink); font-weight: 650; }
+
+  /* ---------- cards ---------- */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  .step { border: 1px solid var(--line); border-radius: 10px; padding: 16px 16px 14px; background: var(--panel); display: flex; flex-direction: column; gap: 8px; }
+  .step .k {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; color: var(--accent);
+  }
+  .step h3 { margin: 0; font-size: 16px; font-weight: 750; }
+  .step p { margin: 0; font-size: 13.5px; color: var(--muted); }
+  .step .trigger {
+    margin-top: auto; padding-top: 8px; border-top: 1px dashed var(--line);
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--tag-place);
+    overflow-wrap: anywhere;
+  }
+
+  /* ---------- call bars ---------- */
+  .calls {
+    border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px 16px;
+    background: var(--panel); margin: 4px 0 12px;
+  }
+  .callrow { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; }
+  .callrow + .callrow { margin-top: 9px; }
+  .callrow .lbl { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .bar { display: flex; height: 18px; }
+  .bar span { display: block; height: 100%; }
+  .bar span:first-child { border-radius: 4px 0 0 4px; }
+  .bar span:last-child { border-radius: 0 4px 4px 0; }
+  .bar .c { background: var(--seg-cached); }
+  .bar .n { background: var(--seg-new); }
+  .bar .o { background: var(--seg-out); }
+  .keys { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 16px; padding-top: 12px; border-top: 1px dashed var(--line); font-size: 13px; color: var(--muted); }
+  .keys i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 7px; vertical-align: -1px; }
+  .keys .c { background: var(--seg-cached); } .keys .n { background: var(--seg-new); } .keys .o { background: var(--seg-out); }
+  .caption { font-size: 13.5px; color: var(--muted); max-width: 70ch; margin: 0 0 8px; }
+
+  /* ---------- tables ---------- */
+  .tscroll { overflow-x: auto; }
+  /* Anything that scrolls sideways shows a soft shadow on the clipped edge: the
+     local layers cover it at the start and end, the scroll layers stay put. */
+  .tscroll, pre.cmd, .formula { --sbg: var(--paper); }
+  pre.cmd, .formula { --sbg: var(--panel); }
+  .tscroll, pre.cmd, .formula {
+    background:
+      linear-gradient(to right, var(--sbg) 30%, transparent) left center / 28px 100% no-repeat local,
+      linear-gradient(to left, var(--sbg) 30%, transparent) right center / 28px 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%, var(--shade), transparent) left center / 12px 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, var(--shade), transparent) right center / 12px 100% no-repeat scroll,
+      var(--sbg);
+  }
+  /* The row label stays put while the numbers slide under it. */
+  .tscroll th:first-child, .tscroll td:first-child { position: sticky; left: 0; z-index: 1; background: var(--paper); }
+  .tscroll { overscroll-behavior-x: contain; }
+  .scroll-hint { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--muted); text-align: right; margin: 0 0 6px; }
+  .wtable { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .wtable th {
+    text-align: left; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 2px solid var(--ink); padding: 6px 12px 8px 0;
+  }
+  .wtable td { border-bottom: 1px solid var(--line); padding: 10px 12px 10px 0; vertical-align: top; }
+  .wtable td.field { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; font-weight: 600; overflow-wrap: anywhere; }
+  .wtable td.num { white-space: nowrap; text-align: right; }
+  .wtable th.num { text-align: right; }
+  .wtable .sub { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .delta { font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .delta.good { color: var(--ok); background: var(--ok-soft); border-radius: 4px; padding: 1px 8px; }
+  .delta.bad { color: var(--bad); background: var(--bad-soft); border-radius: 4px; padding: 1px 8px; }
+  .delta.flat { color: var(--muted); }
+
+  /* ---------- sums ---------- */
+  .sums { display: flex; flex-direction: column; }
+  .sum { display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: baseline; padding: 11px 4px; border-bottom: 1px dashed var(--line); }
+  .sum:last-child { border-bottom: none; }
+  .sum .name { font-weight: 700; font-size: 14.5px; }
+  .sum .how { font-size: 14px; color: var(--muted); }
+  .sum .how code { font-size: 0.86em; }
+
+  .callout {
+    background: var(--ok-soft); border-radius: 8px;
+    padding: 12px 16px; margin: 22px 0 0; font-size: 14.5px; max-width: 74ch;
+  }
+  .callout p { margin: 0; }
+  .formula {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 15px; font-weight: 600;
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 20px; margin: 0 0 14px; overflow-x: auto; white-space: nowrap;
+  }
+  .formula .g { color: var(--ok); } .formula .b { color: var(--bad); }
+
+  /* ---------- commands ---------- */
+  pre.cmd {
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.55;
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 18px; margin: 10px 0 16px; overflow-x: auto;
+  }
+  pre.cmd .c { color: var(--muted); }
+  ol.run { margin: 0; padding-left: 22px; max-width: 74ch; }
+  ol.run > li { margin: 0 0 14px; padding-left: 4px; }
+  ol.run > li::marker { font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 700; color: var(--accent); }
+  ul.plain { margin: 0; padding-left: 20px; max-width: 72ch; }
+  ul.plain li { margin: 0 0 10px; }
+
+  footer { margin-top: 72px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  footer p { margin: 6px 0 0; }
+  footer .built { margin-top: 10px; font-weight: 600; color: var(--ink); }
+
+  @media (max-width: 440px) {
+    .formula { white-space: normal; }
+  }
+  @media (max-height: 500px) {
+    .langbar { position: static; }
+  }
+  @media print {
+    .langbar, .amp-consent, .amp-consent-open, .scroll-hint, .chev { display: none !important; }
+    body { background: #fff; color: #000; }
+    .wrap { max-width: none; padding: 0; }
+    html[data-js] .more { height: auto !important; }
+    section { margin-top: 28px; }
+    .step, .level, .tile, .fnode, .rung, .twin, .sum, tr, pre.cmd, .formula { break-inside: avoid; }
+    h2, h3 { break-after: avoid; }
+    a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #444; overflow-wrap: anywhere; }
+    .chips a::after, .langbar a::after { content: none; }
+  }
+  @media (pointer: coarse) {
+    .langbar .lang { min-height: 44px; padding-inline: 14px; }
+    .langbar .home, a.chip { min-height: 44px; display: inline-flex; align-items: center; }
+  }
+  @media (max-width: 640px) {
+    .wrap { padding: 16px 16px 72px; }
+    .sum { grid-template-columns: 1fr; gap: 2px; }
+    .callrow { grid-template-columns: 52px 1fr; gap: 8px; }
+    .calls { padding: 14px 14px 12px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .langbar .lang {
+      transition: color 160ms var(--ease-out-quart), border-color 160ms var(--ease-out-quart),
+                  background-color 160ms var(--ease-out-quart);
+    }
+    /* Each language, and each page, is its own URL; cross-fade the move. */
+    @view-transition { navigation: auto; }
+    ::view-transition-old(root), ::view-transition-new(root) {
+      animation-duration: 220ms;
+      animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    html[data-js] header > * { animation: amp-rise 640ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+    html[data-js] header > h1 { animation-delay: 70ms; }
+    html[data-js] header > .lede { animation-delay: 140ms; }
+    html[data-js] header > .chips { animation-delay: 210ms; }
+  }
+  @keyframes amp-rise { from { opacity: 0; transform: translateY(12px); } }
+
+  /* ---------- quickstart / compare ---------- */
+  .cmp th:not(:first-child), .cmp td:not(:first-child) { min-width: 136px; }
+  .cmp th:first-child, .cmp td:first-child { min-width: 118px; font-weight: 650; }
+  .cmp th.amp, .cmp td.amp { background: var(--accent-soft); padding-left: 10px; }
+  .agents td:nth-child(2) { white-space: nowrap; }
+  .fit { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; max-width: 74ch; }
+  .fit li { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; background: var(--panel); }
+  .fit li b { display: block; margin-bottom: 4px; }
+  .srcs { margin: 0; padding-left: 20px; font-size: 14px; max-width: 74ch; }
+  .srcs li { margin: 0 0 6px; overflow-wrap: anywhere; }
+  .foot-nav { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 10px; }
+  /* On a phone a three-column table of commands reads better as one block per row. */
+  @media (max-width: 640px) {
+    .stack thead { display: none; }
+    .stack, .stack tbody, .stack tr, .stack td { display: block; }
+    .stack tr { padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .stack td, .stack td:first-child { position: static; border: 0; padding: 2px 0; background: none; }
+    .stack td:first-child { font-weight: 700; }
+    .stack td:empty { display: none; }
+    .stack.agents td:nth-child(2) { white-space: normal; }
+    .stack td code { overflow-wrap: anywhere; }
+  }
+</style>
+<script>document.documentElement.setAttribute("data-js", "on");</script>
+</head>
+<body data-lang="en">
+
+<div class="wrap">
+
+  <nav class="langbar" aria-label="Language">
+    <a class="home" href="./">
+      <span class="t" lang="en">← AMP overview</span>
+    </a>
+    <a class="lang" href="quickstart.html" hreflang="en" lang="en" aria-current="page">EN</a>
+    <a class="lang" href="zh-hant/quickstart.html" hreflang="zh-Hant" lang="zh-Hant">繁中</a>
+  </nav>
+
+  <header>
+    <p class="eyebrow">RxAi AMP · Quickstart · <time datetime="2026-09-24">24 Sep 2026</time></p>
+    <h1>
+      <span class="t" lang="en">Quickstart: shared memory for Claude Code, Codex and agy</span>
+    </h1>
+    <div class="lede">
+      <p class="t" lang="en">You need a GitHub account and about ten minutes. One command creates a private memory repository that you own; one more connects each agent you use. From then on every session starts with the memories that match its task, and a session that committed work ends with one checkpoint asking what is worth keeping.</p>
+    </div>
+    <div class="chips">
+      <a class="chip" href="https://github.com/RxAi-Aus/amp">GitHub ↗</a>
+      <a class="chip" href="https://github.com/RxAi-Aus/amp#step-by-step-installation-guide">README ↗</a>
+      <a class="chip" href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md ↗</a>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">BEFORE YOU START</span>
+      <h2><span class="t" lang="en">What you need</span></h2>
+    </div>
+    <div class="tscroll">
+      <table class="wtable stack">
+        <thead><tr><th><span class="t" lang="en">Tool</span></th><th><span class="t" lang="en">Check</span></th><th><span class="t" lang="en">Notes</span></th></tr></thead>
+        <tbody>
+          <tr><td>Git 2.x</td><td><code>git --version</code></td><td></td></tr>
+          <tr><td>Node.js 22</td><td><code>node --version</code></td><td><span class="t" lang="en">npm comes with it</span></td></tr>
+          <tr><td>GitHub CLI 2.x</td><td><code>gh auth status</code></td><td><span class="t" lang="en"><code>brew install gh</code>, then <code>gh auth login</code></span></td></tr>
+          <tr><td><span class="t" lang="en">A GitHub account</span></td><td></td><td><span class="t" lang="en">Your memories live in a private repository on it</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note t" lang="en">The setup wizard runs on macOS and Linux. On Windows, follow the <a href="https://github.com/RxAi-Aus/amp#step-by-step-installation-guide">step-by-step guide</a> in the README.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">STEP 1</span>
+      <h2><span class="t" lang="en">Create your memory repository</span></h2>
+    </div>
+<pre class="cmd">git clone https://github.com/RxAi-Aus/amp.git my-agent-memory
+cd my-agent-memory
+npm install
+npm run setup -- --dry-run   <span class="c"># <span class="t" lang="en">see every step first; changes nothing</span></span>
+npm run setup</pre>
+    <div class="prose">
+      <p class="t" lang="en">The wizard creates a private repository for your memories (it never pushes to the template), lets GitHub Actions write the index, adds the issue labels the protocol uses, walks you through a fine-grained access token and where to keep it, registers the GitHub MCP server, and finishes by compiling the index and posting a real test issue. If a step fails it prints the manual command for it; running the wizard again resumes, and it never resets a repository that is already live.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">STEP 2</span>
+      <h2><span class="t" lang="en">Connect your agents</span></h2>
+    </div>
+    <div class="prose">
+      <p class="t" lang="en">Hooks decide when memory moves; the bundled <code>rxai-amp</code> skill tells the agent how to read and write it. Run the line for each agent you use. Level 2 means the hooks deliver memory; level 1 means the agent is told the protocol and reads memory itself. The <a href="./">overview</a> explains the levels.</p>
+    </div>
+    <div class="tscroll">
+      <table class="wtable agents stack">
+        <thead><tr><th><span class="t" lang="en">Agent</span></th><th><span class="t" lang="en">Command</span></th><th><span class="t" lang="en">What you get</span></th></tr></thead>
+        <tbody>
+          <tr><td>Claude Code</td><td><code>npm run hooks:install:claude</code></td><td><span class="t" lang="en">Level 2: pointers at session start, summaries matched to each prompt, a checkpoint when work was committed, and the <code>/amp</code> command</span></td></tr>
+          <tr><td>Codex</td><td><code>npm run hooks:install:codex</code></td><td><span class="t" lang="en">Level 2: memories at session start and the checkpoint. Open <code>/hooks</code> in Codex once and trust the new hooks</span></td></tr>
+          <tr><td>agy</td><td><code>npm run hooks:install:agy</code></td><td><span class="t" lang="en">Level 2: memories before the first reply and the checkpoint</span></td></tr>
+          <tr><td>OpenClaw</td><td><code>npm run hooks:install:openclaw</code></td><td><span class="t" lang="en">Level 1: the protocol digest in its workspace <code>AGENTS.md</code></span></td></tr>
+          <tr><td>Hermes</td><td><code>npm run hooks:install:hermes</code></td><td><span class="t" lang="en">Level 1: the protocol digest in <code>~/.hermes/SOUL.md</code>, loaded even outside a project folder</span></td></tr>
+          <tr><td><span class="t" lang="en">Any repository you commit from</span></td><td><code>npm run hooks:install:capture -- /path/to/repo</code></td><td><span class="t" lang="en">A capture reminder after each <code>git commit</code>, for agents without hooks</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note t" lang="en">Add <code>-- --dry-run</code> to any installer to see what it will change before it changes anything.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">STEP 3</span>
+      <h2><span class="t" lang="en">Check that it works</span></h2>
+    </div>
+    <ol class="run">
+      <li><span class="t" lang="en">Start a new Claude Code session in any repository. Its context now opens with a block that starts <code>=== RxAi AMP shared memory — RECALL</code>. If the block is missing, the hooks are not installed or not trusted, and the agent says so instead of searching the index by hand.</span></li>
+      <li><span class="t" lang="en"><code>npm run setup:verify</code> re-runs the whole checklist whenever you like.</span></li>
+      <li><span class="t" lang="en">In Claude Code, <code>/amp status</code> shows which memory repository and agent name it resolved.</span></li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">DAILY USE</span>
+      <h2><span class="t" lang="en">Your first memory, and the daily loop</span></h2>
+    </div>
+    <div class="sums">
+      <div class="sum"><div class="name">/amp update</div><div class="how"><span class="t" lang="en">In Claude Code, <code>/amp update &lt;what to remember&gt;</code> posts a memory issue in the protocol’s title format, or an <code>Outcome:</code> comment on the thread it belongs to. On its own, <code>/amp update</code> stores a summary of the session.</span></div></div>
+      <div class="sum"><div class="name">RECALL</div><div class="how"><span class="t" lang="en">Hooks hand the agent pointers at session start and the summaries of records that match each prompt. A full memory is one <code>gh issue view</code> away.</span></div></div>
+      <div class="sum"><div class="name">CAPTURE</div><div class="how"><span class="t" lang="en">When a session committed work and wrote no memory, the checkpoint stops it once and asks for a memory or a one-line reason to skip.</span></div></div>
+      <div class="sum"><div class="name">OUTCOME</div><div class="how"><span class="t" lang="en">Mark <code>Outcome: success</code> or <code>Outcome: failure</code> on the memories you used. The next index compile raises or lowers their weight, so what worked rises.</span></div></div>
+      <div class="sum"><div class="name">AMP_DISABLE=1</div><div class="how"><span class="t" lang="en">Turns every hook off for one session.</span></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">NEXT</span>
+      <h2><span class="t" lang="en">Where to go next</span></h2>
+    </div>
+    <ul class="srcs">
+      <li><span class="t" lang="en"><a href="https://github.com/RxAi-Aus/amp#step-by-step-installation-guide">Step-by-step guide</a>: every step the wizard automates, by hand, including Windows.</span></li>
+      <li><span class="t" lang="en"><a href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md</a>: the specification, including the title format and the conformance levels.</span></li>
+      <li><span class="t" lang="en"><a href="benchmark.html">Benchmarks</a>: whether memory pays for itself on your model, and how to run the same test.</span></li>
+      <li><span class="t" lang="en"><a href="compare.html">Compare</a>: how AMP differs from Mem0, Zep, Letta and the MCP memory server.</span></li>
+    </ul>
+  </section>
+
+  <footer>
+    <nav class="foot-nav" aria-label="Pages">
+      <a href="./"><span class="t" lang="en">Overview</span></a>
+      <a href="quickstart.html"><span class="t" lang="en">Quickstart</span></a>
+      <a href="compare.html"><span class="t" lang="en">Compare</span></a>
+      <a href="benchmark.html"><span class="t" lang="en">Benchmarks</span></a>
+    </nav>
+    <span class="mono"><a href="./">RxAi AMP</a> · <a href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md</a>
+      <span class="t" lang="en">is the single source of truth · Issues in, knowledge out.</span>
+    </span>
+    <p class="built">
+      <span class="t" lang="en">Built by <a href="https://rxai.com.au">RxAI</a></span>
+    </p>
+    <p>© 2026 James Ho · <a href="https://github.com/RxAi-Aus/amp/blob/main/LICENSE">Dual-licensed</a>: AGPL-3.0-or-later or commercial · patent pending (AU provisional 2026907694) · <a href="https://github.com/RxAi-Aus/amp">github.com/RxAi-Aus/amp</a></p>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  // A results table wider than the screen scrolls sideways; say so above the ones that do.
+  var HINT = { "en": "Swipe sideways for more columns →", "zh-Hant": "左右滑動看更多欄位 →" };
+  function mark() {
+    document.querySelectorAll(".tscroll").forEach(function (el) {
+      var over = el.scrollWidth > el.clientWidth + 1;
+      var prev = el.previousElementSibling;
+      var has = prev && prev.classList.contains("scroll-hint");
+      if (over && !has) {
+        var p = document.createElement("p");
+        p.className = "scroll-hint";
+        p.textContent = HINT[document.body.getAttribute("data-lang")] || HINT.en;
+        el.parentNode.insertBefore(p, el);
+      } else if (!over && has) {
+        prev.remove();
+      }
+    });
+  }
+  var queued = false;
+  window.addEventListener("resize", function () {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function () { queued = false; mark(); });
+  });
+  mark();
+})();
+</script>
+
+<script>
+  // Remember a language picked here, so the English page can send a returning
+  // visitor straight to it.
+  (function () {
+    function keep(e) {
+      var a = e.target.closest(".langbar a[hreflang]");
+      if (a) try { localStorage.setItem("amp-lang", a.getAttribute("hreflang")); } catch (err) {}
+    }
+    document.addEventListener("click", keep);
+    document.addEventListener("auxclick", keep);
+  })();
+</script>
+<script type="speculationrules">
+{"prefetch": [{"where": {"href_matches": "/*"}, "eagerness": "moderate"}]}
+</script>
+</body>
+</html>

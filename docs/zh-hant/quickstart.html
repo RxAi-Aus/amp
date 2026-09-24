@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Google tag (gtag.js) · GA4 property amp.rxai.com.au · Consent Mode v2:
+     everything denied until the visitor accepts (assets/amp-analytics.js shows
+     the banner); a stored choice is restored before gtag.js loads. -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied',
+    analytics_storage: 'denied', wait_for_update: 500
+  });
+  try { if (localStorage.getItem('amp-consent') === 'granted') gtag('consent', 'update', { analytics_storage: 'granted' }); } catch (e) {}
+  gtag('js', new Date());
+  gtag('config', 'G-5T0HGDZQPF', { cookie_expires: 63072000 });
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5T0HGDZQPF"></script>
+<script defer src="../assets/amp-analytics.js"></script>
+<!-- Per-language head text for scripts/build-site.mjs; English is the markup below. -->
+<title>快速開始：Claude Code、Codex、agy 的共享記憶 · RxAi AMP</title>
+<meta name="description" content="大約十分鐘設定好 RxAi AMP：一條命令建立你自己的私人記憶倉庫，再用 hook 接上 Claude Code、Codex、agy、OpenClaw 與 Hermes。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+<meta property="og:title" content="快速開始：Claude Code、Codex、agy 的共享記憶 · RxAi AMP">
+<meta property="og:description" content="一條命令建立私人記憶倉庫，再一條命令接上每個代理。RxAi AMP 快速開始。">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:locale:alternate" content="en_AU">
+<meta property="og:url" content="https://amp.rxai.com.au/zh-hant/quickstart.html">
+<meta property="og:image" content="https://amp.rxai.com.au/assets/social-preview.jpg">
+<meta property="article:published_time" content="2026-09-24">
+<meta property="article:modified_time" content="2026-09-24">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://amp.rxai.com.au/assets/social-preview.jpg">
+<link rel="canonical" href="https://amp.rxai.com.au/zh-hant/quickstart.html">
+<link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/quickstart.html">
+<link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/quickstart.html">
+<link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/quickstart.html">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://rxai.com.au/#organization",
+      "name": "RxAi",
+      "url": "https://www.rxai.com.au/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://amp.rxai.com.au/assets/rxai-logo-512.jpg",
+        "width": 512,
+        "height": 512
+      },
+      "sameAs": [
+        "https://github.com/RxAi-Aus"
+      ]
+    },
+    {
+      "@type": "TechArticle",
+      "@id": "https://amp.rxai.com.au/zh-hant/quickstart.html#article",
+      "headline": "快速開始：給 Claude Code、Codex、agy 的共享記憶",
+      "description": "大約十分鐘設定好 RxAi AMP：一條命令建立你自己的私人記憶倉庫，再用 hook 接上 Claude Code、Codex、agy、OpenClaw 與 Hermes。",
+      "url": "https://amp.rxai.com.au/zh-hant/quickstart.html",
+      "mainEntityOfPage": "https://amp.rxai.com.au/zh-hant/quickstart.html",
+      "inLanguage": "zh-Hant",
+      "datePublished": "2026-09-24",
+      "dateModified": "2026-09-24",
+      "author": {
+        "@type": "Person",
+        "name": "James Ho"
+      },
+      "publisher": {
+        "@id": "https://rxai.com.au/#organization"
+      },
+      "image": "https://amp.rxai.com.au/assets/social-preview.jpg",
+      "about": {
+        "@id": "https://amp.rxai.com.au/#software"
+      },
+      "isPartOf": {
+        "@id": "https://amp.rxai.com.au/#website"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RxAi AMP",
+          "item": "https://amp.rxai.com.au/zh-hant/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "快速開始",
+          "item": "https://amp.rxai.com.au/zh-hant/quickstart.html"
+        }
+      ]
+    }
+  ]
+}
+</script>
+<style>
+  /* Tokens and components follow index.html so the two pages read as one site. */
+  :root {
+    --paper: #FAFBFD;
+    --ink: #1A2334;
+    --muted: #55637A;
+    --line: #D9E0EA;
+    --panel: #F0F3F8;
+    --accent: #8B5A0E;
+    --accent-soft: #F5EAD4;
+    --ok: #287046;
+    --ok-soft: #E3F0E8;
+    --bad: #A83E38;
+    --bad-soft: #F6E5E4;
+    --ref: #2F5FA8;
+    --ref-soft: #E4ECF7;
+    --tag-place: #1F7A72;
+    --seg-cached: #BFD0EA;
+    --seg-new: #D99A2B;
+    --seg-out: #2E7D4F;
+    --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+    --shade: rgba(26, 35, 52, 0.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0E1420;
+      --ink: #E8ECF4;
+      --muted: #93A1B8;
+      --line: #263248;
+      --panel: #161F30;
+      --accent: #E0A83C;
+      --accent-soft: #2B2415;
+      --ok: #5BBF87;
+      --ok-soft: #14261C;
+      --bad: #E08078;
+      --bad-soft: #2C1817;
+      --ref: #7EA6E8;
+      --ref-soft: #15202F;
+      --tag-place: #5FBDB4;
+      --seg-cached: #2E4466;
+      --seg-new: #C98F2A;
+      --seg-out: #4FAE7A;
+      --shade: rgba(0, 0, 0, 0.55);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    line-height: 1.62;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 20px 24px 96px; }
+  code, .mono {
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.86em;
+  }
+  p code, li code, td code, .note code {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px;
+    overflow-wrap: anywhere;
+  }
+  a { color: var(--ref); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+  /* ---------- language switching ---------- */
+  .t { display: none; }
+  body[data-lang="en"]      .t[lang="en"],
+  body[data-lang="zh-Hant"] .t[lang="zh-Hant"] { display: revert; }
+
+  .langbar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+    padding: 14px 0 12px; margin-bottom: 22px;
+    background: var(--paper); border-bottom: 1px solid var(--line);
+  }
+  .langbar .home {
+    margin-right: auto; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;
+    color: var(--muted); text-decoration: none;
+  }
+  .langbar .home:hover { color: var(--accent); }
+  .langbar .lang {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;
+    border: 1px solid var(--line); background: var(--paper); color: var(--muted);
+    border-radius: 999px; padding: 4px 13px; text-decoration: none; display: inline-flex; align-items: center;
+  }
+  .langbar .lang:hover { border-color: var(--accent); color: var(--accent); }
+  .langbar .lang[aria-current="page"] {
+    color: var(--accent); border-color: var(--accent); background: var(--accent-soft); font-weight: 700;
+  }
+
+  /* ---------- header ---------- */
+  header { border-bottom: 2px solid var(--ink); padding-bottom: 28px; margin-bottom: 12px; }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 14px;
+  }
+  h1 {
+    font-size: clamp(30px, 5.4vw, 46px); font-weight: 800; letter-spacing: -0.02em;
+    line-height: 1.12; margin: 0 0 20px; text-wrap: balance;
+  }
+  .lede { max-width: 68ch; }
+  .lede p { margin: 14px 0 0; }
+  .chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
+  .chip {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
+    border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; color: var(--muted);
+  }
+  a.chip { color: var(--accent); border-color: var(--accent); text-decoration: none; font-weight: 700; }
+  a.chip:hover { background: var(--accent-soft); }
+
+  /* ---------- sections ---------- */
+  section { margin-top: 64px; }
+  .sec-head { display: flex; align-items: baseline; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 22px; }
+  .sec-head .mono-label {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
+    letter-spacing: 0.12em; color: var(--accent); white-space: nowrap;
+  }
+  h2 { font-size: 21px; font-weight: 750; letter-spacing: -0.01em; margin: 0; }
+  h3.sub { font-size: 16.5px; font-weight: 750; margin: 34px 0 10px; }
+  .note { color: var(--muted); font-size: 14.5px; max-width: 70ch; margin: 0 0 18px; }
+  .prose { max-width: 70ch; }
+  .prose p { margin: 0 0 14px; }
+
+  /* ---------- twins ---------- */
+  .twins { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 30px; }
+  .twin { border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; background: var(--panel); }
+  .twin.on { border-color: var(--accent); background: var(--accent-soft); }
+  .twin .k {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; color: var(--muted);
+  }
+  .twin.on .k { color: var(--accent); }
+  .twin h3 { margin: 4px 0 8px; font-size: 17px; font-weight: 750; }
+  .twin ul { margin: 0; padding-left: 18px; font-size: 14px; color: var(--muted); }
+  .twin li + li { margin-top: 2px; }
+  .twin li.diff { color: var(--ink); font-weight: 650; }
+
+  /* ---------- cards ---------- */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  .step { border: 1px solid var(--line); border-radius: 10px; padding: 16px 16px 14px; background: var(--panel); display: flex; flex-direction: column; gap: 8px; }
+  .step .k {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; color: var(--accent);
+  }
+  .step h3 { margin: 0; font-size: 16px; font-weight: 750; }
+  .step p { margin: 0; font-size: 13.5px; color: var(--muted); }
+  .step .trigger {
+    margin-top: auto; padding-top: 8px; border-top: 1px dashed var(--line);
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--tag-place);
+    overflow-wrap: anywhere;
+  }
+
+  /* ---------- call bars ---------- */
+  .calls {
+    border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px 16px;
+    background: var(--panel); margin: 4px 0 12px;
+  }
+  .callrow { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; }
+  .callrow + .callrow { margin-top: 9px; }
+  .callrow .lbl { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .bar { display: flex; height: 18px; }
+  .bar span { display: block; height: 100%; }
+  .bar span:first-child { border-radius: 4px 0 0 4px; }
+  .bar span:last-child { border-radius: 0 4px 4px 0; }
+  .bar .c { background: var(--seg-cached); }
+  .bar .n { background: var(--seg-new); }
+  .bar .o { background: var(--seg-out); }
+  .keys { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 16px; padding-top: 12px; border-top: 1px dashed var(--line); font-size: 13px; color: var(--muted); }
+  .keys i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 7px; vertical-align: -1px; }
+  .keys .c { background: var(--seg-cached); } .keys .n { background: var(--seg-new); } .keys .o { background: var(--seg-out); }
+  .caption { font-size: 13.5px; color: var(--muted); max-width: 70ch; margin: 0 0 8px; }
+
+  /* ---------- tables ---------- */
+  .tscroll { overflow-x: auto; }
+  /* Anything that scrolls sideways shows a soft shadow on the clipped edge: the
+     local layers cover it at the start and end, the scroll layers stay put. */
+  .tscroll, pre.cmd, .formula { --sbg: var(--paper); }
+  pre.cmd, .formula { --sbg: var(--panel); }
+  .tscroll, pre.cmd, .formula {
+    background:
+      linear-gradient(to right, var(--sbg) 30%, transparent) left center / 28px 100% no-repeat local,
+      linear-gradient(to left, var(--sbg) 30%, transparent) right center / 28px 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%, var(--shade), transparent) left center / 12px 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, var(--shade), transparent) right center / 12px 100% no-repeat scroll,
+      var(--sbg);
+  }
+  /* The row label stays put while the numbers slide under it. */
+  .tscroll th:first-child, .tscroll td:first-child { position: sticky; left: 0; z-index: 1; background: var(--paper); }
+  .tscroll { overscroll-behavior-x: contain; }
+  .scroll-hint { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--muted); text-align: right; margin: 0 0 6px; }
+  .wtable { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .wtable th {
+    text-align: left; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 2px solid var(--ink); padding: 6px 12px 8px 0;
+  }
+  .wtable td { border-bottom: 1px solid var(--line); padding: 10px 12px 10px 0; vertical-align: top; }
+  .wtable td.field { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; font-weight: 600; overflow-wrap: anywhere; }
+  .wtable td.num { white-space: nowrap; text-align: right; }
+  .wtable th.num { text-align: right; }
+  .wtable .sub { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .delta { font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .delta.good { color: var(--ok); background: var(--ok-soft); border-radius: 4px; padding: 1px 8px; }
+  .delta.bad { color: var(--bad); background: var(--bad-soft); border-radius: 4px; padding: 1px 8px; }
+  .delta.flat { color: var(--muted); }
+
+  /* ---------- sums ---------- */
+  .sums { display: flex; flex-direction: column; }
+  .sum { display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: baseline; padding: 11px 4px; border-bottom: 1px dashed var(--line); }
+  .sum:last-child { border-bottom: none; }
+  .sum .name { font-weight: 700; font-size: 14.5px; }
+  .sum .how { font-size: 14px; color: var(--muted); }
+  .sum .how code { font-size: 0.86em; }
+
+  .callout {
+    background: var(--ok-soft); border-radius: 8px;
+    padding: 12px 16px; margin: 22px 0 0; font-size: 14.5px; max-width: 74ch;
+  }
+  .callout p { margin: 0; }
+  .formula {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 15px; font-weight: 600;
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 20px; margin: 0 0 14px; overflow-x: auto; white-space: nowrap;
+  }
+  .formula .g { color: var(--ok); } .formula .b { color: var(--bad); }
+
+  /* ---------- commands ---------- */
+  pre.cmd {
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.55;
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 18px; margin: 10px 0 16px; overflow-x: auto;
+  }
+  pre.cmd .c { color: var(--muted); }
+  ol.run { margin: 0; padding-left: 22px; max-width: 74ch; }
+  ol.run > li { margin: 0 0 14px; padding-left: 4px; }
+  ol.run > li::marker { font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 700; color: var(--accent); }
+  ul.plain { margin: 0; padding-left: 20px; max-width: 72ch; }
+  ul.plain li { margin: 0 0 10px; }
+
+  footer { margin-top: 72px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  footer p { margin: 6px 0 0; }
+  footer .built { margin-top: 10px; font-weight: 600; color: var(--ink); }
+
+  @media (max-width: 440px) {
+    .formula { white-space: normal; }
+  }
+  @media (max-height: 500px) {
+    .langbar { position: static; }
+  }
+  @media print {
+    .langbar, .amp-consent, .amp-consent-open, .scroll-hint, .chev { display: none !important; }
+    body { background: #fff; color: #000; }
+    .wrap { max-width: none; padding: 0; }
+    html[data-js] .more { height: auto !important; }
+    section { margin-top: 28px; }
+    .step, .level, .tile, .fnode, .rung, .twin, .sum, tr, pre.cmd, .formula { break-inside: avoid; }
+    h2, h3 { break-after: avoid; }
+    a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #444; overflow-wrap: anywhere; }
+    .chips a::after, .langbar a::after { content: none; }
+  }
+  @media (pointer: coarse) {
+    .langbar .lang { min-height: 44px; padding-inline: 14px; }
+    .langbar .home, a.chip { min-height: 44px; display: inline-flex; align-items: center; }
+  }
+  @media (max-width: 640px) {
+    .wrap { padding: 16px 16px 72px; }
+    .sum { grid-template-columns: 1fr; gap: 2px; }
+    .callrow { grid-template-columns: 52px 1fr; gap: 8px; }
+    .calls { padding: 14px 14px 12px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .langbar .lang {
+      transition: color 160ms var(--ease-out-quart), border-color 160ms var(--ease-out-quart),
+                  background-color 160ms var(--ease-out-quart);
+    }
+    /* Each language, and each page, is its own URL; cross-fade the move. */
+    @view-transition { navigation: auto; }
+    ::view-transition-old(root), ::view-transition-new(root) {
+      animation-duration: 220ms;
+      animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    html[data-js] header > * { animation: amp-rise 640ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+    html[data-js] header > h1 { animation-delay: 70ms; }
+    html[data-js] header > .lede { animation-delay: 140ms; }
+    html[data-js] header > .chips { animation-delay: 210ms; }
+  }
+  @keyframes amp-rise { from { opacity: 0; transform: translateY(12px); } }
+
+  /* ---------- quickstart / compare ---------- */
+  .cmp th:not(:first-child), .cmp td:not(:first-child) { min-width: 136px; }
+  .cmp th:first-child, .cmp td:first-child { min-width: 118px; font-weight: 650; }
+  .cmp th.amp, .cmp td.amp { background: var(--accent-soft); padding-left: 10px; }
+  .agents td:nth-child(2) { white-space: nowrap; }
+  .fit { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; max-width: 74ch; }
+  .fit li { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; background: var(--panel); }
+  .fit li b { display: block; margin-bottom: 4px; }
+  .srcs { margin: 0; padding-left: 20px; font-size: 14px; max-width: 74ch; }
+  .srcs li { margin: 0 0 6px; overflow-wrap: anywhere; }
+  .foot-nav { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 10px; }
+  /* On a phone a three-column table of commands reads better as one block per row. */
+  @media (max-width: 640px) {
+    .stack thead { display: none; }
+    .stack, .stack tbody, .stack tr, .stack td { display: block; }
+    .stack tr { padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .stack td, .stack td:first-child { position: static; border: 0; padding: 2px 0; background: none; }
+    .stack td:first-child { font-weight: 700; }
+    .stack td:empty { display: none; }
+    .stack.agents td:nth-child(2) { white-space: normal; }
+    .stack td code { overflow-wrap: anywhere; }
+  }
+</style>
+<script>document.documentElement.setAttribute("data-js", "on");</script>
+</head>
+<body data-lang="zh-Hant">
+
+<div class="wrap">
+
+  <nav class="langbar" aria-label="Language">
+    <a class="home" href="./">
+      <span class="t" lang="zh-Hant">← AMP 總覽</span>
+    </a>
+    <a class="lang" href="../quickstart.html" hreflang="en" lang="en">EN</a>
+    <a class="lang" href="quickstart.html" hreflang="zh-Hant" lang="zh-Hant" aria-current="page">繁中</a>
+  </nav>
+
+  <header>
+    <p class="eyebrow">RxAi AMP · Quickstart · <time datetime="2026-09-24">24 Sep 2026</time></p>
+    <h1>
+      <span class="t" lang="zh-Hant">快速開始：給 Claude Code、Codex、agy 的共享記憶</span>
+    </h1>
+    <div class="lede">
+      <p class="t" lang="zh-Hant">你需要一個 GitHub 帳號和大約十分鐘。一條命令建立一個屬於你的私人記憶倉庫；再一條命令接上你用的每個代理。之後每個工作階段一開始就拿到和任務相符的記憶；有提交工作的工作階段，結束前會停一次，問你哪些值得留下。</p>
+    </div>
+    <div class="chips">
+      <a class="chip" href="https://github.com/RxAi-Aus/amp">GitHub ↗</a>
+      <a class="chip" href="https://github.com/RxAi-Aus/amp#step-by-step-installation-guide">README ↗</a>
+      <a class="chip" href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md ↗</a>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">BEFORE YOU START</span>
+      <h2><span class="t" lang="zh-Hant">事前準備</span></h2>
+    </div>
+    <div class="tscroll">
+      <table class="wtable stack">
+        <thead><tr><th><span class="t" lang="zh-Hant">工具</span></th><th><span class="t" lang="zh-Hant">檢查</span></th><th><span class="t" lang="zh-Hant">說明</span></th></tr></thead>
+        <tbody>
+          <tr><td>Git 2.x</td><td><code>git --version</code></td><td></td></tr>
+          <tr><td>Node.js 22</td><td><code>node --version</code></td><td><span class="t" lang="zh-Hant">npm 隨附</span></td></tr>
+          <tr><td>GitHub CLI 2.x</td><td><code>gh auth status</code></td><td><span class="t" lang="zh-Hant"><code>brew install gh</code>，再執行 <code>gh auth login</code></span></td></tr>
+          <tr><td><span class="t" lang="zh-Hant">GitHub 帳號</span></td><td></td><td><span class="t" lang="zh-Hant">你的記憶會存在它底下的私人倉庫</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note t" lang="zh-Hant">設定精靈支援 macOS 與 Linux。Windows 請照 README 的<a href="https://github.com/RxAi-Aus/amp#step-by-step-installation-guide">逐步安裝指南</a>操作。</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">STEP 1</span>
+      <h2><span class="t" lang="zh-Hant">建立你的記憶倉庫</span></h2>
+    </div>
+<pre class="cmd">git clone https://github.com/RxAi-Aus/amp.git my-agent-memory
+cd my-agent-memory
+npm install
+npm run setup -- --dry-run   <span class="c"># <span class="t" lang="zh-Hant">先看每個步驟；不會改任何東西</span></span>
+npm run setup</pre>
+    <div class="prose">
+      <p class="t" lang="zh-Hant">精靈會替你的記憶建立一個私人倉庫（絕不推送到範本）、讓 GitHub Actions 能寫入索引、加上協定使用的 Issue 標籤、帶你建立細粒度存取權杖並妥善保存、註冊 GitHub MCP 伺服器，最後編譯索引並發一則真正的測試 Issue。某一步失敗時，它會印出該步的手動命令；再跑一次精靈就從中斷處繼續，而且絕不重置已經上線的倉庫。</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">STEP 2</span>
+      <h2><span class="t" lang="zh-Hant">接上你的代理</span></h2>
+    </div>
+    <div class="prose">
+      <p class="t" lang="zh-Hant">Hook 決定記憶何時流動；內附的 <code>rxai-amp</code> skill 告訴代理怎麼讀寫。你用哪個代理，就跑哪一行。第 2 級代表由 hook 遞送記憶；第 1 級代表代理知道協定、自己讀取記憶。各級差別見<a href="./">總覽</a>。</p>
+    </div>
+    <div class="tscroll">
+      <table class="wtable agents stack">
+        <thead><tr><th><span class="t" lang="zh-Hant">代理</span></th><th><span class="t" lang="zh-Hant">命令</span></th><th><span class="t" lang="zh-Hant">你會得到</span></th></tr></thead>
+        <tbody>
+          <tr><td>Claude Code</td><td><code>npm run hooks:install:claude</code></td><td><span class="t" lang="zh-Hant">第 2 級：開始時注入指標、依每個提示展開相符的摘要、有提交時停一次檢查點，並附 <code>/amp</code> 命令</span></td></tr>
+          <tr><td>Codex</td><td><code>npm run hooks:install:codex</code></td><td><span class="t" lang="zh-Hant">第 2 級：開始時注入記憶與檢查點。之後在 Codex 開一次 <code>/hooks</code>，信任新的 hook</span></td></tr>
+          <tr><td>agy</td><td><code>npm run hooks:install:agy</code></td><td><span class="t" lang="zh-Hant">第 2 級：第一次回覆前注入記憶，加上檢查點</span></td></tr>
+          <tr><td>OpenClaw</td><td><code>npm run hooks:install:openclaw</code></td><td><span class="t" lang="zh-Hant">第 1 級：把協定摘要寫進它的工作區 <code>AGENTS.md</code></span></td></tr>
+          <tr><td>Hermes</td><td><code>npm run hooks:install:hermes</code></td><td><span class="t" lang="zh-Hant">第 1 級：把協定摘要寫進 <code>~/.hermes/SOUL.md</code>，不在專案資料夾裡也會載入</span></td></tr>
+          <tr><td><span class="t" lang="zh-Hant">任何你會提交的倉庫</span></td><td><code>npm run hooks:install:capture -- /path/to/repo</code></td><td><span class="t" lang="zh-Hant">每次 <code>git commit</code> 後提醒記錄，給沒有 hook 的代理</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note t" lang="zh-Hant">任何安裝程式加上 <code>-- --dry-run</code>，就能在真的修改之前先看它要改什麼。</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">STEP 3</span>
+      <h2><span class="t" lang="zh-Hant">確認它能運作</span></h2>
+    </div>
+    <ol class="run">
+      <li><span class="t" lang="zh-Hant">在任何倉庫開一個新的 Claude Code 工作階段。它的上下文開頭會有一段以 <code>=== RxAi AMP shared memory — RECALL</code> 開始的區塊。如果沒有這段，代表 hook 沒裝好或還沒被信任；代理會直接告訴你，而不是自己手動翻索引。</span></li>
+      <li><span class="t" lang="zh-Hant"><code>npm run setup:verify</code> 隨時可以重跑整份檢查清單。</span></li>
+      <li><span class="t" lang="zh-Hant">在 Claude Code 裡，<code>/amp status</code> 會顯示它找到的記憶倉庫與代理名稱。</span></li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">DAILY USE</span>
+      <h2><span class="t" lang="zh-Hant">第一條記憶與日常循環</span></h2>
+    </div>
+    <div class="sums">
+      <div class="sum"><div class="name">/amp update</div><div class="how"><span class="t" lang="zh-Hant">在 Claude Code 輸入 <code>/amp update &lt;要記住的事&gt;</code>，會依協定的標題格式發一則記憶 Issue，或在它所屬的討論串留一則 <code>Outcome:</code> 留言。只打 <code>/amp update</code> 則會存下這個工作階段的摘要。</span></div></div>
+      <div class="sum"><div class="name">RECALL</div><div class="how"><span class="t" lang="zh-Hant">Hook 在工作階段開始時交給代理指標，並依每個提示展開相符紀錄的摘要。完整記憶只要一個 <code>gh issue view</code>。</span></div></div>
+      <div class="sum"><div class="name">CAPTURE</div><div class="how"><span class="t" lang="zh-Hant">工作階段有提交工作卻沒寫記憶時，檢查點會停一次，請代理寫一條記憶，或用一行說明為何略過。</span></div></div>
+      <div class="sum"><div class="name">OUTCOME</div><div class="how"><span class="t" lang="zh-Hant">在用過的記憶上標 <code>Outcome: success</code> 或 <code>Outcome: failure</code>。下次編譯索引時權重跟著升降，有用的記憶會浮上來。</span></div></div>
+      <div class="sum"><div class="name">AMP_DISABLE=1</div><div class="how"><span class="t" lang="zh-Hant">讓單一工作階段關閉所有 hook。</span></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">NEXT</span>
+      <h2><span class="t" lang="zh-Hant">接下來</span></h2>
+    </div>
+    <ul class="srcs">
+      <li><span class="t" lang="zh-Hant"><a href="https://github.com/RxAi-Aus/amp#step-by-step-installation-guide">逐步安裝指南</a>：精靈自動化的每一步的手動做法，包括 Windows。</span></li>
+      <li><span class="t" lang="zh-Hant"><a href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md</a>：協定規格，包括標題格式與符合性等級。</span></li>
+      <li><span class="t" lang="zh-Hant"><a href="benchmark.html">基準測試</a>：記憶在你的模型上划不划算，以及如何跑同一個測試。</span></li>
+      <li><span class="t" lang="zh-Hant"><a href="compare.html">比較</a>：AMP 和 Mem0、Zep、Letta、MCP 記憶伺服器有什麼不同。</span></li>
+    </ul>
+  </section>
+
+  <footer>
+    <nav class="foot-nav" aria-label="Pages">
+      <a href="./"><span class="t" lang="zh-Hant">總覽</span></a>
+      <a href="quickstart.html"><span class="t" lang="zh-Hant">快速開始</span></a>
+      <a href="compare.html"><span class="t" lang="zh-Hant">比較</span></a>
+      <a href="benchmark.html"><span class="t" lang="zh-Hant">基準測試</span></a>
+    </nav>
+    <span class="mono"><a href="./">RxAi AMP</a> · <a href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md</a>
+      <span class="t" lang="zh-Hant">為唯一真相來源 · Issue 進，知識出。</span>
+    </span>
+    <p class="built">
+      <span class="t" lang="zh-Hant">由 <a href="https://rxai.com.au">RxAI</a> 打造</span>
+    </p>
+    <p>© 2026 James Ho · <a href="https://github.com/RxAi-Aus/amp/blob/main/LICENSE">Dual-licensed</a>: AGPL-3.0-or-later or commercial · patent pending (AU provisional 2026907694) · <a href="https://github.com/RxAi-Aus/amp">github.com/RxAi-Aus/amp</a></p>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  // A results table wider than the screen scrolls sideways; say so above the ones that do.
+  var HINT = { "en": "Swipe sideways for more columns →", "zh-Hant": "左右滑動看更多欄位 →" };
+  function mark() {
+    document.querySelectorAll(".tscroll").forEach(function (el) {
+      var over = el.scrollWidth > el.clientWidth + 1;
+      var prev = el.previousElementSibling;
+      var has = prev && prev.classList.contains("scroll-hint");
+      if (over && !has) {
+        var p = document.createElement("p");
+        p.className = "scroll-hint";
+        p.textContent = HINT[document.body.getAttribute("data-lang")] || HINT.en;
+        el.parentNode.insertBefore(p, el);
+      } else if (!over && has) {
+        prev.remove();
+      }
+    });
+  }
+  var queued = false;
+  window.addEventListener("resize", function () {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function () { queued = false; mark(); });
+  });
+  mark();
+})();
+</script>
+
+<script>
+  // Remember a language picked here, so the English page can send a returning
+  // visitor straight to it.
+  (function () {
+    function keep(e) {
+      var a = e.target.closest(".langbar a[hreflang]");
+      if (a) try { localStorage.setItem("amp-lang", a.getAttribute("hreflang")); } catch (err) {}
+    }
+    document.addEventListener("click", keep);
+    document.addEventListener("auxclick", keep);
+  })();
+</script>
+<script type="speculationrules">
+{"prefetch": [{"where": {"href_matches": "/*"}, "eagerness": "moderate"}]}
+</script>
+</body>
+</html>

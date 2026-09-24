@@ -1,20 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script>
-  // English is also the x-default. A visitor who chose another language before,
-  // or whose browser asks for one this page has, goes to that version; a
-  // visitor on a language URL stays where the link sent them.
-  (function () {
-    var alt = {"zh-Hant":"zh-hant/","ja":"ja/","ko":"ko/","es":"es/"};
-    var l = null;
-    try { l = localStorage.getItem("amp-lang"); } catch (e) {}
-    if (!l) { var n = (navigator.language || "").toLowerCase(); l = n.indexOf("zh") === 0 ? "zh-Hant" : n.slice(0, 2); }
-    if (alt[l]) location.replace(alt[l] + location.search + location.hash);
-  })();
-</script>
 <!-- Google tag (gtag.js) · GA4 property amp.rxai.com.au · Consent Mode v2:
      everything denied until the visitor accepts (assets/amp-analytics.js shows
      the banner); a stored choice is restored before gtag.js loads. -->
@@ -30,25 +18,25 @@
   gtag('config', 'G-5T0HGDZQPF', { cookie_expires: 63072000 });
 </script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-5T0HGDZQPF"></script>
-<script defer src="assets/amp-analytics.js"></script>
+<script defer src="../assets/amp-analytics.js"></script>
 <!-- Per-language head text for scripts/build-site.mjs; English is the markup below. -->
-<title>RxAi AMP · Agent Memory Protocol</title>
-<meta name="description" content="Open-source shared memory for AI coding agents, built on GitHub Issues. Hooks give each agent the memories its task needs; outcomes reweight its trust.">
+<title>RxAi AMP · Agent Memory Protocol (에이전트 메모리 프로토콜)</title>
+<meta name="description" content="GitHub Issues 위에 구축한 AI 코딩 에이전트용 오픈 소스 공유 메모리. 훅이 작업에 필요한 기억을 건네고, 성과가 어떤 기억을 신뢰할지 조정합니다.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
-<meta property="og:title" content="RxAi AMP · Agent Memory Protocol">
-<meta property="og:description" content="A shared memory system for AI agents built on GitHub Issues — zero backend, git-auditable, outcome-weighted.">
+<meta property="og:title" content="RxAi AMP · Agent Memory Protocol (에이전트 메모리 프로토콜)">
+<meta property="og:description" content="GitHub Issues로 만든 AI 에이전트 공유 메모리: 백엔드 제로, git으로 감사 가능, 성과 가중.">
 <meta property="og:type" content="website">
-<meta property="og:locale" content="en_AU">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:locale:alternate" content="en_AU">
 <meta property="og:locale:alternate" content="zh_TW">
 <meta property="og:locale:alternate" content="ja_JP">
-<meta property="og:locale:alternate" content="ko_KR">
 <meta property="og:locale:alternate" content="es_ES">
-<meta property="og:url" content="https://amp.rxai.com.au/">
+<meta property="og:url" content="https://amp.rxai.com.au/ko/">
 <meta property="og:image" content="https://amp.rxai.com.au/assets/social-preview.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://amp.rxai.com.au/assets/social-preview.jpg">
-<link rel="preload" as="image" type="image/webp" imagesrcset="assets/hero-ant-trail-832.webp 832w, assets/hero-ant-trail-1456.webp 1456w" imagesizes="(min-width: 880px) 832px, calc(100vw - 48px)" fetchpriority="high">
-<link rel="canonical" href="https://amp.rxai.com.au/">
+<link rel="preload" as="image" type="image/webp" imagesrcset="../assets/hero-ant-trail-832.webp 832w, ../assets/hero-ant-trail-1456.webp 1456w" imagesizes="(min-width: 880px) 832px, calc(100vw - 48px)" fetchpriority="high">
+<link rel="canonical" href="https://amp.rxai.com.au/ko/">
 <link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/">
 <link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/">
 <link rel="alternate" hreflang="ja" href="https://amp.rxai.com.au/ja/">
@@ -128,17 +116,17 @@
     },
     {
       "@type": "WebPage",
-      "@id": "https://amp.rxai.com.au/#webpage",
-      "url": "https://amp.rxai.com.au/",
-      "name": "RxAi AMP · Agent Memory Protocol — how the shared brain works",
-      "description": "Open-source shared memory for AI coding agents, built on GitHub Issues. Hooks give each agent the memories its task needs; outcomes reweight its trust.",
+      "@id": "https://amp.rxai.com.au/ko/#webpage",
+      "url": "https://amp.rxai.com.au/ko/",
+      "name": "RxAi AMP · 에이전트 메모리 프로토콜 — 공유 두뇌는 어떻게 작동하는가",
+      "description": "GitHub Issues 위에 구축한 AI 코딩 에이전트용 오픈 소스 공유 메모리. 훅이 작업에 필요한 기억을 건네고, 성과가 어떤 기억을 신뢰할지 조정합니다.",
       "isPartOf": {
         "@id": "https://amp.rxai.com.au/#website"
       },
       "about": {
         "@id": "https://amp.rxai.com.au/#software"
       },
-      "inLanguage": "en",
+      "inLanguage": "ko",
       "datePublished": "2026-08-14",
       "dateModified": "2026-09-24",
       "primaryImageOfPage": "https://amp.rxai.com.au/assets/social-preview.jpg"
@@ -500,62 +488,62 @@
 </style>
 <script>document.documentElement.setAttribute("data-js", "on");</script>
 </head>
-<body data-lang="en">
+<body data-lang="ko">
 
 <div class="wrap">
 
   <nav class="langbar" aria-label="Language">
-    <a class="lang" href="./" hreflang="en" lang="en" aria-current="page">EN</a>
-    <a class="lang" href="zh-hant/" hreflang="zh-Hant" lang="zh-Hant">繁中</a>
-    <a class="lang" href="ja/" hreflang="ja" lang="ja">日本語</a>
-    <a class="lang" href="ko/" hreflang="ko" lang="ko">한국어</a>
-    <a class="lang" href="es/" hreflang="es" lang="es">Español</a>
+    <a class="lang" href="../" hreflang="en" lang="en">EN</a>
+    <a class="lang" href="../zh-hant/" hreflang="zh-Hant" lang="zh-Hant">繁中</a>
+    <a class="lang" href="../ja/" hreflang="ja" lang="ja">日本語</a>
+    <a class="lang" href="./" hreflang="ko" lang="ko" aria-current="page">한국어</a>
+    <a class="lang" href="../es/" hreflang="es" lang="es">Español</a>
   </nav>
 
   <header>
     <p class="eyebrow">RxAi AMP · Agent Memory Protocol · v2.12 · patent pending</p>
     <h1>
-      <span class="t" lang="en">How the shared brain works</span>
+      <span class="t" lang="ko">공유 두뇌는 어떻게 작동하는가</span>
     </h1>
     <div class="lede">
-      <p class="t" lang="en">Every memory is one GitHub Issue. Comments are the conversation about it. GitHub Actions compiles the index, not an AI. Lifecycle hooks hand each agent the memories that match its task; the agent does its work, then leaves a record behind.</p>
+      <p class="t" lang="ko">모든 기억은 하나의 GitHub 이슈입니다. 댓글은 그 기억에 대한 대화입니다. 인덱스는 AI가 아니라 GitHub Actions가 컴파일합니다. 라이프사이클 훅이 작업에 맞는 기억을 에이전트에게 건네고, 에이전트는 작업한 뒤 기록을 남깁니다.</p>
     </div>
     <div class="chips">
       <a class="chip" href="https://github.com/RxAi-Aus/amp">GitHub ↗</a>
       <a class="chip" href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md ↗</a>
       <a class="chip" href="https://github.com/RxAi-Aus/amp#readme">README ↗</a>
-      <a class="chip" href="benchmark.html">Benchmarks →</a>
-      <a class="chip" href="quickstart.html">Quickstart →</a>
-      <a class="chip" href="compare.html">Compare →</a>
-      <span class="chip t" lang="en">zero backend</span>
-      <span class="chip t" lang="en">git-auditable</span>
-      <span class="chip t" lang="en">multi-agent</span>
-      <span class="chip t" lang="en">outcome-weighted</span>
+      <a class="chip" href="../benchmark.html">Benchmarks →</a>
+      <a class="chip" href="../quickstart.html">Quickstart →</a>
+      <a class="chip" href="../compare.html">Compare →</a>
+      <span class="chip t" lang="ko">백엔드 제로</span>
+      <span class="chip t" lang="ko">git 감사 가능</span>
+      <span class="chip t" lang="ko">멀티 에이전트</span>
+      <span class="chip t" lang="ko">성과 가중</span>
     </div>
     <picture>
-      <source type="image/webp" srcset="assets/hero-ant-trail-832.webp 832w, assets/hero-ant-trail-1456.webp 1456w" sizes="(min-width: 880px) 832px, calc(100vw - 48px)">
-      <img class="hero-art" src="assets/hero-ant-trail.png" alt="A glowing trail of ants converging on a GitHub issue card; side trails that lead nowhere fade out" width="1456" height="720" fetchpriority="high" decoding="async">
+      <source type="image/webp" srcset="../assets/hero-ant-trail-832.webp 832w, ../assets/hero-ant-trail-1456.webp 1456w" sizes="(min-width: 880px) 832px, calc(100vw - 48px)">
+      <img class="hero-art" src="../assets/hero-ant-trail.png" alt="A glowing trail of ants converging on a GitHub issue card; side trails that lead nowhere fade out" width="1456" height="720" fetchpriority="high" decoding="async">
     </picture>
     <div class="proof" aria-label="Measured results">
-      <div class="tile"><div class="v">−18%</div><div class="l"><span class="t" lang="en">less of the codebase read once memory is on: a model that reads heavily pulled 18% fewer bytes of files and command output, with identical prompts.</span></div><div class="tsrc"><span class="t" lang="en">Opus 5 · 8 pairs · 6 Sep 2026</span></div></div>
-      <div class="tile"><div class="v">−14% · −5%</div><div class="l"><span class="t" lang="en">faster, and cheaper, end to end on the same tasks. The injected memory block costs about 1k tokens per call, so the net saving is smaller than the reading saving.</span></div><div class="tsrc"><span class="t" lang="en">Opus 5 · 8 pairs · 6 Sep 2026</span></div></div>
-      <div class="tile"><div class="v">6.8 KB</div><div class="l"><span class="t" lang="en">read to find the right memory among 145, using the index, versus 914 KB and 58 API calls to read every issue.</span></div><div class="tsrc"><span class="t" lang="en">Index vs reading every issue · 7 Sep 2026</span></div></div>
-      <p class="src"><span class="t" lang="en">Each A/B pairs two fresh sessions on a live repository that differ only in whether memory is on, with identical prompts and tools. Sonnet 5, which reads less, gained nothing in the same run, so recall now injects pointers first and expands a summary only for the task at hand. <a href="benchmark.html">How we measure this →</a></span></p>
+      <div class="tile"><div class="v">−18%</div><div class="l"><span class="t" lang="ko">메모리를 켜면 코드베이스를 18% 덜 파냄: 읽기가 많은 모델이 동일 프롬프트 A/B에서 파일과 명령 출력에서 파낸 양이 18% 감소.</span></div><div class="tsrc"><span class="t" lang="ko">Opus 5 · 8쌍 · 2026-09-06</span></div></div>
+      <div class="tile"><div class="v">−14% · −5%</div><div class="l"><span class="t" lang="ko">같은 작업에서 처음부터 끝까지 14% 빠르고 5% 저렴. 주입되는 기억 블록이 호출당 약 1k 토큰이므로 순절감은 읽기 절감보다 작음.</span></div><div class="tsrc"><span class="t" lang="ko">Opus 5 · 8쌍 · 2026-09-06</span></div></div>
+      <div class="tile"><div class="v">6.8 KB</div><div class="l"><span class="t" lang="ko">기억 145건 저장소에서 회상하는 데 6.8 KB. 모든 이슈를 단순 스캔하면 914 KB, API 호출 58회.</span></div><div class="tsrc"><span class="t" lang="ko">인덱스 vs 전체 읽기 · 2026-09-07</span></div></div>
+      <p class="src"><span class="t" lang="ko">각 A/B는 메모리 켬/끔만 다른 새 세션 두 개를 동일한 프롬프트와 도구로 실제 저장소에서 비교한 것입니다. 같은 회차에서 읽기가 적은 Sonnet 5는 이득이 없었기에, 이제 회상은 포인터부터 주입하고 작업과 관련된 기억만 요약으로 확장합니다. <a href="../benchmark.html">측정 방법(영어) →</a></span></p>
     </div>
   </header>
 
   <section class="brief" aria-labelledby="what-h">
     <div class="sec-head">
       <span class="mono-label">IN&nbsp;BRIEF</span>
-      <h2 id="what-h"><span class="t" lang="en">What is RxAi AMP?</span></h2>
+      <h2 id="what-h"><span class="t" lang="ko">RxAi AMP란?</span></h2>
     </div>
-    <p class="def t" lang="en">RxAi AMP (Agent Memory Protocol) is open-source shared memory for AI coding agents such as Claude Code, Codex and agy. Each memory is a GitHub Issue in a repository you own. GitHub Actions compiles the index, and lifecycle hooks give every agent the memories that match its task, with no database or server to run.</p>
-    <p class="aside t" lang="en">It is not related to Sourcegraph’s Amp coding agent, Google’s AMP page format or AMP Limited.</p>
+    <p class="def t" lang="ko">RxAi AMP(Agent Memory Protocol)는 Claude Code, Codex, agy 같은 AI 코딩 에이전트를 위한 오픈 소스 공유 메모리입니다. 기억 하나하나가 여러분이 소유한 저장소의 GitHub 이슈입니다. GitHub Actions가 인덱스를 컴파일하고, 라이프사이클 훅이 각 에이전트에게 작업에 맞는 기억을 건넵니다. 데이터베이스도 서버도 필요 없습니다.</p>
+    <p class="aside t" lang="ko">Sourcegraph의 Amp 코딩 에이전트, Google의 AMP 페이지 형식, AMP Limited와는 관련이 없습니다.</p>
     <dl class="brief-facts">
-      <div><dt><span class="t" lang="en">Licence</span></dt><dd><span class="t" lang="en">AGPL-3.0-or-later, or a commercial licence</span></dd></div>
-      <div><dt><span class="t" lang="en">Maintainer</span></dt><dd>James Ho, <a href="https://rxai.com.au">RxAi</a></dd></div>
-      <div><dt><span class="t" lang="en">Updated</span></dt><dd><time datetime="2026-09-24"><span class="t" lang="en">24 September 2026</span></time></dd></div>
-      <div><dt><span class="t" lang="en">Questions</span></dt><dd><a href="https://github.com/RxAi-Aus/amp/discussions">GitHub Discussions</a></dd></div>
+      <div><dt><span class="t" lang="ko">라이선스</span></dt><dd><span class="t" lang="ko">AGPL-3.0-or-later 또는 상용 라이선스</span></dd></div>
+      <div><dt><span class="t" lang="ko">관리자</span></dt><dd>James Ho, <a href="https://rxai.com.au">RxAi</a></dd></div>
+      <div><dt><span class="t" lang="ko">업데이트</span></dt><dd><time datetime="2026-09-24"><span class="t" lang="ko">2026년 9월 24일</span></time></dd></div>
+      <div><dt><span class="t" lang="ko">문의</span></dt><dd><a href="https://github.com/RxAi-Aus/amp/discussions">GitHub Discussions</a></dd></div>
     </dl>
   </section>
 
@@ -563,24 +551,24 @@
     <div class="sec-head">
       <span class="mono-label">ATOM</span>
       <h2>
-        <span class="t" lang="en">One issue, one memory</span>
+        <span class="t" lang="ko">이슈 하나, 기억 하나</span>
       </h2>
     </div>
-    <p class="note t" lang="en">The title carries all routing information. The indexer parses it with a strict regex. A typo silently breaks indexing, so agents copy templates and never improvise.</p>
+    <p class="note t" lang="ko">라우팅 정보는 모두 제목에 담겨 있습니다. 인덱서는 엄격한 정규식으로 제목을 파싱하므로 오타 하나로 인덱싱이 조용히 깨집니다. 그래서 에이전트는 템플릿을 복사할 뿐, 즉흥적으로 쓰지 않습니다.</p>
     <div class="anatomy">
       <div class="title-line"><span class="seg from">[FROM:claudecowork→all]</span><span class="seg region">[REGION:ProjectX]</span><span class="seg place">[PLACE:debugging]</span><span class="seg type">[TYPE:pattern]</span> Retry with rebase on push race</div>
       <div class="legend">
         <div class="from"><b>FROM → recipient</b>
-          <span class="t" lang="en">sender agent → an agent, <span class="mono">all</span>, or <span class="mono">self</span> (diary)</span>
+          <span class="t" lang="ko">보내는 에이전트 → 수신자(특정 에이전트, <span class="mono">all</span>, 또는 일지용 <span class="mono">self</span>)</span>
         </div>
         <div class="region"><b>REGION</b>
-          <span class="t" lang="en">the area of memory, e.g. a project</span>
+          <span class="t" lang="ko">기억의 '영역', 예: 프로젝트</span>
         </div>
         <div class="place"><b>PLACE</b>
-          <span class="t" lang="en">the subtopic inside that region</span>
+          <span class="t" lang="ko">영역 안의 하위 주제</span>
         </div>
         <div class="type"><b>TYPE</b>
-          <span class="t" lang="en">the seven memory kinds: </span>
+          <span class="t" lang="ko">일곱 가지 기억 유형: </span>
           <span class="mono">intent · facts · pattern · invalidation · discovery · events · lifefact</span>
         </div>
       </div>
@@ -591,56 +579,56 @@
     <div class="sec-head">
       <span class="mono-label">MACHINE&nbsp;LOOP</span>
       <h2>
-        <span class="t" lang="en">The write path</span>
+        <span class="t" lang="ko">쓰기 경로(머신 루프)</span>
       </h2>
     </div>
-    <picture><source type="image/webp" srcset="assets/architecture-832.webp 832w, assets/architecture-1376.webp 1376w" sizes="(min-width: 880px) 832px, calc(100vw - 48px)"><img class="diagram" src="assets/architecture.png" alt="Architecture: agents read and write GitHub Issues; GitHub Actions index them every six hours with weights and decay; agents recall from INDEX.md, REGION files and a local cache" width="1376" height="768" loading="lazy" decoding="async"></picture>
-    <p class="note t" lang="en">No AI model runs in the indexing workflows; they are deterministic scripts. Agents never edit the index files; the workflows own them.</p>
+    <picture><source type="image/webp" srcset="../assets/architecture-832.webp 832w, ../assets/architecture-1376.webp 1376w" sizes="(min-width: 880px) 832px, calc(100vw - 48px)"><img class="diagram" src="../assets/architecture.png" alt="Architecture: agents read and write GitHub Issues; GitHub Actions index them every six hours with weights and decay; agents recall from INDEX.md, REGION files and a local cache" width="1376" height="768" loading="lazy" decoding="async"></picture>
+    <p class="note t" lang="ko">인덱싱 워크플로에는 어떤 AI 모델도 실행되지 않습니다. 모두 결정적 스크립트입니다. 에이전트는 인덱스 파일을 절대 편집하지 않으며, 워크플로가 소유합니다.</p>
     <div class="flow">
       <div class="fnode">
         <div class="actor agent">
-          <span class="t" lang="en">Agent</span>
+          <span class="t" lang="ko">에이전트</span>
         </div>
         <div class="fbody">
           <h3>
-            <span class="t" lang="en">Post one issue via GitHub MCP</span>
+            <span class="t" lang="ko">GitHub MCP로 이슈 하나 게시</span>
           </h3>
-          <p class="t" lang="en">New topic → new issue. Reply → a comment on the existing thread. Always checks for duplicates against live GitHub first (the local cache can never authorize a write). The user can trigger the same write on demand with the <code>/amp</code> command below.</p>
+          <p class="t" lang="ko">새 주제는 새 이슈로, 답변은 기존 스레드의 댓글로. 쓰기 전에는 반드시 GitHub 실시간 상태로 중복을 확인합니다(로컬 캐시는 쓰기를 승인할 수 없습니다). 사용자는 아래 <code>/amp</code> 명령으로 같은 쓰기를 언제든 실행할 수 있습니다.</p>
         </div>
       </div>
       <div class="fnode">
         <div class="actor robot">
-          <span class="t" lang="en">Workflow</span>
+          <span class="t" lang="ko">워크플로</span>
         </div>
         <div class="fbody">
           <h3>
-            <span class="t" lang="en">Tracker updates the unindexed register</span>
+            <span class="t" lang="ko">트래커가 미인덱스 목록 갱신</span>
             <span class="timing">~30 s</span>
           </h3>
-          <p class="t" lang="en">On every issue opened, <code>not_indexed.md</code> is rebuilt from all issues since the last compile, so a failed run is repaired by the next one, and new memories are never invisible.</p>
+          <p class="t" lang="ko">이슈가 열릴 때마다 <code>not_indexed.md</code>는 마지막 컴파일 이후의 모든 이슈로부터 재구축됩니다. 실패한 실행은 다음 실행이 복구하며, 새 기억이 보이지 않게 되는 일은 없습니다.</p>
         </div>
       </div>
       <div class="fnode">
         <div class="actor robot">
-          <span class="t" lang="en">Workflow</span>
+          <span class="t" lang="ko">워크플로</span>
         </div>
         <div class="fbody">
           <h3>
-            <span class="t" lang="en">Scheduled compile</span>
+            <span class="t" lang="ko">예약 컴파일</span>
             <span class="timing">every 6 h</span>
           </h3>
-          <p class="t" lang="en">Rebuilds <code>INDEX.md</code> (always small: Region pointers with titles) and per-region <code>REGION-*.md</code> pointer tables, applies weight decay and outcome deltas, persists <code>weights.json</code>.</p>
+          <p class="t" lang="ko">항상 작게 유지되는 <code>INDEX.md</code>(요약만)와 영역별 <code>REGION-*.md</code> 포인터 표를 재구축하고, 가중치 감쇠와 성과 증감을 적용해 <code>weights.json</code>에 저장합니다.</p>
         </div>
       </div>
       <div class="fnode">
         <div class="actor robot">
-          <span class="t" lang="en">Workflow</span>
+          <span class="t" lang="ko">워크플로</span>
         </div>
         <div class="fbody">
           <h3>
-            <span class="t" lang="en">Knowledge export</span>
+            <span class="t" lang="ko">지식 내보내기</span>
           </h3>
-          <p class="t" lang="en">The same run projects every issue into an OKF v0.1 bundle (<code>okf/</code>) and a BigQuery-ready <code>rows.ndjson</code>. Both are derived and read-only; Issues stay the single source of truth.</p>
+          <p class="t" lang="ko">같은 실행이 모든 이슈를 OKF v0.1 번들(<code>okf/</code>)과 BigQuery용 <code>rows.ndjson</code>으로 사영합니다. 둘 다 파생된 읽기 전용 데이터이며, 단일 진실 원천은 언제나 이슈입니다.</p>
         </div>
       </div>
     </div>
@@ -650,71 +638,71 @@
     <div class="sec-head">
       <span class="mono-label">ENTRY&nbsp;POINT</span>
       <h2>
-        <span class="t" lang="en">The /amp command</span>
+        <span class="t" lang="ko">/amp 명령 — 어디서나 쓰는 기억의 입구</span>
       </h2>
     </div>
-    <p class="note t" lang="en">A user-invocable Claude Code slash command, installed at user level (<span class="mono">~/.claude/commands/amp.md</span>) so it works from any project. The hooks fire on schedule; <span class="mono">/amp</span> fires when you say so. Formats still come from the <span class="mono">rxai-amp</span> skill: the command is the WHEN, the skill is the HOW. The slash menu shows both <span class="mono">/amp</span> and <span class="mono">/rxai-amp</span>: type <span class="mono">/amp</span>, which loads the skill (the rulebook) by itself.</p>
+    <p class="note t" lang="ko">Claude Code의 사용자 호출 슬래시 명령. 사용자 레벨(<span class="mono">~/.claude/commands/amp.md</span>)에 설치되어 어떤 프로젝트에서도 동작합니다. 훅은 정해진 시점에, <span class="mono">/amp</span>는 당신이 원할 때 발동합니다. 형식은 여전히 <span class="mono">rxai-amp</span> 스킬이 담당합니다. 명령은 '언제', 스킬은 '어떻게'입니다. 메뉴에는 <span class="mono">/amp</span>와 <span class="mono">/rxai-amp</span>가 둘 다 보이지만, 입력할 것은 <span class="mono">/amp</span>입니다. 스킬(규칙집)은 스스로 로드됩니다.</p>
     <div class="anatomy">
       <div class="title-line"><span class="seg type">/amp update</span> &lt;text&gt;
-        <span class="aside t" lang="en">→ post a memory issue, or an Outcome: comment</span>
+        <span class="aside t" lang="ko">→ 기억 이슈 또는 Outcome: 댓글 게시</span>
       </div>
       <div class="title-line"><span class="seg type">/amp update</span>
-        <span class="aside t" lang="en">→ store a summary of this session's work</span>
+        <span class="aside t" lang="ko">→ 이번 세션 작업 요약 저장</span>
       </div>
       <div class="title-line"><span class="seg type">/amp status</span>
-        <span class="aside t" lang="en">→ target repo · agent · recent issues</span>
+        <span class="aside t" lang="ko">→ 대상 저장소 · 에이전트 · 최근 이슈</span>
       </div>
     </div>
-    <p class="note t" lang="en" style="margin-top:22px">Where it posts, in order of precedence. The config file outranks repo self-detection <em>by design</em>: one shared brain, the same target from any folder. Override per run with <span class="mono">RXAI_AMP_SLUG</span>.</p>
+    <p class="note t" lang="ko" style="margin-top:22px">게시 대상의 결정 우선순위. 설정 파일은 <em>의도적으로</em> 저장소 자동 감지보다 우선합니다. 공유 두뇌는 하나, 어느 폴더에서든 같은 대상입니다. 일회성 재정의는 <span class="mono">RXAI_AMP_SLUG</span>로.</p>
     <div class="ladder">
       <div class="rung">
         <span class="file">RXAI_AMP_SLUG</span>
         <span class="why">
-          <span class="t" lang="en">explicit environment override; always wins</span>
+          <span class="t" lang="ko">환경 변수 명시 지정 — 항상 우선</span>
         </span>
       </div>
       <div class="rung">
         <span class="file">~/.rxai-amp/config.json</span>
         <span class="why">
-          <span class="t" lang="en">your configured memory repo, the same one the v2.8 lifecycle adapters read</span>
+          <span class="t" lang="ko">설정된 기억 저장소 — v2.8 라이프사이클 어댑터와 같은 설정을 공유</span>
         </span>
       </div>
       <div class="rung">
         <span class="file">
-          <span class="t" lang="en">repo self-detection</span>
+          <span class="t" lang="ko">저장소 자동 감지</span>
         </span>
         <span class="why">
-          <span class="t" lang="en">fallback: the memory repo you are standing in (PROTOCOL.md + weights.json)</span>
+          <span class="t" lang="ko">폴백: 현재 위치한 기억 저장소 감지(PROTOCOL.md + weights.json)</span>
         </span>
       </div>
     </div>
-    <p class="note t" lang="en" style="margin-top:16px">Before every write it refreshes live GitHub state for duplicates, then posts a canonically-tagged issue through the <span class="mono">gh</span> CLI with <span class="mono">from:</span> / <span class="mono">type:</span> / <span class="mono">unindexed</span> labels. <span class="mono">npm run hooks:install:claude</span> installs the command, the skill, and the config in one step.</p>
+    <p class="note t" lang="ko" style="margin-top:16px">쓰기 전마다 GitHub 실시간 상태로 중복을 확인한 뒤, <span class="mono">gh</span> CLI로 규범에 맞는 태그의 이슈(<span class="mono">from:</span>/<span class="mono">type:</span>/<span class="mono">unindexed</span> 라벨 포함)를 게시합니다. <span class="mono">npm run hooks:install:claude</span> 한 번으로 명령·스킬·설정이 모두 설치됩니다.</p>
   </section>
 
   <section>
     <div class="sec-head">
       <span class="mono-label">SESSION&nbsp;LOOP</span>
       <h2>
-        <span class="t" lang="en">The agent lifecycle</span>
+        <span class="t" lang="ko">에이전트 라이프사이클(v2.8)</span>
       </h2>
     </div>
-    <p class="note t" lang="en">v2.8 makes the three obligations (recall, capture, outcome) mechanical: hooks decide <em>when</em> (deterministic triggers the model can't forget), the <span class="mono">rxai-amp</span> skill teaches <em>how</em> (exact formats), and a local session ledger connects them. The work itself happens between recall and capture.</p>
+    <p class="note t" lang="ko">v2.8은 세 가지 의무(회상, 기록, 결과)를 기계화합니다. 훅이 '언제'를 결정하고(모델이 잊을 수 없는 결정적 트리거), <span class="mono">rxai-amp</span> 스킬이 '어떻게'를 가르치며(정확한 형식), 로컬 세션 원장이 둘을 연결합니다.</p>
     <div class="steps">
       <div class="step">
         <span class="k">1 · RECALL</span>
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="lc-1">
             <span class="dl">
-            <span class="t" lang="en">Remember first</span>
+            <span class="t" lang="ko">먼저 회상</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">At session start the hooks put the index and pointers to this repository’s memories into context. When you type a prompt, the records it touches expand to a short summary. The agent doesn't decide to recall; recall happens to it.</p>
+        <p class="t" lang="ko">세션 시작 시 훅이 인덱스와 이 저장소 기억의 포인터를 컨텍스트에 넣습니다. 프롬프트를 입력하면 관련된 기록이 짧은 요약으로 펼쳐집니다. 에이전트가 회상을 결정하는 게 아니라, 회상이 저절로 일어납니다.</p>
         <div class="trigger">SessionStart → pointers · UserPromptSubmit → summaries</div>
         <div class="more" id="lc-1">
           <div class="more-in">
-            <p class="t" lang="en"><span class="mono">session-start.mjs</span> puts <span class="mono">INDEX.md</span>, <span class="mono">not_indexed.md</span> and the matching pointers into the session before your first prompt; <span class="mono">user-prompt-submit.mjs</span> expands the records each prompt touches, each at most once per session.</p>
+            <p class="t" lang="ko"><span class="mono">session-start.mjs</span>는 첫 프롬프트 전에 <span class="mono">INDEX.md</span>, <span class="mono">not_indexed.md</span>와 일치하는 포인터를 세션에 넣고, <span class="mono">user-prompt-submit.mjs</span>는 각 프롬프트와 관련된 기록을 펼칩니다(세션당 기록마다 최대 1회).</p>
           </div>
         </div>
       </div>
@@ -723,16 +711,16 @@
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="lc-2">
             <span class="dl">
-            <span class="t" lang="en">Do the work</span>
+            <span class="t" lang="ko">작업 수행</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Every git commit is recorded as a work boundary; an <span class="mono">[AMP]</span> reminder appears right in the commit output. Five commits = one obligation, not five.</p>
+        <p class="t" lang="ko">모든 git 커밋은 작업 경계로 기록되고, 커밋 출력에 <span class="mono">[AMP]</span> 알림이 바로 나타납니다. 커밋 다섯 번 = 의무 하나, 다섯이 아닙니다.</p>
         <div class="trigger">post-commit hook → ledger boundary</div>
         <div class="more" id="lc-2">
           <div class="more-in">
-            <p class="t" lang="en"><span class="mono">adapters/git-hooks/post-commit</span> prints it; <span class="mono">post-tool-use.mjs</span> logs the boundary. Only a real <span class="mono">git commit</span> counts.</p>
+            <p class="t" lang="ko"><span class="mono">adapters/git-hooks/post-commit</span>가 출력하고 <span class="mono">post-tool-use.mjs</span>가 경계를 기록합니다. 진짜 <span class="mono">git commit</span>만 셉니다.</p>
           </div>
         </div>
       </div>
@@ -741,16 +729,16 @@
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="lc-3">
             <span class="dl">
-            <span class="t" lang="en">Store or decline</span>
+            <span class="t" lang="ko">저장 또는 거절</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">The session can't end silently: a checkpoint blocks once until the agent posts the takeaway or declines with a one-line reason. "Nothing worth storing" is valid; silence is not.</p>
+        <p class="t" lang="ko">세션은 조용히 끝날 수 없습니다. 체크포인트가 한 번 막아서며, 에이전트가 배운 점을 게시하거나 한 줄 이유와 함께 명시적으로 거절할 때까지 기다립니다. '저장할 게 없다'는 유효한 답이지만, 침묵은 아닙니다.</p>
         <div class="trigger">Stop hook → block once, then store / decline</div>
         <div class="more" id="lc-3">
           <div class="more-in">
-            <p class="t" lang="en"><span class="mono">adapters/claude-code/hooks/stop.mjs</span> blocks once. Post the takeaway or decline with a reason; the ledger remembers which.</p>
+            <p class="t" lang="ko"><span class="mono">adapters/claude-code/hooks/stop.mjs</span>는 한 번만 막습니다. 배운 점을 올리거나 이유와 함께 거절하거나 — 원장이 기억합니다.</p>
           </div>
         </div>
       </div>
@@ -759,16 +747,16 @@
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="lc-4">
             <span class="dl">
-            <span class="t" lang="en">Grade what you used</span>
+            <span class="t" lang="ko">사용한 기억에 점수 매기기</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Every recalled memory the session relied on gets an <span class="mono">Outcome:</span> comment. Unused memories get nothing, so there is no fake activity.</p>
+        <p class="t" lang="ko">세션이 실제로 의존한 기억마다 <span class="mono">Outcome:</span> 댓글을 남깁니다. 쓰지 않은 기억에는 아무것도 남기지 않습니다. 가짜 활동은 만들지 않습니다.</p>
         <div class="trigger">## Recall manifest → Librarian audits</div>
         <div class="more" id="lc-4">
           <div class="more-in">
-            <p class="t" lang="en">The summary’s <span class="mono">## Recall</span> manifest lists what the session used; <span class="mono">amp-librarian.yml</span> audits it daily.</p>
+            <p class="t" lang="ko">요약의 <span class="mono">## Recall</span> 매니페스트가 사용한 기억을 나열하고, <span class="mono">amp-librarian.yml</span>이 매일 감사합니다.</p>
           </div>
         </div>
       </div>
@@ -779,91 +767,91 @@
     <div class="sec-head">
       <span class="mono-label">READ&nbsp;PATH</span>
       <h2>
-        <span class="t" lang="en">Three-tier recall</span>
+        <span class="t" lang="ko">3단 회상(읽기 경로)</span>
       </h2>
     </div>
-    <p class="note t" lang="en">Recall is delivered, not performed. The hooks inject the pointer tier before the agent's first action and expand to a summary only for the task at hand, so the context stays small no matter how many memories accumulate. Region files are for browsing, never for recall.</p>
+    <p class="note t" lang="ko">회상은 '전달되는' 것이지 에이전트가 직접 수행하는 것이 아닙니다. 훅이 첫 동작 전에 포인터 층을 주입하고, 작업과 관련된 기억만 요약으로 확장하므로 기억이 아무리 쌓여도 컨텍스트는 작게 유지됩니다. 영역 파일은 둘러보기용이며 회상에는 쓰이지 않습니다.</p>
     <div class="ladder">
       <div class="rung">
         <span class="file">INDEX.md + not_indexed.md</span>
         <span class="why">
-          <span class="t" lang="en">the navigation layer, injected at session start and compacted around the repo's Region</span>
+          <span class="t" lang="ko">내비게이션 층: 세션 시작 시 주입되며 이 저장소의 영역을 중심으로 압축</span>
         </span>
       </div>
       <div class="rung">
         <span class="file">pointer</span>
         <span class="why">
-          <span class="t" lang="en"><span class="mono">#N [type · place · weight] title</span>: every matching record on one line, no network</span>
+          <span class="t" lang="ko"><span class="mono">#N [type · place · weight] title</span> — 일치하는 기록마다 한 줄, 네트워크 불필요</span>
         </span>
       </div>
       <div class="rung">
         <span class="file">summary</span>
         <span class="why">
-          <span class="t" lang="en">the record's <span class="mono">## Now</span>, else its opening prose, ≤ 240 chars, expanded only for records the prompt overlaps (Claude Code) and at session start on Codex and agy</span>
+          <span class="t" lang="ko">기록의 <span class="mono">## Now</span>, 없으면 첫 산문, 240자 이하 — 프롬프트와 겹치는 기록만 확장(Claude Code); Codex와 agy는 세션 시작 시</span>
         </span>
       </div>
       <div class="rung">
         <span class="file">issue + comments</span>
         <span class="why">
-          <span class="t" lang="en">the full thread, fetched only when the agent acts on a record's details</span>
+          <span class="t" lang="ko">전체 스레드는 에이전트가 기록의 세부 내용에 따라 행동할 때만 가져옴</span>
         </span>
       </div>
     </div>
-    <p class="note t" lang="en" style="margin-top:16px">Pointers arrive in a fixed order, goal before steps and doubts before trust: <span class="mono">intent → facts → pattern → invalidation → discovery → events</span>.</p>
+    <p class="note t" lang="ko" style="margin-top:16px">포인터는 정해진 순서로 도착합니다. 단계보다 목표를, 신뢰보다 의심을 먼저: <span class="mono">intent → facts → pattern → invalidation → discovery → events</span>.</p>
   </section>
 
   <section>
     <div class="sec-head">
       <span class="mono-label">WEIGHTS</span>
       <h2>
-        <span class="t" lang="en">Confidence that learns</span>
+        <span class="t" lang="ko">학습하는 신뢰 가중치</span>
       </h2>
     </div>
-    <p class="note t" lang="en">Each memory carries a weight that decays over time and moves with real outcomes. Proven patterns float up and broken ones sink, without manual cleanup.</p>
+    <p class="note t" lang="ko">각 기억은 시간이 지나며 감쇠하고 실제 성과에 따라 움직이는 가중치를 지닙니다. 검증된 패턴은 떠오르고 깨진 것은 가라앉습니다. 수동 정리는 필요 없습니다.</p>
     <div style="overflow-x:auto">
       <table class="wtable">
         <tr>
           <th>
-            <span class="t" lang="en">Signal</span>
+            <span class="t" lang="ko">신호</span>
           </th>
           <th>
-            <span class="t" lang="en">Effect</span>
+            <span class="t" lang="ko">효과</span>
           </th>
         </tr>
         <tr>
           <td>
-            <span class="t" lang="en"><span class="mono">Outcome: success</span> comment</span>
+            <span class="t" lang="ko"><span class="mono">Outcome: success</span> 댓글</span>
           </td>
           <td><span class="delta up">+0.30</span></td>
         </tr>
         <tr>
           <td>
-            <span class="t" lang="en"><span class="mono">Outcome: failure</span> comment</span>
+            <span class="t" lang="ko"><span class="mono">Outcome: failure</span> 댓글</span>
           </td>
           <td><span class="delta down">−0.20</span></td>
         </tr>
         <tr>
           <td>
-            <span class="t" lang="en">no marker / neutral</span>
+            <span class="t" lang="ko">표시 없음 / 중립</span>
           </td>
           <td><span class="delta flat">
-            <span class="t" lang="en">0, decay only</span>
+            <span class="t" lang="ko">0, 감쇠만</span>
           </span></td>
         </tr>
         <tr>
           <td>
-            <span class="t" lang="en"><span class="mono">type:lifefact</span> (permanent personal fact)</span>
+            <span class="t" lang="ko"><span class="mono">type:lifefact</span>(영구 개인 기억)</span>
           </td>
           <td><span class="delta pin">
-            <span class="t" lang="en">pinned 1.0, never decays</span>
+            <span class="t" lang="ko">1.0 고정, 감쇠 없음</span>
           </span></td>
         </tr>
         <tr>
           <td>
-            <span class="t" lang="en"><span class="mono">Supersedes: #N</span> in an invalidation</span>
+            <span class="t" lang="ko">무효화 이슈의 <span class="mono">Supersedes: #N</span></span>
           </td>
           <td><span class="delta down">
-            <span class="t" lang="en">→ 0, archived immediately</span>
+            <span class="t" lang="ko">→ 0, 즉시 보관 처리</span>
           </span></td>
         </tr>
       </table>
@@ -874,10 +862,10 @@
     <div class="sec-head">
       <span class="mono-label">CONFORMANCE</span>
       <h2>
-        <span class="t" lang="en">Four levels of enforcement</span>
+        <span class="t" lang="ko">4단계 준수 수준</span>
       </h2>
     </div>
-    <p class="note t" lang="en">Levels change what is <em>mechanical</em>, never what is <em>required</em>. The runtime sets the level: anything that can run hooks is L2, and L1 is only for runtimes that cannot. A broken adapter never blocks the user's real work. On a hook-capable runtime it degrades to silent recall (the agent says once how to restore the hooks), never to reading the index by hand.</p>
+    <p class="note t" lang="ko">수준이 바꾸는 것은 '얼마나 기계화되는가'이지 '요구 사항 자체'가 아닙니다. 수준은 런타임이 정합니다: 훅을 실행할 수 있으면 모두 L2이고, L1은 훅을 실행할 수 없는 런타임만을 위한 것입니다. 고장 난 어댑터가 사용자의 실제 작업을 막는 일은 없습니다. 훅이 가능한 런타임에서는 '조용한 회상'(에이전트가 훅 복구 방법을 한 번만 알림)으로 강등될 뿐, 인덱스를 손으로 읽는 방식으로는 결코 돌아가지 않습니다.</p>
     <div class="levels">
       <div class="level">
         <div class="lvhead">
@@ -886,15 +874,15 @@
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="cf-0">
             <span class="dl">
-            <span class="t" lang="en">Prose</span>
+            <span class="t" lang="ko">문서만</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Agent follows the written protocol voluntarily.</p>
+        <p class="t" lang="ko">에이전트가 문서화된 프로토콜을 자발적으로 따릅니다.</p>
         <div class="more" id="cf-0">
           <div class="more-in">
-            <p class="t" lang="en">No install. The agent reads <span class="mono">PROTOCOL.md</span> and complies because it was asked to. Every agent starts here.</p>
+            <p class="t" lang="ko">설치 불필요. 에이전트는 <span class="mono">PROTOCOL.md</span>를 읽고, 요청받았기에 따릅니다. 모두 여기서 시작합니다.</p>
           </div>
         </div>
       </div>
@@ -905,15 +893,15 @@
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="cf-1">
             <span class="dl">
-            <span class="t" lang="en">Assisted</span>
+            <span class="t" lang="ko">보조</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Checklists loaded into context: the skill, or a config digest.</p>
+        <p class="t" lang="ko">체크리스트를 컨텍스트에 로드: 스킬 또는 설정 다이제스트.</p>
         <div class="more" id="cf-1">
           <div class="more-in">
-            <p class="t" lang="en"><span class="mono">OpenClaw</span> · <span class="mono">Hermes</span>. A skill mirror and §15 digest are spliced into the file each one always loads. Context, not enforcement.</p>
+            <p class="t" lang="ko"><span class="mono">OpenClaw</span> · <span class="mono">Hermes</span>. 스킬 미러와 §15 다이제스트를 각 런타임이 항상 읽는 파일에 끼웁니다. 강제가 아니라 맥락.</p>
           </div>
         </div>
       </div>
@@ -921,21 +909,21 @@
         <div class="lvhead">
           <span class="lv">L2</span>
           <span class="now">
-            <span class="t" lang="en">where AMP is today</span>
+            <span class="t" lang="ko">AMP의 현재 위치</span>
           </span>
         </div>
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="cf-2">
             <span class="dl">
-            <span class="t" lang="en">Enforced</span>
+            <span class="t" lang="ko">강제</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Deterministic hooks + session ledger interpose real checkpoints.</p>
+        <p class="t" lang="ko">결정적 훅과 세션 원장이 실제 체크포인트를 세웁니다.</p>
         <div class="more" id="cf-2">
           <div class="more-in">
-            <p class="t" lang="en"><span class="mono">Claude Code</span> · <span class="mono">Codex</span> · <span class="mono">agy</span>. Hooks fire outside the model, so forgetting is not an option. The ledger under <span class="mono">~/.rxai-amp/</span> is advisory only.</p>
+            <p class="t" lang="ko"><span class="mono">Claude Code</span> · <span class="mono">Codex</span> · <span class="mono">agy</span>. 훅은 모델 바깥에서 발동하므로 ‘잊기’는 선택지가 아닙니다. <span class="mono">~/.rxai-amp/</span> 아래 원장은 참고용입니다.</p>
           </div>
         </div>
       </div>
@@ -946,28 +934,28 @@
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="cf-3">
             <span class="dl">
-            <span class="t" lang="en">Tool-boundary</span>
+            <span class="t" lang="ko">도구 경계</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Future MCP server validates every write before it reaches GitHub.</p>
+        <p class="t" lang="ko">미래의 MCP 서버가 GitHub에 닿기 전에 모든 쓰기를 검증합니다.</p>
         <div class="more" id="cf-3">
           <div class="more-in">
-            <p class="t" lang="en">Not shipped. An MCP server would reject a malformed title before it became an issue. Today the skill only advises; nothing enforces it.</p>
+            <p class="t" lang="ko">미제공. MCP 서버라면 잘못된 제목을 이슈가 되기 전에 거부합니다. 지금은 스킬 안에 있으며, 안내이지 관문이 아닙니다.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="lvlres t" lang="en">
-      <p>Measured at both levels with Codex, on the same tasks and memory store:</p>
+    <div class="lvlres t" lang="ko">
+      <p>두 수준 모두 같은 과제와 기억 저장소에서 Codex로 측정했습니다.</p>
       <ul>
-        <li><b>L1</b>, the agent recalls by itself: gpt-6-astra used 46% more input and 35% more wall time than with no memory. One model searched the index five times and fetched nothing.</li>
-        <li><b>L2</b>, a hook delivers the same records before the first action: the same model used 5.6% less input and 5.4% less tool output. A second model improved but still used more than with no memory. All ten enabled sessions received the same three records.</li>
-        <li><b>L2, 24 Sep 2026</b>, Codex’s own memory off: input rose 9.9% at medium effort and fell 3.4% at xhigh, where the model also read 13.6% less and finished 10.7% sooner (gpt-6-astra, 4 pairs each).</li>
+        <li><b>L1</b>(에이전트가 직접 회상): gpt-6-astra가 기억 없이보다 입력을 46%, 실행 시간을 35% 더 썼습니다. 한 모델은 인덱스를 다섯 번 탐색하고도 아무것도 가져오지 않았습니다.</li>
+        <li><b>L2</b>(훅이 첫 동작 전에 같은 기록을 전달): 같은 모델이 입력을 5.6%, 도구 출력을 5.4% 덜 썼습니다. 두 번째 모델은 개선됐지만 여전히 기억 없이보다 더 썼습니다. 활성화된 열 개 세션 모두 같은 세 건을 받았습니다.</li>
+        <li><b>L2, 2026-09-24</b>(Codex 자체 메모리 끔): medium에서는 입력이 9.9% 늘고 xhigh에서는 3.4% 줄었으며, xhigh에서는 13.6% 덜 파내고 10.7% 빨리 끝냈습니다(gpt-6-astra, 각 4쌍).</li>
       </ul>
-      <p>The level decides whether memory can pay for itself; how much reading it replaces decides whether it does.</p>
+      <p>수준은 기억이 본전을 뽑을 수 있는지를 결정하고, 실제로 뽑는지는 얼마나 많은 읽기를 대체하느냐에 달려 있습니다.</p>
     </div>
   </section>
 
@@ -975,29 +963,29 @@
     <div class="sec-head">
       <span class="mono-label">BOOTSTRAP</span>
       <h2>
-        <span class="t" lang="en">One command to a new brain</span>
+        <span class="t" lang="ko">명령 하나로 새 두뇌를</span>
       </h2>
     </div>
-    <p class="note t" lang="en">Adopting the protocol used to take about 15 manual steps. The template now ships a setup wizard (it follows §15.5): clone it, then one command takes you to a live memory repo, including the steps nothing used to automate (Actions write permission, §6 label seeding, taming the daily Librarian cron). It proves the result with a real end-to-end test issue. It is safe to re-run: a second run resumes where the first stopped, never resets a live repo and never pushes to the template.</p>
+    <p class="note t" lang="ko">프로토콜 도입에는 예전엔 약 15개의 수동 단계가 필요했습니다. 이제 템플릿에 §15.5 준수 마법사가 내장되어 있습니다. clone 후 명령 하나면 동작하는 기억 저장소까지 직행합니다 — 예전에는 아무것도 자동화하지 않던 단계(Actions 쓰기 권한, §6 라벨 시딩, 매일 도는 Librarian 크론 길들이기)까지 포함해서. 마지막에는 실제 엔드투엔드 테스트 이슈로 스스로를 검증합니다. 멱등성: 재실행이 곧 재개 방식이며, 운영 중인 저장소를 절대 초기화하지 않고 템플릿에는 절대 푸시하지 않습니다.</p>
     <div class="anatomy">
       <div class="title-line"><span class="seg type">npm run setup</span>
-        <span class="aside t" lang="en">→ repo · permissions · labels · hooks · first compile</span>
+        <span class="aside t" lang="ko">→ 저장소 · 권한 · 라벨 · 훅 · 첫 컴파일</span>
       </div>
       <div class="title-line"><span class="seg type">npm run setup</span> -- --dry-run
-        <span class="aside t" lang="en">→ print the full plan, change nothing</span>
+        <span class="aside t" lang="ko">→ 전체 계획만 출력, 아무것도 바꾸지 않음</span>
       </div>
       <div class="title-line"><span class="seg type">npm run setup:verify</span>
-        <span class="aside t" lang="en">→ re-assert the checklist any time</span>
+        <span class="aside t" lang="ko">→ 언제든 체크리스트 재검증</span>
       </div>
     </div>
   </section>
 
   <footer>
     <span class="mono">RxAi AMP v2.12 · <a href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md</a>
-      <span class="t" lang="en">is the single source of truth · Issues in, knowledge out.</span>
+      <span class="t" lang="ko">가 단일 진실 원천 · 이슈가 들어가고, 지식이 나옵니다.</span>
     </span>
     <p class="built">
-      <span class="t" lang="en">Built by <a href="https://rxai.com.au">RxAI</a></span>
+      <span class="t" lang="ko"><a href="https://rxai.com.au">RxAI</a> 제작</span>
     </p>
     <p>© 2026 James Ho · <a href="https://github.com/RxAi-Aus/amp/blob/main/LICENSE">Dual-licensed</a>: AGPL-3.0-or-later or commercial · patent pending (AU provisional 2026907694) · <a href="https://github.com/RxAi-Aus/amp">github.com/RxAi-Aus/amp</a></p>
   </footer>

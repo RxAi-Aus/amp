@@ -41,6 +41,7 @@ npm run hooks:install:hermes              # v2.9.1: Hermes L1 digest into ~/.her
 npm run hooks:install:capture -- <repo>   # v2.8: AMP post-commit capture hook into any working repo
 npm run ledger:status -- <session-id>     # v2.8: inspect a session ledger
 npm run ledger:sweep                      # v2.8: janitor for stale ledgers
+npm run site:build       # docs/*.html + sitemap.xml from site/ (one URL per language); site:check verifies
 npm run board -- [--clone <path>] [--port 7345]   # AMP Board: local five-column task board UI over the memory clone (board/)
 npm run board:next -- --agent <x> [--role reviewer]   # AMP Board pull mode: claim + run one queued task (launchd/cron entry)
 npm run board:schedule -- --agent <x> --every 30m [--uninstall] [--dry-run]   # launchd installer for board:next on this Mac
@@ -54,7 +55,7 @@ npm run board:schedule -- --agent <x> --every 30m [--uninstall] [--dry-run]   # 
 
 Two layers: GitHub Issues (authoritative memory store) and derived projections of them (indexes, cache, OKF export). Everything generated is a deterministic projection of issue state — scripts never write back to GitHub.
 
-**Generated / workflow-owned files — never hand-edit:** `INDEX.md`, `REGION-*.md`, `not_indexed.md`, `weights.json`, `okf/`, `artifacts/`. GitHub Actions overwrites them.
+**Generated / workflow-owned files — never hand-edit:** `INDEX.md`, `REGION-*.md`, `not_indexed.md`, `weights.json`, `okf/`, `artifacts/`. GitHub Actions overwrites them. The site pages `docs/**/*.html` and `docs/sitemap.xml` are built from `site/` by `scripts/build-site.mjs` (edit `site/`, run `npm run site:build`; `test/site.test.mjs` fails on drift); `docs/assets/`, `llms.txt`, `robots.txt` and `CNAME` are hand-maintained.
 
 **Root-level TypeScript scripts** (one file per concern, parsing regexes kept explicit and local to each script):
 

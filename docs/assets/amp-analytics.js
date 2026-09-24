@@ -1,6 +1,6 @@
 /* amp-analytics.js — cookie consent (Google Consent Mode v2) and event tracking
- * for amp.rxai.com.au. Loaded with `defer` on every page after the page's own
- * script has applied the language, so `body[data-lang]` is already set.
+ * for amp.rxai.com.au. Loaded with `defer` on every page. Each language is
+ * its own URL (scripts/build-site.mjs), so `body[data-lang]` is set in the HTML.
  *
  * Consent: the head sets every consent type to "denied" before gtag.js loads
  * and restores a stored "granted" choice synchronously. This file shows the
@@ -11,10 +11,11 @@
  *
  * Events (all sent through gtag, so they respect consent state):
  *   github_click | protocol_click | readme_click | benchmark_click | home_click
+ *   | quickstart_click | compare_click
  *   | outbound_click            — what people leave the page for
  *   command_copy                — an install command was copied (the real
  *                                 "conversion" of a developer landing page)
- *   language_switch             — a language button was used
+ *   language_switch             — a language link in the top bar was followed
  *   section_view                — a section heading scrolled into view, once
  *   consent_update              — accept / essential-only
  * User property: site_language. Nothing here identifies a person.
@@ -138,10 +139,11 @@
     try { url = new URL(a.href, location.href); } catch (e) { return null; }
     if (url.origin === location.origin) {
       if (href.indexOf("#") === 0) return null; // in-page anchor
-      var p = url.pathname.replace(/\/index\.html$/, "/");
-      if (/benchmark\.html$/.test(p)) return { name: "benchmark_click", params: { link_path: p } };
-      if (p === "/") return { name: "home_click", params: { link_path: p } };
-      return null;
+      if (a.hasAttribute("hreflang") && a.closest(".langbar")) return null; // language_switch below
+      // /zh-hant/benchmark.html is the same page as /benchmark.html
+      var p = url.pathname.replace(/\/index\.html$/, "/").replace(/^\/(?:zh-hant|ja|ko|es)\//, "/");
+      var page = { "/benchmark.html": "benchmark_click", "/quickstart.html": "quickstart_click", "/compare.html": "compare_click", "/": "home_click" }[p];
+      return page ? { name: page, params: { link_path: url.pathname } } : null;
     }
     if (url.hostname === "github.com" && /^\/RxAi-Aus\/amp/i.test(url.pathname)) {
       if (/PROTOCOL\.md/i.test(url.pathname)) return { name: "protocol_click", params: { link_path: url.pathname } };
@@ -174,9 +176,9 @@
   });
 
   document.addEventListener("click", function (e) {
-    var b = e.target.closest(".langbar button[data-set]");
-    if (!b) return;
-    var l = b.getAttribute("data-set");
+    var b = e.target.closest(".langbar a[hreflang]");
+    if (!b || b.getAttribute("aria-current") === "page") return;
+    var l = b.getAttribute("hreflang");
     gtagSafe("event", "language_switch", { language: l, previous_language: currentLang() });
     gtagSafe("set", "user_properties", { site_language: l });
   }, true);

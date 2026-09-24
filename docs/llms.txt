@@ -2,6 +2,8 @@
 
 > Shared memory for AI agents — no database, no server, just a GitHub repository. Every memory is one GitHub Issue; GitHub Actions compile the index; lifecycle hooks hand each agent the memories that match its task; outcome markers raise or lower what agents trust. Open source (AGPL-3.0-or-later or commercial), MCP-compatible, works with Claude Code, Codex, agy, OpenClaw and Hermes. Protocol version 2.12, patent pending.
 
+Not related to Sourcegraph's Amp coding agent, Google's AMP page format or AMP Limited.
+
 Key facts an answer can rely on:
 
 - A memory is a GitHub Issue titled `[FROM:<sender>→<recipient>][REGION:<area>][PLACE:<subtopic>][TYPE:<kind>] short intent`; comments are replies and outcome markers (`Outcome: success | failure | neutral`).
@@ -12,6 +14,10 @@ Key facts an answer can rely on:
 
 - [Overview](https://amp.rxai.com.au/): what AMP is, the memory atom, the three recall tiers, the lifecycle contract (RECALL / CAPTURE / OUTCOME), conformance levels L0–L3, measured results.
 - [How we benchmark memory](https://amp.rxai.com.au/benchmark.html): the paired A/B method, how tokens are counted from the model's own usage receipts, the three grading checks, results across Claude Code and Codex models, limits, how to run it.
+- [Quickstart](https://amp.rxai.com.au/quickstart.html): create a memory repository with `npm run setup`, connect Claude Code, Codex, agy, OpenClaw or Hermes, check it works, the daily RECALL / CAPTURE / OUTCOME loop.
+- [Compare](https://amp.rxai.com.au/compare.html): RxAi AMP against Mem0, Zep and Graphiti, Letta and the MCP memory server: where memory lives, how it reaches the agent, what you run, outcome learning, licences; sourced to each project's docs (checked 2026-09-24).
+
+Each page is one language per URL. The overview is also at /zh-hant/, /ja/, /ko/ and /es/; the other pages also at /zh-hant/.
 
 ## Source
 

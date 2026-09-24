@@ -6,6 +6,8 @@
   "type": "module",
   "scripts": {
     "setup": "node scripts/setup.mjs",
+    "site:build": "node scripts/build-site.mjs",
+    "site:check": "node scripts/build-site.mjs --check",
     "setup:verify": "node scripts/setup.mjs --verify",
     "postinstall": "node scripts/postinstall-hint.mjs",
     "build": "tsc -p tsconfig.json",

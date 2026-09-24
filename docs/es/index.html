@@ -1,20 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script>
-  // English is also the x-default. A visitor who chose another language before,
-  // or whose browser asks for one this page has, goes to that version; a
-  // visitor on a language URL stays where the link sent them.
-  (function () {
-    var alt = {"zh-Hant":"zh-hant/","ja":"ja/","ko":"ko/","es":"es/"};
-    var l = null;
-    try { l = localStorage.getItem("amp-lang"); } catch (e) {}
-    if (!l) { var n = (navigator.language || "").toLowerCase(); l = n.indexOf("zh") === 0 ? "zh-Hant" : n.slice(0, 2); }
-    if (alt[l]) location.replace(alt[l] + location.search + location.hash);
-  })();
-</script>
 <!-- Google tag (gtag.js) · GA4 property amp.rxai.com.au · Consent Mode v2:
      everything denied until the visitor accepts (assets/amp-analytics.js shows
      the banner); a stored choice is restored before gtag.js loads. -->
@@ -30,25 +18,25 @@
   gtag('config', 'G-5T0HGDZQPF', { cookie_expires: 63072000 });
 </script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-5T0HGDZQPF"></script>
-<script defer src="assets/amp-analytics.js"></script>
+<script defer src="../assets/amp-analytics.js"></script>
 <!-- Per-language head text for scripts/build-site.mjs; English is the markup below. -->
-<title>RxAi AMP · Agent Memory Protocol</title>
-<meta name="description" content="Open-source shared memory for AI coding agents, built on GitHub Issues. Hooks give each agent the memories its task needs; outcomes reweight its trust.">
+<title>RxAi AMP · Agent Memory Protocol, memoria para agentes de IA</title>
+<meta name="description" content="Memoria compartida de código abierto para agentes de IA, construida sobre GitHub Issues. Los hooks dan a cada agente lo que su tarea necesita.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
-<meta property="og:title" content="RxAi AMP · Agent Memory Protocol">
-<meta property="og:description" content="A shared memory system for AI agents built on GitHub Issues — zero backend, git-auditable, outcome-weighted.">
+<meta property="og:title" content="RxAi AMP · Agent Memory Protocol, memoria para agentes de IA">
+<meta property="og:description" content="Memoria compartida para agentes de IA sobre GitHub Issues: sin backend, auditable con git y ponderada por resultados.">
 <meta property="og:type" content="website">
-<meta property="og:locale" content="en_AU">
+<meta property="og:locale" content="es_ES">
+<meta property="og:locale:alternate" content="en_AU">
 <meta property="og:locale:alternate" content="zh_TW">
 <meta property="og:locale:alternate" content="ja_JP">
 <meta property="og:locale:alternate" content="ko_KR">
-<meta property="og:locale:alternate" content="es_ES">
-<meta property="og:url" content="https://amp.rxai.com.au/">
+<meta property="og:url" content="https://amp.rxai.com.au/es/">
 <meta property="og:image" content="https://amp.rxai.com.au/assets/social-preview.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://amp.rxai.com.au/assets/social-preview.jpg">
-<link rel="preload" as="image" type="image/webp" imagesrcset="assets/hero-ant-trail-832.webp 832w, assets/hero-ant-trail-1456.webp 1456w" imagesizes="(min-width: 880px) 832px, calc(100vw - 48px)" fetchpriority="high">
-<link rel="canonical" href="https://amp.rxai.com.au/">
+<link rel="preload" as="image" type="image/webp" imagesrcset="../assets/hero-ant-trail-832.webp 832w, ../assets/hero-ant-trail-1456.webp 1456w" imagesizes="(min-width: 880px) 832px, calc(100vw - 48px)" fetchpriority="high">
+<link rel="canonical" href="https://amp.rxai.com.au/es/">
 <link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/">
 <link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/">
 <link rel="alternate" hreflang="ja" href="https://amp.rxai.com.au/ja/">
@@ -128,17 +116,17 @@
     },
     {
       "@type": "WebPage",
-      "@id": "https://amp.rxai.com.au/#webpage",
-      "url": "https://amp.rxai.com.au/",
-      "name": "RxAi AMP · Agent Memory Protocol — how the shared brain works",
-      "description": "Open-source shared memory for AI coding agents, built on GitHub Issues. Hooks give each agent the memories its task needs; outcomes reweight its trust.",
+      "@id": "https://amp.rxai.com.au/es/#webpage",
+      "url": "https://amp.rxai.com.au/es/",
+      "name": "RxAi AMP · Agent Memory Protocol — cómo funciona el cerebro compartido",
+      "description": "Memoria compartida de código abierto para agentes de IA, construida sobre GitHub Issues. Los hooks dan a cada agente lo que su tarea necesita.",
       "isPartOf": {
         "@id": "https://amp.rxai.com.au/#website"
       },
       "about": {
         "@id": "https://amp.rxai.com.au/#software"
       },
-      "inLanguage": "en",
+      "inLanguage": "es",
       "datePublished": "2026-08-14",
       "dateModified": "2026-09-24",
       "primaryImageOfPage": "https://amp.rxai.com.au/assets/social-preview.jpg"
@@ -500,62 +488,62 @@
 </style>
 <script>document.documentElement.setAttribute("data-js", "on");</script>
 </head>
-<body data-lang="en">
+<body data-lang="es">
 
 <div class="wrap">
 
   <nav class="langbar" aria-label="Language">
-    <a class="lang" href="./" hreflang="en" lang="en" aria-current="page">EN</a>
-    <a class="lang" href="zh-hant/" hreflang="zh-Hant" lang="zh-Hant">繁中</a>
-    <a class="lang" href="ja/" hreflang="ja" lang="ja">日本語</a>
-    <a class="lang" href="ko/" hreflang="ko" lang="ko">한국어</a>
-    <a class="lang" href="es/" hreflang="es" lang="es">Español</a>
+    <a class="lang" href="../" hreflang="en" lang="en">EN</a>
+    <a class="lang" href="../zh-hant/" hreflang="zh-Hant" lang="zh-Hant">繁中</a>
+    <a class="lang" href="../ja/" hreflang="ja" lang="ja">日本語</a>
+    <a class="lang" href="../ko/" hreflang="ko" lang="ko">한국어</a>
+    <a class="lang" href="./" hreflang="es" lang="es" aria-current="page">Español</a>
   </nav>
 
   <header>
     <p class="eyebrow">RxAi AMP · Agent Memory Protocol · v2.12 · patent pending</p>
     <h1>
-      <span class="t" lang="en">How the shared brain works</span>
+      <span class="t" lang="es">Cómo funciona el cerebro compartido</span>
     </h1>
     <div class="lede">
-      <p class="t" lang="en">Every memory is one GitHub Issue. Comments are the conversation about it. GitHub Actions compiles the index, not an AI. Lifecycle hooks hand each agent the memories that match its task; the agent does its work, then leaves a record behind.</p>
+      <p class="t" lang="es">Cada recuerdo es un issue de GitHub. Los comentarios son la conversación sobre él. GitHub Actions —no ninguna IA— compila el índice. Los hooks de ciclo de vida entregan a cada agente los recuerdos que encajan con su tarea; el agente hace su trabajo y deja constancia.</p>
     </div>
     <div class="chips">
       <a class="chip" href="https://github.com/RxAi-Aus/amp">GitHub ↗</a>
       <a class="chip" href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md ↗</a>
       <a class="chip" href="https://github.com/RxAi-Aus/amp#readme">README ↗</a>
-      <a class="chip" href="benchmark.html">Benchmarks →</a>
-      <a class="chip" href="quickstart.html">Quickstart →</a>
-      <a class="chip" href="compare.html">Compare →</a>
-      <span class="chip t" lang="en">zero backend</span>
-      <span class="chip t" lang="en">git-auditable</span>
-      <span class="chip t" lang="en">multi-agent</span>
-      <span class="chip t" lang="en">outcome-weighted</span>
+      <a class="chip" href="../benchmark.html">Benchmarks →</a>
+      <a class="chip" href="../quickstart.html">Quickstart →</a>
+      <a class="chip" href="../compare.html">Compare →</a>
+      <span class="chip t" lang="es">sin backend</span>
+      <span class="chip t" lang="es">auditable con git</span>
+      <span class="chip t" lang="es">multiagente</span>
+      <span class="chip t" lang="es">ponderado por resultados</span>
     </div>
     <picture>
-      <source type="image/webp" srcset="assets/hero-ant-trail-832.webp 832w, assets/hero-ant-trail-1456.webp 1456w" sizes="(min-width: 880px) 832px, calc(100vw - 48px)">
-      <img class="hero-art" src="assets/hero-ant-trail.png" alt="A glowing trail of ants converging on a GitHub issue card; side trails that lead nowhere fade out" width="1456" height="720" fetchpriority="high" decoding="async">
+      <source type="image/webp" srcset="../assets/hero-ant-trail-832.webp 832w, ../assets/hero-ant-trail-1456.webp 1456w" sizes="(min-width: 880px) 832px, calc(100vw - 48px)">
+      <img class="hero-art" src="../assets/hero-ant-trail.png" alt="A glowing trail of ants converging on a GitHub issue card; side trails that lead nowhere fade out" width="1456" height="720" fetchpriority="high" decoding="async">
     </picture>
     <div class="proof" aria-label="Measured results">
-      <div class="tile"><div class="v">−18%</div><div class="l"><span class="t" lang="en">less of the codebase read once memory is on: a model that reads heavily pulled 18% fewer bytes of files and command output, with identical prompts.</span></div><div class="tsrc"><span class="t" lang="en">Opus 5 · 8 pairs · 6 Sep 2026</span></div></div>
-      <div class="tile"><div class="v">−14% · −5%</div><div class="l"><span class="t" lang="en">faster, and cheaper, end to end on the same tasks. The injected memory block costs about 1k tokens per call, so the net saving is smaller than the reading saving.</span></div><div class="tsrc"><span class="t" lang="en">Opus 5 · 8 pairs · 6 Sep 2026</span></div></div>
-      <div class="tile"><div class="v">6.8 KB</div><div class="l"><span class="t" lang="en">read to find the right memory among 145, using the index, versus 914 KB and 58 API calls to read every issue.</span></div><div class="tsrc"><span class="t" lang="en">Index vs reading every issue · 7 Sep 2026</span></div></div>
-      <p class="src"><span class="t" lang="en">Each A/B pairs two fresh sessions on a live repository that differ only in whether memory is on, with identical prompts and tools. Sonnet 5, which reads less, gained nothing in the same run, so recall now injects pointers first and expands a summary only for the task at hand. <a href="benchmark.html">How we measure this →</a></span></p>
+      <div class="tile"><div class="v">−18%</div><div class="l"><span class="t" lang="es">18% menos código extraído con la memoria activada: un modelo de lectura intensiva sacó un 18% menos de archivos y salidas de comandos en un A/B con prompts idénticos.</span></div><div class="tsrc"><span class="t" lang="es">Opus 5 · 8 pares · 6 sep 2026</span></div></div>
+      <div class="tile"><div class="v">−14% · −5%</div><div class="l"><span class="t" lang="es">14% más rápido y 5% más barato de extremo a extremo en las mismas tareas. El bloque de memoria inyectado cuesta cerca de 1k tokens por llamada, así que el ahorro neto es menor que el de lectura.</span></div><div class="tsrc"><span class="t" lang="es">Opus 5 · 8 pares · 6 sep 2026</span></div></div>
+      <div class="tile"><div class="v">6.8 KB</div><div class="l"><span class="t" lang="es">para recordar de un almacén de 145 memorias, frente a 914 KB y 58 llamadas a la API de un escaneo ingenuo de cada issue.</span></div><div class="tsrc"><span class="t" lang="es">Índice vs leer cada issue · 7 sep 2026</span></div></div>
+      <p class="src"><span class="t" lang="es">Cada A/B compara, sobre un repositorio real, dos sesiones nuevas que solo difieren en si la memoria está activada, con prompts y herramientas idénticos. Sonnet 5, que lee menos, no ganó nada en esa misma ronda, así que el recuerdo ahora inyecta primero punteros y solo expande un resumen para la tarea en curso. <a href="../benchmark.html">Cómo lo medimos (en inglés) →</a></span></p>
     </div>
   </header>
 
   <section class="brief" aria-labelledby="what-h">
     <div class="sec-head">
       <span class="mono-label">IN&nbsp;BRIEF</span>
-      <h2 id="what-h"><span class="t" lang="en">What is RxAi AMP?</span></h2>
+      <h2 id="what-h"><span class="t" lang="es">¿Qué es RxAi AMP?</span></h2>
     </div>
-    <p class="def t" lang="en">RxAi AMP (Agent Memory Protocol) is open-source shared memory for AI coding agents such as Claude Code, Codex and agy. Each memory is a GitHub Issue in a repository you own. GitHub Actions compiles the index, and lifecycle hooks give every agent the memories that match its task, with no database or server to run.</p>
-    <p class="aside t" lang="en">It is not related to Sourcegraph’s Amp coding agent, Google’s AMP page format or AMP Limited.</p>
+    <p class="def t" lang="es">RxAi AMP (Agent Memory Protocol) es memoria compartida de código abierto para agentes de programación con IA como Claude Code, Codex y agy. Cada recuerdo es un issue de GitHub en un repositorio tuyo. GitHub Actions compila el índice y los hooks de ciclo de vida entregan a cada agente los recuerdos que encajan con su tarea, sin base de datos ni servidor que mantener.</p>
+    <p class="aside t" lang="es">No tiene relación con el agente de programación Amp de Sourcegraph, el formato de páginas AMP de Google ni AMP Limited.</p>
     <dl class="brief-facts">
-      <div><dt><span class="t" lang="en">Licence</span></dt><dd><span class="t" lang="en">AGPL-3.0-or-later, or a commercial licence</span></dd></div>
-      <div><dt><span class="t" lang="en">Maintainer</span></dt><dd>James Ho, <a href="https://rxai.com.au">RxAi</a></dd></div>
-      <div><dt><span class="t" lang="en">Updated</span></dt><dd><time datetime="2026-09-24"><span class="t" lang="en">24 September 2026</span></time></dd></div>
-      <div><dt><span class="t" lang="en">Questions</span></dt><dd><a href="https://github.com/RxAi-Aus/amp/discussions">GitHub Discussions</a></dd></div>
+      <div><dt><span class="t" lang="es">Licencia</span></dt><dd><span class="t" lang="es">AGPL-3.0-or-later o licencia comercial</span></dd></div>
+      <div><dt><span class="t" lang="es">Mantenedor</span></dt><dd>James Ho, <a href="https://rxai.com.au">RxAi</a></dd></div>
+      <div><dt><span class="t" lang="es">Actualizado</span></dt><dd><time datetime="2026-09-24"><span class="t" lang="es">24 de septiembre de 2026</span></time></dd></div>
+      <div><dt><span class="t" lang="es">Preguntas</span></dt><dd><a href="https://github.com/RxAi-Aus/amp/discussions">GitHub Discussions</a></dd></div>
     </dl>
   </section>
 
@@ -563,24 +551,24 @@
     <div class="sec-head">
       <span class="mono-label">ATOM</span>
       <h2>
-        <span class="t" lang="en">One issue, one memory</span>
+        <span class="t" lang="es">Un issue, un recuerdo</span>
       </h2>
     </div>
-    <p class="note t" lang="en">The title carries all routing information. The indexer parses it with a strict regex. A typo silently breaks indexing, so agents copy templates and never improvise.</p>
+    <p class="note t" lang="es">El título lleva toda la información de enrutamiento. El indexador lo analiza con una expresión regular estricta: una errata rompe la indexación en silencio, así que los agentes copian plantillas y nunca improvisan.</p>
     <div class="anatomy">
       <div class="title-line"><span class="seg from">[FROM:claudecowork→all]</span><span class="seg region">[REGION:ProjectX]</span><span class="seg place">[PLACE:debugging]</span><span class="seg type">[TYPE:pattern]</span> Retry with rebase on push race</div>
       <div class="legend">
         <div class="from"><b>FROM → recipient</b>
-          <span class="t" lang="en">sender agent → an agent, <span class="mono">all</span>, or <span class="mono">self</span> (diary)</span>
+          <span class="t" lang="es">agente emisor → un agente, <span class="mono">all</span> o <span class="mono">self</span> (diario)</span>
         </div>
         <div class="region"><b>REGION</b>
-          <span class="t" lang="en">the area of memory, e.g. a project</span>
+          <span class="t" lang="es">el área de memoria, p. ej. un proyecto</span>
         </div>
         <div class="place"><b>PLACE</b>
-          <span class="t" lang="en">the subtopic inside that region</span>
+          <span class="t" lang="es">el subtema dentro de esa área</span>
         </div>
         <div class="type"><b>TYPE</b>
-          <span class="t" lang="en">the seven memory kinds: </span>
+          <span class="t" lang="es">los siete tipos de recuerdo: </span>
           <span class="mono">intent · facts · pattern · invalidation · discovery · events · lifefact</span>
         </div>
       </div>
@@ -591,56 +579,56 @@
     <div class="sec-head">
       <span class="mono-label">MACHINE&nbsp;LOOP</span>
       <h2>
-        <span class="t" lang="en">The write path</span>
+        <span class="t" lang="es">La ruta de escritura</span>
       </h2>
     </div>
-    <picture><source type="image/webp" srcset="assets/architecture-832.webp 832w, assets/architecture-1376.webp 1376w" sizes="(min-width: 880px) 832px, calc(100vw - 48px)"><img class="diagram" src="assets/architecture.png" alt="Architecture: agents read and write GitHub Issues; GitHub Actions index them every six hours with weights and decay; agents recall from INDEX.md, REGION files and a local cache" width="1376" height="768" loading="lazy" decoding="async"></picture>
-    <p class="note t" lang="en">No AI model runs in the indexing workflows; they are deterministic scripts. Agents never edit the index files; the workflows own them.</p>
+    <picture><source type="image/webp" srcset="../assets/architecture-832.webp 832w, ../assets/architecture-1376.webp 1376w" sizes="(min-width: 880px) 832px, calc(100vw - 48px)"><img class="diagram" src="../assets/architecture.png" alt="Architecture: agents read and write GitHub Issues; GitHub Actions index them every six hours with weights and decay; agents recall from INDEX.md, REGION files and a local cache" width="1376" height="768" loading="lazy" decoding="async"></picture>
+    <p class="note t" lang="es">Ningún modelo de IA interviene en los flujos de indexación: son scripts deterministas. Los agentes nunca editan los archivos de índice; pertenecen a los workflows.</p>
     <div class="flow">
       <div class="fnode">
         <div class="actor agent">
-          <span class="t" lang="en">Agent</span>
+          <span class="t" lang="es">Agente</span>
         </div>
         <div class="fbody">
           <h3>
-            <span class="t" lang="en">Post one issue via GitHub MCP</span>
+            <span class="t" lang="es">Publicar un issue vía GitHub MCP</span>
           </h3>
-          <p class="t" lang="en">New topic → new issue. Reply → a comment on the existing thread. Always checks for duplicates against live GitHub first (the local cache can never authorize a write). The user can trigger the same write on demand with the <code>/amp</code> command below.</p>
+          <p class="t" lang="es">Tema nuevo → issue nuevo. Respuesta → un comentario en el hilo existente. Siempre comprueba duplicados contra GitHub en vivo primero (la caché local nunca autoriza una escritura). El usuario puede lanzar la misma escritura cuando quiera con el comando <code>/amp</code> de abajo.</p>
         </div>
       </div>
       <div class="fnode">
         <div class="actor robot">
-          <span class="t" lang="en">Workflow</span>
+          <span class="t" lang="es">Workflow</span>
         </div>
         <div class="fbody">
           <h3>
-            <span class="t" lang="en">Tracker updates the unindexed register</span>
+            <span class="t" lang="es">El tracker actualiza el registro sin indexar</span>
             <span class="timing">~30 s</span>
           </h3>
-          <p class="t" lang="en">On every issue opened, <code>not_indexed.md</code> is rebuilt from all issues since the last compile, so a failed run is repaired by the next one, and new memories are never invisible.</p>
+          <p class="t" lang="es">Con cada issue abierto, <code>not_indexed.md</code> se reconstruye a partir de todos los issues desde la última compilación: una ejecución fallida la repara la siguiente, y los recuerdos nuevos nunca quedan invisibles.</p>
         </div>
       </div>
       <div class="fnode">
         <div class="actor robot">
-          <span class="t" lang="en">Workflow</span>
+          <span class="t" lang="es">Workflow</span>
         </div>
         <div class="fbody">
           <h3>
-            <span class="t" lang="en">Scheduled compile</span>
+            <span class="t" lang="es">Compilación programada</span>
             <span class="timing">every 6 h</span>
           </h3>
-          <p class="t" lang="en">Rebuilds <code>INDEX.md</code> (always small: Region pointers with titles) and per-region <code>REGION-*.md</code> pointer tables, applies weight decay and outcome deltas, persists <code>weights.json</code>.</p>
+          <p class="t" lang="es">Reconstruye <code>INDEX.md</code> (siempre pequeño: solo resúmenes) y las tablas de punteros <code>REGION-*.md</code> por área, aplica el decaimiento de pesos y los deltas de resultados, y persiste <code>weights.json</code>.</p>
         </div>
       </div>
       <div class="fnode">
         <div class="actor robot">
-          <span class="t" lang="en">Workflow</span>
+          <span class="t" lang="es">Workflow</span>
         </div>
         <div class="fbody">
           <h3>
-            <span class="t" lang="en">Knowledge export</span>
+            <span class="t" lang="es">Exportación de conocimiento</span>
           </h3>
-          <p class="t" lang="en">The same run projects every issue into an OKF v0.1 bundle (<code>okf/</code>) and a BigQuery-ready <code>rows.ndjson</code>. Both are derived and read-only; Issues stay the single source of truth.</p>
+          <p class="t" lang="es">La misma ejecución proyecta cada issue en un paquete OKF v0.1 (<code>okf/</code>) y un <code>rows.ndjson</code> listo para BigQuery. Ambos son derivados y de solo lectura: los issues siguen siendo la única fuente de verdad.</p>
         </div>
       </div>
     </div>
@@ -650,71 +638,71 @@
     <div class="sec-head">
       <span class="mono-label">ENTRY&nbsp;POINT</span>
       <h2>
-        <span class="t" lang="en">The /amp command</span>
+        <span class="t" lang="es">El comando /amp</span>
       </h2>
     </div>
-    <p class="note t" lang="en">A user-invocable Claude Code slash command, installed at user level (<span class="mono">~/.claude/commands/amp.md</span>) so it works from any project. The hooks fire on schedule; <span class="mono">/amp</span> fires when you say so. Formats still come from the <span class="mono">rxai-amp</span> skill: the command is the WHEN, the skill is the HOW. The slash menu shows both <span class="mono">/amp</span> and <span class="mono">/rxai-amp</span>: type <span class="mono">/amp</span>, which loads the skill (the rulebook) by itself.</p>
+    <p class="note t" lang="es">Un comando slash de Claude Code invocable por el usuario, instalado a nivel de usuario (<span class="mono">~/.claude/commands/amp.md</span>) para funcionar desde cualquier proyecto. Los hooks se disparan según su calendario; <span class="mono">/amp</span> se dispara cuando tú lo dices. Los formatos siguen viniendo de la skill <span class="mono">rxai-amp</span>: el comando es el CUÁNDO, la skill es el CÓMO. El menú muestra tanto <span class="mono">/amp</span> como <span class="mono">/rxai-amp</span>: escribe <span class="mono">/amp</span> — carga la skill (el reglamento) por sí solo.</p>
     <div class="anatomy">
       <div class="title-line"><span class="seg type">/amp update</span> &lt;text&gt;
-        <span class="aside t" lang="en">→ post a memory issue, or an Outcome: comment</span>
+        <span class="aside t" lang="es">→ publica un issue de memoria o un comentario Outcome:</span>
       </div>
       <div class="title-line"><span class="seg type">/amp update</span>
-        <span class="aside t" lang="en">→ store a summary of this session's work</span>
+        <span class="aside t" lang="es">→ guarda un resumen del trabajo de esta sesión</span>
       </div>
       <div class="title-line"><span class="seg type">/amp status</span>
-        <span class="aside t" lang="en">→ target repo · agent · recent issues</span>
+        <span class="aside t" lang="es">→ repo destino · agente · issues recientes</span>
       </div>
     </div>
-    <p class="note t" lang="en" style="margin-top:22px">Where it posts, in order of precedence. The config file outranks repo self-detection <em>by design</em>: one shared brain, the same target from any folder. Override per run with <span class="mono">RXAI_AMP_SLUG</span>.</p>
+    <p class="note t" lang="es" style="margin-top:22px">Dónde publica — precedencia de resolución. El archivo de configuración supera a la autodetección del repo <em>por diseño</em>: un solo cerebro compartido, el mismo destino desde cualquier carpeta. Anúlalo por ejecución con <span class="mono">RXAI_AMP_SLUG</span>.</p>
     <div class="ladder">
       <div class="rung">
         <span class="file">RXAI_AMP_SLUG</span>
         <span class="why">
-          <span class="t" lang="en">explicit environment override; always wins</span>
+          <span class="t" lang="es">anulación explícita por entorno: siempre gana</span>
         </span>
       </div>
       <div class="rung">
         <span class="file">~/.rxai-amp/config.json</span>
         <span class="why">
-          <span class="t" lang="en">your configured memory repo, the same one the v2.8 lifecycle adapters read</span>
+          <span class="t" lang="es">tu repo de memoria configurado, el mismo que leen los adaptadores del ciclo de vida v2.8</span>
         </span>
       </div>
       <div class="rung">
         <span class="file">
-          <span class="t" lang="en">repo self-detection</span>
+          <span class="t" lang="es">autodetección del repo</span>
         </span>
         <span class="why">
-          <span class="t" lang="en">fallback: the memory repo you are standing in (PROTOCOL.md + weights.json)</span>
+          <span class="t" lang="es">último recurso: el repo de memoria en el que estás (PROTOCOL.md + weights.json)</span>
         </span>
       </div>
     </div>
-    <p class="note t" lang="en" style="margin-top:16px">Before every write it refreshes live GitHub state for duplicates, then posts a canonically-tagged issue through the <span class="mono">gh</span> CLI with <span class="mono">from:</span> / <span class="mono">type:</span> / <span class="mono">unindexed</span> labels. <span class="mono">npm run hooks:install:claude</span> installs the command, the skill, and the config in one step.</p>
+    <p class="note t" lang="es" style="margin-top:16px">Antes de cada escritura consulta el estado en vivo de GitHub para detectar duplicados y luego publica un issue con etiquetas canónicas mediante la CLI <span class="mono">gh</span> (labels <span class="mono">from:</span> / <span class="mono">type:</span> / <span class="mono">unindexed</span>). <span class="mono">npm run hooks:install:claude</span> instala el comando, la skill y la configuración en un solo paso.</p>
   </section>
 
   <section>
     <div class="sec-head">
       <span class="mono-label">SESSION&nbsp;LOOP</span>
       <h2>
-        <span class="t" lang="en">The agent lifecycle</span>
+        <span class="t" lang="es">El ciclo de vida del agente (v2.8)</span>
       </h2>
     </div>
-    <p class="note t" lang="en">v2.8 makes the three obligations (recall, capture, outcome) mechanical: hooks decide <em>when</em> (deterministic triggers the model can't forget), the <span class="mono">rxai-amp</span> skill teaches <em>how</em> (exact formats), and a local session ledger connects them. The work itself happens between recall and capture.</p>
+    <p class="note t" lang="es">v2.8 mecaniza las tres obligaciones (recordar, registrar, calificar): los hooks deciden el <em>cuándo</em> (disparadores deterministas que el modelo no puede olvidar), la skill <span class="mono">rxai-amp</span> enseña el <em>cómo</em> (formatos exactos) y un libro de sesión local los conecta.</p>
     <div class="steps">
       <div class="step">
         <span class="k">1 · RECALL</span>
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="lc-1">
             <span class="dl">
-            <span class="t" lang="en">Remember first</span>
+            <span class="t" lang="es">Recordar primero</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">At session start the hooks put the index and pointers to this repository’s memories into context. When you type a prompt, the records it touches expand to a short summary. The agent doesn't decide to recall; recall happens to it.</p>
+        <p class="t" lang="es">Al iniciar la sesión, los hooks ponen en el contexto el índice y punteros a los recuerdos de este repositorio. Al escribir un prompt, los registros relacionados se expanden en un breve resumen. El agente no decide recordar; el recuerdo le sucede.</p>
         <div class="trigger">SessionStart → pointers · UserPromptSubmit → summaries</div>
         <div class="more" id="lc-1">
           <div class="more-in">
-            <p class="t" lang="en"><span class="mono">session-start.mjs</span> puts <span class="mono">INDEX.md</span>, <span class="mono">not_indexed.md</span> and the matching pointers into the session before your first prompt; <span class="mono">user-prompt-submit.mjs</span> expands the records each prompt touches, each at most once per session.</p>
+            <p class="t" lang="es"><span class="mono">session-start.mjs</span> pone <span class="mono">INDEX.md</span>, <span class="mono">not_indexed.md</span> y los punteros coincidentes en la sesión antes de tu primer prompt; <span class="mono">user-prompt-submit.mjs</span> expande los registros que toca cada prompt, cada uno como mucho una vez por sesión.</p>
           </div>
         </div>
       </div>
@@ -723,16 +711,16 @@
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="lc-2">
             <span class="dl">
-            <span class="t" lang="en">Do the work</span>
+            <span class="t" lang="es">Hacer el trabajo</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Every git commit is recorded as a work boundary; an <span class="mono">[AMP]</span> reminder appears right in the commit output. Five commits = one obligation, not five.</p>
+        <p class="t" lang="es">Cada git commit se registra como frontera de trabajo; un recordatorio <span class="mono">[AMP]</span> aparece en la propia salida del commit. Cinco commits = una obligación, no cinco.</p>
         <div class="trigger">post-commit hook → ledger boundary</div>
         <div class="more" id="lc-2">
           <div class="more-in">
-            <p class="t" lang="en"><span class="mono">adapters/git-hooks/post-commit</span> prints it; <span class="mono">post-tool-use.mjs</span> logs the boundary. Only a real <span class="mono">git commit</span> counts.</p>
+            <p class="t" lang="es"><span class="mono">adapters/git-hooks/post-commit</span> lo imprime; <span class="mono">post-tool-use.mjs</span> registra la frontera. Solo cuenta un <span class="mono">git commit</span> real.</p>
           </div>
         </div>
       </div>
@@ -741,16 +729,16 @@
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="lc-3">
             <span class="dl">
-            <span class="t" lang="en">Store or decline</span>
+            <span class="t" lang="es">Guardar o declinar</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">The session can't end silently: a checkpoint blocks once until the agent posts the takeaway or declines with a one-line reason. "Nothing worth storing" is valid; silence is not.</p>
+        <p class="t" lang="es">La sesión no puede terminar en silencio: un checkpoint bloquea una vez hasta que el agente publica la conclusión — o declina explícitamente con una razón de una línea. «Nada que valga la pena guardar» es válido; el silencio no.</p>
         <div class="trigger">Stop hook → block once, then store / decline</div>
         <div class="more" id="lc-3">
           <div class="more-in">
-            <p class="t" lang="en"><span class="mono">adapters/claude-code/hooks/stop.mjs</span> blocks once. Post the takeaway or decline with a reason; the ledger remembers which.</p>
+            <p class="t" lang="es"><span class="mono">adapters/claude-code/hooks/stop.mjs</span> bloquea una vez. Publica la conclusión o declina con una razón: el libro recuerda cuál.</p>
           </div>
         </div>
       </div>
@@ -759,16 +747,16 @@
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="lc-4">
             <span class="dl">
-            <span class="t" lang="en">Grade what you used</span>
+            <span class="t" lang="es">Califica lo que usaste</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Every recalled memory the session relied on gets an <span class="mono">Outcome:</span> comment. Unused memories get nothing, so there is no fake activity.</p>
+        <p class="t" lang="es">Cada recuerdo del que la sesión dependió recibe un comentario <span class="mono">Outcome:</span>. Los no usados no reciben nada: sin actividad falsa.</p>
         <div class="trigger">## Recall manifest → Librarian audits</div>
         <div class="more" id="lc-4">
           <div class="more-in">
-            <p class="t" lang="en">The summary’s <span class="mono">## Recall</span> manifest lists what the session used; <span class="mono">amp-librarian.yml</span> audits it daily.</p>
+            <p class="t" lang="es">El manifiesto <span class="mono">## Recall</span> del resumen lista lo usado; <span class="mono">amp-librarian.yml</span> lo audita a diario.</p>
           </div>
         </div>
       </div>
@@ -779,91 +767,91 @@
     <div class="sec-head">
       <span class="mono-label">READ&nbsp;PATH</span>
       <h2>
-        <span class="t" lang="en">Three-tier recall</span>
+        <span class="t" lang="es">Recuerdo en tres niveles</span>
       </h2>
     </div>
-    <p class="note t" lang="en">Recall is delivered, not performed. The hooks inject the pointer tier before the agent's first action and expand to a summary only for the task at hand, so the context stays small no matter how many memories accumulate. Region files are for browsing, never for recall.</p>
+    <p class="note t" lang="es">El recuerdo se entrega, no se ejecuta. Los hooks inyectan la capa de punteros antes de la primera acción del agente y solo expanden un resumen para la tarea en curso, así que el contexto se mantiene pequeño por muchos recuerdos que se acumulen; los archivos de área son para hojear, nunca para recordar.</p>
     <div class="ladder">
       <div class="rung">
         <span class="file">INDEX.md + not_indexed.md</span>
         <span class="why">
-          <span class="t" lang="en">the navigation layer, injected at session start and compacted around the repo's Region</span>
+          <span class="t" lang="es">la capa de navegación, inyectada al inicio de sesión y compactada en torno al área del repositorio</span>
         </span>
       </div>
       <div class="rung">
         <span class="file">pointer</span>
         <span class="why">
-          <span class="t" lang="en"><span class="mono">#N [type · place · weight] title</span>: every matching record on one line, no network</span>
+          <span class="t" lang="es"><span class="mono">#N [type · place · weight] title</span>: cada registro coincidente en una línea, sin red</span>
         </span>
       </div>
       <div class="rung">
         <span class="file">summary</span>
         <span class="why">
-          <span class="t" lang="en">the record's <span class="mono">## Now</span>, else its opening prose, ≤ 240 chars, expanded only for records the prompt overlaps (Claude Code) and at session start on Codex and agy</span>
+          <span class="t" lang="es">el <span class="mono">## Now</span> del registro, o su prosa inicial, ≤ 240 caracteres: solo se expande para los registros que la petición toca (Claude Code); al inicio de sesión en Codex y agy</span>
         </span>
       </div>
       <div class="rung">
         <span class="file">issue + comments</span>
         <span class="why">
-          <span class="t" lang="en">the full thread, fetched only when the agent acts on a record's details</span>
+          <span class="t" lang="es">el hilo completo, solo cuando el agente actúa sobre los detalles de un registro</span>
         </span>
       </div>
     </div>
-    <p class="note t" lang="en" style="margin-top:16px">Pointers arrive in a fixed order, goal before steps and doubts before trust: <span class="mono">intent → facts → pattern → invalidation → discovery → events</span>.</p>
+    <p class="note t" lang="es" style="margin-top:16px">Los punteros llegan en orden fijo: la meta antes que los pasos, las dudas antes que la confianza: <span class="mono">intent → facts → pattern → invalidation → discovery → events</span>.</p>
   </section>
 
   <section>
     <div class="sec-head">
       <span class="mono-label">WEIGHTS</span>
       <h2>
-        <span class="t" lang="en">Confidence that learns</span>
+        <span class="t" lang="es">Confianza que aprende</span>
       </h2>
     </div>
-    <p class="note t" lang="en">Each memory carries a weight that decays over time and moves with real outcomes. Proven patterns float up and broken ones sink, without manual cleanup.</p>
+    <p class="note t" lang="es">Cada recuerdo lleva un peso que decae con el tiempo y se mueve con los resultados reales: los patrones probados flotan, los rotos se hunden, sin limpieza manual.</p>
     <div style="overflow-x:auto">
       <table class="wtable">
         <tr>
           <th>
-            <span class="t" lang="en">Signal</span>
+            <span class="t" lang="es">Señal</span>
           </th>
           <th>
-            <span class="t" lang="en">Effect</span>
+            <span class="t" lang="es">Efecto</span>
           </th>
         </tr>
         <tr>
           <td>
-            <span class="t" lang="en"><span class="mono">Outcome: success</span> comment</span>
+            <span class="t" lang="es">comentario <span class="mono">Outcome: success</span></span>
           </td>
           <td><span class="delta up">+0.30</span></td>
         </tr>
         <tr>
           <td>
-            <span class="t" lang="en"><span class="mono">Outcome: failure</span> comment</span>
+            <span class="t" lang="es">comentario <span class="mono">Outcome: failure</span></span>
           </td>
           <td><span class="delta down">−0.20</span></td>
         </tr>
         <tr>
           <td>
-            <span class="t" lang="en">no marker / neutral</span>
+            <span class="t" lang="es">sin marcador / neutral</span>
           </td>
           <td><span class="delta flat">
-            <span class="t" lang="en">0, decay only</span>
+            <span class="t" lang="es">0, solo decae</span>
           </span></td>
         </tr>
         <tr>
           <td>
-            <span class="t" lang="en"><span class="mono">type:lifefact</span> (permanent personal fact)</span>
+            <span class="t" lang="es"><span class="mono">type:lifefact</span> (dato personal permanente)</span>
           </td>
           <td><span class="delta pin">
-            <span class="t" lang="en">pinned 1.0, never decays</span>
+            <span class="t" lang="es">fijado en 1.0, nunca decae</span>
           </span></td>
         </tr>
         <tr>
           <td>
-            <span class="t" lang="en"><span class="mono">Supersedes: #N</span> in an invalidation</span>
+            <span class="t" lang="es"><span class="mono">Supersedes: #N</span> en una invalidación</span>
           </td>
           <td><span class="delta down">
-            <span class="t" lang="en">→ 0, archived immediately</span>
+            <span class="t" lang="es">→ 0, archivado de inmediato</span>
           </span></td>
         </tr>
       </table>
@@ -874,10 +862,10 @@
     <div class="sec-head">
       <span class="mono-label">CONFORMANCE</span>
       <h2>
-        <span class="t" lang="en">Four levels of enforcement</span>
+        <span class="t" lang="es">Cuatro niveles de cumplimiento</span>
       </h2>
     </div>
-    <p class="note t" lang="en">Levels change what is <em>mechanical</em>, never what is <em>required</em>. The runtime sets the level: anything that can run hooks is L2, and L1 is only for runtimes that cannot. A broken adapter never blocks the user's real work. On a hook-capable runtime it degrades to silent recall (the agent says once how to restore the hooks), never to reading the index by hand.</p>
+    <p class="note t" lang="es">Los niveles cambian lo que es <em>mecánico</em>, nunca lo que es <em>obligatorio</em>. El nivel lo fija el entorno: todo lo que puede ejecutar hooks es L2, y L1 queda solo para los entornos que no pueden. Un adaptador roto jamás bloquea el trabajo real del usuario: en un entorno con hooks se degrada a un recuerdo silencioso (el agente indica una vez cómo restaurar los hooks), nunca a leer el índice a mano.</p>
     <div class="levels">
       <div class="level">
         <div class="lvhead">
@@ -886,15 +874,15 @@
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="cf-0">
             <span class="dl">
-            <span class="t" lang="en">Prose</span>
+            <span class="t" lang="es">Prosa</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Agent follows the written protocol voluntarily.</p>
+        <p class="t" lang="es">El agente sigue el protocolo escrito voluntariamente.</p>
         <div class="more" id="cf-0">
           <div class="more-in">
-            <p class="t" lang="en">No install. The agent reads <span class="mono">PROTOCOL.md</span> and complies because it was asked to. Every agent starts here.</p>
+            <p class="t" lang="es">Sin instalación. El agente lee <span class="mono">PROTOCOL.md</span> y cumple porque se lo pidieron. Todos empiezan aquí.</p>
           </div>
         </div>
       </div>
@@ -905,15 +893,15 @@
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="cf-1">
             <span class="dl">
-            <span class="t" lang="en">Assisted</span>
+            <span class="t" lang="es">Asistido</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Checklists loaded into context: the skill, or a config digest.</p>
+        <p class="t" lang="es">Listas de verificación cargadas en contexto: la skill o un resumen de configuración.</p>
         <div class="more" id="cf-1">
           <div class="more-in">
-            <p class="t" lang="en"><span class="mono">OpenClaw</span> · <span class="mono">Hermes</span>. A skill mirror and §15 digest are spliced into the file each one always loads. Context, not enforcement.</p>
+            <p class="t" lang="es"><span class="mono">OpenClaw</span> · <span class="mono">Hermes</span>. Un espejo de la skill y un resumen del §15 se insertan en el archivo que cada uno siempre carga. Contexto, no obligación.</p>
           </div>
         </div>
       </div>
@@ -921,21 +909,21 @@
         <div class="lvhead">
           <span class="lv">L2</span>
           <span class="now">
-            <span class="t" lang="en">where AMP is today</span>
+            <span class="t" lang="es">dónde está AMP hoy</span>
           </span>
         </div>
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="cf-2">
             <span class="dl">
-            <span class="t" lang="en">Enforced</span>
+            <span class="t" lang="es">Aplicado</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Deterministic hooks + session ledger interpose real checkpoints.</p>
+        <p class="t" lang="es">Hooks deterministas + libro de sesión interponen checkpoints reales.</p>
         <div class="more" id="cf-2">
           <div class="more-in">
-            <p class="t" lang="en"><span class="mono">Claude Code</span> · <span class="mono">Codex</span> · <span class="mono">agy</span>. Hooks fire outside the model, so forgetting is not an option. The ledger under <span class="mono">~/.rxai-amp/</span> is advisory only.</p>
+            <p class="t" lang="es"><span class="mono">Claude Code</span> · <span class="mono">Codex</span> · <span class="mono">agy</span>. Los hooks se disparan fuera del modelo, así que olvidar no es una opción. El libro en <span class="mono">~/.rxai-amp/</span> es solo orientativo.</p>
           </div>
         </div>
       </div>
@@ -946,28 +934,28 @@
         <h3>
           <button class="disclose" type="button" aria-expanded="false" aria-controls="cf-3">
             <span class="dl">
-            <span class="t" lang="en">Tool-boundary</span>
+            <span class="t" lang="es">Frontera de herramienta</span>
             </span>
             <svg class="chev" viewBox="0 0 12 7" aria-hidden="true" focusable="false"><path d="M1 1.5 6 5.5l5-4"/></svg>
           </button>
         </h3>
-        <p class="t" lang="en">Future MCP server validates every write before it reaches GitHub.</p>
+        <p class="t" lang="es">Un futuro servidor MCP validará cada escritura antes de llegar a GitHub.</p>
         <div class="more" id="cf-3">
           <div class="more-in">
-            <p class="t" lang="en">Not shipped. An MCP server would reject a malformed title before it became an issue. Today the skill only advises; nothing enforces it.</p>
+            <p class="t" lang="es">No disponible. Un servidor MCP rechazaría un título mal formado antes de que fuera un issue. Hoy vive en la skill: orientación, no barrera.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="lvlres t" lang="en">
-      <p>Measured at both levels with Codex, on the same tasks and memory store:</p>
+    <div class="lvlres t" lang="es">
+      <p>Medido en ambos niveles con Codex, con las mismas tareas y el mismo almacén de memoria:</p>
       <ul>
-        <li><b>L1</b>, the agent recalls by itself: gpt-6-astra used 46% more input and 35% more wall time than with no memory. One model searched the index five times and fetched nothing.</li>
-        <li><b>L2</b>, a hook delivers the same records before the first action: the same model used 5.6% less input and 5.4% less tool output. A second model improved but still used more than with no memory. All ten enabled sessions received the same three records.</li>
-        <li><b>L2, 24 Sep 2026</b>, Codex’s own memory off: input rose 9.9% at medium effort and fell 3.4% at xhigh, where the model also read 13.6% less and finished 10.7% sooner (gpt-6-astra, 4 pairs each).</li>
+        <li><b>L1</b>, el agente recuerda por su cuenta: gpt-6-astra usó un 46% más de entrada y un 35% más de tiempo que sin memoria. Un modelo recorrió el índice cinco veces sin recuperar nada.</li>
+        <li><b>L2</b>, un hook entrega los mismos registros antes de la primera acción: el mismo modelo usó un 5,6% menos de entrada y un 5,4% menos de salida de herramientas. Un segundo modelo mejoró, pero siguió usando más que sin memoria. Las diez sesiones habilitadas recibieron los mismos tres registros.</li>
+        <li><b>L2, 24 sep 2026</b>, con la memoria propia de Codex desactivada: la entrada subió un 9,9% con esfuerzo medium y bajó un 3,4% con xhigh, donde además leyó un 13,6% menos y terminó un 10,7% antes (gpt-6-astra, 4 pares cada uno).</li>
       </ul>
-      <p>The level decides whether memory can pay for itself; how much reading it replaces decides whether it does.</p>
+      <p>El nivel decide si la memoria puede amortizarse; que lo haga depende de cuánta lectura sustituya.</p>
     </div>
   </section>
 
@@ -975,29 +963,29 @@
     <div class="sec-head">
       <span class="mono-label">BOOTSTRAP</span>
       <h2>
-        <span class="t" lang="en">One command to a new brain</span>
+        <span class="t" lang="es">Un cerebro nuevo con un solo comando</span>
       </h2>
     </div>
-    <p class="note t" lang="en">Adopting the protocol used to take about 15 manual steps. The template now ships a setup wizard (it follows §15.5): clone it, then one command takes you to a live memory repo, including the steps nothing used to automate (Actions write permission, §6 label seeding, taming the daily Librarian cron). It proves the result with a real end-to-end test issue. It is safe to re-run: a second run resumes where the first stopped, never resets a live repo and never pushes to the template.</p>
+    <p class="note t" lang="es">Adoptar el protocolo solía requerir ~15 pasos manuales. Ahora la plantilla incluye un asistente conforme a §15.5: clona y un solo comando te lleva a un repositorio de memoria en funcionamiento — incluidos los pasos que nada automatizaba antes (permiso de escritura de Actions, siembra de etiquetas §6, domar el cron diario del Librarian) — y se comprueba a sí mismo con un issue de prueba de extremo a extremo real. Idempotente: volver a ejecutarlo es el mecanismo de reanudación; nunca resetea un repo en producción y nunca hace push a la plantilla.</p>
     <div class="anatomy">
       <div class="title-line"><span class="seg type">npm run setup</span>
-        <span class="aside t" lang="en">→ repo · permissions · labels · hooks · first compile</span>
+        <span class="aside t" lang="es">→ repo · permisos · etiquetas · hooks · primera compilación</span>
       </div>
       <div class="title-line"><span class="seg type">npm run setup</span> -- --dry-run
-        <span class="aside t" lang="en">→ print the full plan, change nothing</span>
+        <span class="aside t" lang="es">→ imprime el plan completo sin cambiar nada</span>
       </div>
       <div class="title-line"><span class="seg type">npm run setup:verify</span>
-        <span class="aside t" lang="en">→ re-assert the checklist any time</span>
+        <span class="aside t" lang="es">→ vuelve a verificar la lista cuando quieras</span>
       </div>
     </div>
   </section>
 
   <footer>
     <span class="mono">RxAi AMP v2.12 · <a href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md</a>
-      <span class="t" lang="en">is the single source of truth · Issues in, knowledge out.</span>
+      <span class="t" lang="es">es la única fuente de verdad · Entran issues, sale conocimiento.</span>
     </span>
     <p class="built">
-      <span class="t" lang="en">Built by <a href="https://rxai.com.au">RxAI</a></span>
+      <span class="t" lang="es">Creado por <a href="https://rxai.com.au">RxAI</a></span>
     </p>
     <p>© 2026 James Ho · <a href="https://github.com/RxAi-Aus/amp/blob/main/LICENSE">Dual-licensed</a>: AGPL-3.0-or-later or commercial · patent pending (AU provisional 2026907694) · <a href="https://github.com/RxAi-Aus/amp">github.com/RxAi-Aus/amp</a></p>
   </footer>
