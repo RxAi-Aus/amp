@@ -1,4 +1,4 @@
-# RxAi AMP · Agent Memory Protocol v2.12
+# RxAi AMP · Agent Memory Protocol v2.13
 
 > 🌏 **繁體中文說明：[README.zh-TW.md](./README.zh-TW.md)**
 
@@ -28,8 +28,8 @@ in [PROTOCOL.md](./PROTOCOL.md).
   - [Step 2 — Create a private GitHub repo and push](#step-2--create-a-private-github-repo-and-push)
   - [Step 3 — Install dependencies and build locally](#step-3--install-dependencies-and-build-locally)
   - [Step 4 — Enable workflow write permissions](#step-4--enable-workflow-write-permissions)
-  - [Step 5 — Create fine-grained PATs for your agents](#step-5--create-fine-grained-pats-for-your-agents)
-  - [Step 6 — Store tokens securely (macOS)](#step-6--store-tokens-securely-macos)
+  - [Step 5 — Choose each agent's credential (personal use or collaboration)](#step-5--choose-each-agents-credential-personal-use-or-collaboration)
+  - [Step 6 — Store a fine-grained PAT securely (mode B only)](#step-6--store-a-fine-grained-pat-securely-mode-b-only)
   - [Step 7 — Configure the GitHub MCP server for each agent](#step-7--configure-the-github-mcp-server-for-each-agent)
   - [Step 8 — Run the indexer manually to verify](#step-8--run-the-indexer-manually-to-verify)
   - [Step 9 — Send your first test issue](#step-9--send-your-first-test-issue)
@@ -61,7 +61,7 @@ the conversation about that thought. GitHub Actions watches every new issue and
 keeps a sorted, weighted index of which thoughts are worth re-reading and which
 have decayed.
 
-The current release is **v2.12** (tightening: L1 is now the level of runtimes that cannot run lifecycle hooks — a hook-capable runtime participates at L2 through its adapter, a broken adapter degrades to silent recall rather than manual navigation, and Region files leave the recall path at every level, §15.3). v2.11 (additive) capped recall injection at a summary tier — a record's optional `## Now` section, else the opening prose of its `## Message`, never a list — made it task-aware on Claude Code (pointers at session start, summaries only for the records a prompt overlaps), and let a Recall manifest that records a memory as `(used → success)` reinforce it (§4.4c). v2.10 (additive) gave `INDEX.md` pointers issue titles so the first tier can support a skip decision, and decay a relevance term — §4.4b — driven by recall manifests that recorded a memory as surfaced-but-unused. v2.9.2 gave Codex an L2 lifecycle adapter on its stable hooks runtime, with the existing skill and digest retained as L1 fallback. v2.9 added release-readiness hardening: an automated test suite + CI gate, the Rule 14 Agent Loop Guard made normative, the official Docker GitHub MCP server as primary configuration, and the §16 Security Considerations & Threat Model. v2.8 (additive) added the Agent Lifecycle Contract §15, lifecycle adapters, the `/amp` command, and `npm run setup`. v2.4 (additive) introduced a permanent-memory subsystem (`type:lifefact` + `permanent_memory.json`) for biographical facts that should never decay. v2.5 (additive) added an optional local issue cache (`.rxai-cache/`) for fast lookup, plus a pre-commit secret-scan hook. v2.6 (additive) added the OKF/BigQuery derived search layer (PROTOCOL.md §14). v2.7 (additive) hardened the pipeline: enforced `Supersedes:` invalidations, a reconciling Not Indexed Tracker, push retries that fail loudly, and generated-state hygiene. The earlier v2.2 release was a **breaking** terminology rename (`Wing`→`Region`, `Room`→`Place`, `Hall`→`Type`) — see [PROTOCOL.md Appendix B](./PROTOCOL.md) for migration guidance.
+The current release is **v2.13** (tightening: each agent's GitHub credential is chosen by two questions — can a person log in on the machine, and who owns the repo — so your own machines use your `gh` login and unattended hosts a fine-grained PAT; no agent config holds a literal token, the official MCP server is held to the six tools AMP uses, and collaboration on a personal-account repo is documented as it actually works, §2). v2.12 (tightening) made L1 is now the level of runtimes that cannot run lifecycle hooks — a hook-capable runtime participates at L2 through its adapter, a broken adapter degrades to silent recall rather than manual navigation, and Region files leave the recall path at every level, §15.3). v2.11 (additive) capped recall injection at a summary tier — a record's optional `## Now` section, else the opening prose of its `## Message`, never a list — made it task-aware on Claude Code (pointers at session start, summaries only for the records a prompt overlaps), and let a Recall manifest that records a memory as `(used → success)` reinforce it (§4.4c). v2.10 (additive) gave `INDEX.md` pointers issue titles so the first tier can support a skip decision, and decay a relevance term — §4.4b — driven by recall manifests that recorded a memory as surfaced-but-unused. v2.9.2 gave Codex an L2 lifecycle adapter on its stable hooks runtime, with the existing skill and digest retained as L1 fallback. v2.9 added release-readiness hardening: an automated test suite + CI gate, the Rule 14 Agent Loop Guard made normative, the official Docker GitHub MCP server as primary configuration, and the §16 Security Considerations & Threat Model. v2.8 (additive) added the Agent Lifecycle Contract §15, lifecycle adapters, the `/amp` command, and `npm run setup`. v2.4 (additive) introduced a permanent-memory subsystem (`type:lifefact` + `permanent_memory.json`) for biographical facts that should never decay. v2.5 (additive) added an optional local issue cache (`.rxai-cache/`) for fast lookup, plus a pre-commit secret-scan hook. v2.6 (additive) added the OKF/BigQuery derived search layer (PROTOCOL.md §14). v2.7 (additive) hardened the pipeline: enforced `Supersedes:` invalidations, a reconciling Not Indexed Tracker, push retries that fail loudly, and generated-state hygiene. The earlier v2.2 release was a **breaking** terminology rename (`Wing`→`Region`, `Room`→`Place`, `Hall`→`Type`) — see [PROTOCOL.md Appendix B](./PROTOCOL.md) for migration guidance.
 
 The substantive intelligence layer was added in v2.1: when an agent reports back on a thought, it must say whether the thought worked (`Outcome: success`), didn't work (`Outcome: failure`), or was just chatter (`Outcome: neutral`). Successes raise the weight, failures lower it, chatter does nothing. Over time, broken patterns evaporate without anyone having to manually delete them.
 
@@ -129,8 +129,9 @@ manual guide can't enforce: it creates your private memory repo (never pushing t
 the template), sets the Actions **read + write** workflow permission (the #1 reason
 setup fails), **seeds the §6 issue labels** (a fresh repo has none, and label-less
 issues are what you get without this), configures or disables the daily AMP
-Librarian so it doesn't go red without its Copilot PAT, walks you through the
-fine-grained PAT + Keychain storage, registers the GitHub MCP server, delegates to
+Librarian so it doesn't go red without its Copilot PAT, picks each agent's
+credential (your `gh` login by default, a fine-grained PAT for unattended
+hosts — v2.13), installs and registers GitHub's official MCP server, delegates to
 the lifecycle-hook installers, and finishes with a real end-to-end compile + test
 issue. macOS/Linux only for now.
 
@@ -166,8 +167,7 @@ Before you begin, make sure you have the following installed on your machine:
 | **npm** | 10.x (bundled with Node) | `npm --version` | Comes with Node.js |
 | **GitHub CLI (`gh`)** | 2.x | `gh --version` | `brew install gh`, then `gh auth login` — required by `npm run setup` and the `/amp` command |
 | **GitHub account** | — | Can you log in at github.com? | [github.com/signup](https://github.com/signup) |
-
-> **Note:** `npx` (used to run the GitHub MCP server) is bundled with npm — no separate install needed.
+| **GitHub MCP server** | — | `github-mcp-server --version` | `brew install github-mcp-server` (or a release binary) — `npm run setup` offers to install it |
 
 ---
 
@@ -294,60 +294,86 @@ npm run build
 
 ---
 
-### Step 5 — Create fine-grained PATs for your agents
+### Step 5 — Choose each agent's credential (personal use or collaboration)
 
-Each AI agent needs its own Personal Access Token (PAT) to read/write issues on your repo. Use **fine-grained** tokens (not classic) for security — they scope to a single repo.
+Every agent reads and writes memory through the GitHub **Issues API**, so it
+needs an API credential of its own. An SSH key is not one: it carries `git`
+only. Since v2.13 ([PROTOCOL.md §2](./PROTOCOL.md)) two questions decide the
+credential: **can a person log in interactively on this machine?** and **who
+owns the memory repo?** The number of computers and the number of people
+writing at once do not matter — the Issues API takes concurrent writes.
 
-**For each agent (repeat for each one):**
+| Mode | Credential | Use it for | Reach if it leaks | Expires |
+|------|------------|------------|-------------------|---------|
+| **A** | Your `gh` login (`gh auth login`, once per machine) | Any machine a person can log in on — laptops and desktops, however many | Every repo the account can reach; the MCP tool allow-list holds an agent to file reads and issue reads/writes | No |
+| **B** | Fine-grained PAT for the memory repo only | Unattended hosts (servers, schedulers, containers, cloud agents), or wherever one-repo reach is required | The memory repo's issues and file reads | Yes — 1–366 days; rotate before it |
+| **C** | GitHub App (installation token or user login) | Fleets of unattended hosts; collaborators who need one-repo reach on a personal-account repo | Repos the App is installed on | Installation tokens renew hourly |
 
-1. Go to GitHub → click your **avatar** (top-right) → **Settings**
-2. Left sidebar: **Developer settings**
-3. **Personal access tokens** → **Fine-grained tokens**
-4. Click **Generate new token**
-5. Fill in:
-   - **Token name:** `pat-claudecowork` (or `pat-openclaw`, `pat-gemini`, etc.)
-   - **Expiration:** 90 days (you'll need to rotate it later)
-   - **Resource owner:** your account
-   - **Repository access:** **Only select repositories** → pick your agent-memory repo
-   - **Permissions** → **Repository permissions:**
-     - **Contents:** Read-only
-     - **Issues:** Read and write
-     - **Metadata:** Read-only (auto-selected)
-     - Everything else: **No access**
-6. Click **Generate token**
-7. **⚠️ Copy the token immediately** — GitHub will never show it again
-8. Save it in a password manager (1Password, Bitwarden, macOS Keychain, etc.)
-9. **Repeat** for each additional agent
+#### Personal use — the memory repo is in your own account
+
+- **Your own machines:** mode A. Run `gh auth login` once on each machine;
+  nothing to copy, nothing to rotate.
+- **An unattended host** (a server, a scheduled job, a container): mode B, or
+  mode C for several hosts.
+
+#### Collaboration — several people write to one memory repo
+
+Each person uses **their own** credential, never a shared one: GitHub records
+who wrote each memory, and a shared token erases that. Each person first
+accepts the repo's collaborator invitation (or org membership). Then:
+
+| Memory repo lives in | Collaborator's own machine | Collaborator's unattended host |
+|----------------------|----------------------------|--------------------------------|
+| **A personal account** (e.g. yours) | Mode A — their own `gh auth login` | Their classic PAT (`repo` scope, with an expiry), or a mode C installation token |
+| **An organization** | Mode A, or mode B (org members only) | Mode B, or a mode C installation token |
+
+> **Fine-grained PATs do not work for collaborators on a personal-account
+> repo.** GitHub excludes outside collaborators from fine-grained PATs. If
+> collaborators need one-repo reach, move the memory repo into an
+> organization (the free plan is enough) — members can then use mode B, and
+> the org can require approval for their tokens — or use a mode C GitHub App.
+
+A **classic PAT** is a fallback only: it reaches every repo the account can,
+like mode A, and it also expires.
+
+**Creating a mode B fine-grained PAT** (one per agent or host):
+
+1. GitHub → **avatar** → **Settings** → **Developer settings** →
+   **Personal access tokens** → **Fine-grained tokens** → **Generate new token**
+2. **Token name:** `amp-claudecowork` (or `amp-server-1`, …) · **Expiration:**
+   your choice — note the date
+3. **Resource owner:** the account or organization that owns the memory repo
+4. **Repository access:** **Only select repositories** → the memory repo
+5. **Repository permissions:** Contents **Read-only** · Issues **Read and
+   write** · Metadata **Read-only** (auto) · everything else **No access**
+6. **Generate token** and copy it straight into Step 6 — GitHub never shows it
+   again
 
 ---
 
-### Step 6 — Store tokens securely (macOS)
+### Step 6 — Store a fine-grained PAT securely (mode B only)
 
-> Skip this step if you're on Linux/Windows — use your OS credential manager or store in `.env` (see fallback below).
+> Mode A needs nothing here: `gh` already keeps its login in the OS keychain
+> (`gh auth status` shows `(keyring)`).
 
-**Recommended — macOS Keychain:**
-
-```bash
-# Store the token (you'll be prompted to paste it)
-security add-generic-password -a "$USER" -s rxai-amp-gh-token -w
-```
-
-**Retrieve it later:**
-
-```bash
-export GH_TOKEN="$(security find-generic-password -a "$USER" -s rxai-amp-gh-token -w)"
-```
-
-**For multiple agents**, use distinct Keychain entries:
+**macOS Keychain**, one entry per agent:
 
 ```bash
 security add-generic-password -a "$USER" -s rxai-amp-gh-token-claudecowork -w
 security add-generic-password -a "$USER" -s rxai-amp-gh-token-openclaw -w
 ```
 
-**Fallback — `.env` file (less secure):**
+The npm scripts read a token from `GH_TOKEN`:
 
-Create a `.env` file in the repo root (it's already in `.gitignore` so it won't be committed):
+```bash
+export GH_TOKEN="$(security find-generic-password -a "$USER" -s rxai-amp-gh-token -w)"
+# or, on a mode A machine:
+export GH_TOKEN="$(gh auth token)"
+```
+
+**Linux:** `secret-tool store --label "rxai-amp" service rxai-amp-gh-token-<agent>`.
+
+**Fallback — `.env` file (less secure, gitignored):**
 
 ```env
 GH_TOKEN=<paste-your-token-here>
@@ -355,73 +381,94 @@ REPO_OWNER=your-github-username
 REPO_NAME=your-repo-name
 ```
 
-> ⚠️ If a token is ever committed or shared, **revoke it immediately** on GitHub and create a new one.
+> ⚠️ Never paste a token into an agent's config file, an issue, or a chat. If
+> one is ever committed or shared, **revoke it immediately** on GitHub.
 
 ---
 
 ### Step 7 — Configure the GitHub MCP server for each agent
 
-Each AI agent connects to GitHub through the GitHub MCP server. The configuration tells the agent how to launch the server and which token to use.
+Agents other than agy reach GitHub through **GitHub's official MCP server**,
+installed once per machine:
 
-**The MCP config block (same structure for all agents).** Since v2.9 the
-primary configuration is GitHub's official server via Docker (it actually
-enforces `GITHUB_TOOLSETS`):
+```bash
+brew install github-mcp-server        # or a release binary from github/github-mcp-server
+```
+
+Each agent's config launches it through a one-line wrapper that reads the
+credential at start — **the config holds the command, never the token**, so
+there is nothing to leak from it and nothing to update when a token changes:
+
+```sh
+# Mode A — your gh login (replace <github-user> with your GitHub login)
+GITHUB_PERSONAL_ACCESS_TOKEN=$(/opt/homebrew/bin/gh auth token -u <github-user>) exec /opt/homebrew/bin/github-mcp-server stdio --tools=get_file_contents,issue_read,issue_write,list_issues,search_issues,add_issue_comment
+
+# Mode B — the agent's fine-grained PAT from the Keychain
+GITHUB_PERSONAL_ACCESS_TOKEN=$(/usr/bin/security find-generic-password -a "$USER" -s rxai-amp-gh-token-<agent> -w) exec /opt/homebrew/bin/github-mcp-server stdio --tools=get_file_contents,issue_read,issue_write,list_issues,search_issues,add_issue_comment
+```
+
+- `--tools=…` exposes exactly the six tools AMP uses. Without it the server
+  also offers `create_repository`, `push_files`, `delete_file`, and more — with
+  a mode A login, on every repo you own.
+- Use absolute paths: agents started from the Dock don't inherit your shell's
+  `PATH`. Check yours with `which gh github-mcp-server`.
+- Keep `-u <github-user>` if you are logged in to more than one GitHub account
+  in `gh`.
+
+**Where it goes, per agent** (mode A shown; for mode B swap the `$(…)` part):
+
+**Claude Code** — `npm run setup` does this for you:
+
+```bash
+claude mcp add github --scope user -- /bin/sh -c 'GITHUB_PERSONAL_ACCESS_TOKEN=$(/opt/homebrew/bin/gh auth token -u <github-user>) exec /opt/homebrew/bin/github-mcp-server stdio --tools=get_file_contents,issue_read,issue_write,list_issues,search_issues,add_issue_comment'
+```
+
+**Claude Desktop** (`claude_desktop_config.json`) and **OpenClaw**
+(`~/.mcporter/config.json`, via its `mcporter` skill):
 
 ```json
 {
   "mcpServers": {
     "github": {
-      "command": "docker",
-      "args": [
-        "run", "-i", "--rm",
-        "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
-        "-e", "GITHUB_TOOLSETS",
-        "ghcr.io/github/github-mcp-server"
-      ],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "<paste-your-PAT-here>",
-        "GITHUB_TOOLSETS": "repos,issues"
-      }
+      "command": "/bin/sh",
+      "args": ["-c", "GITHUB_PERSONAL_ACCESS_TOKEN=$(/opt/homebrew/bin/gh auth token -u <github-user>) exec /opt/homebrew/bin/github-mcp-server stdio --tools=get_file_contents,issue_read,issue_write,list_issues,search_issues,add_issue_comment"]
     }
   }
 }
 ```
 
-**No Docker?** Use the npx fallback (deprecated on npm but still working;
-`GITHUB_TOOLSETS` is not enforced there — your fine-grained PAT is the real
-permission boundary, see PROTOCOL.md §16). `npm run setup` registers this form:
+**Codex** (`~/.codex/config.toml`):
 
-```json
-{
-  "mcpServers": {
-    "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "<paste-your-PAT-here>",
-        "GITHUB_TOOLSETS": "repos,issues"
-      }
-    }
-  }
-}
+```toml
+[mcp_servers.github]
+command = "/bin/sh"
+args = ["-c", "GITHUB_PERSONAL_ACCESS_TOKEN=$(/opt/homebrew/bin/gh auth token -u <github-user>) exec /opt/homebrew/bin/github-mcp-server stdio --tools=get_file_contents,issue_read,issue_write,list_issues,search_issues,add_issue_comment"]
 ```
 
-**Where to put it depends on your agent:**
+**Hermes** (`~/.hermes/config.yaml`):
 
-| Agent | Config File Location | How to Open |
-|-------|---------------------|-------------|
-| **Claude Desktop** | `claude_desktop_config.json` | Claude Desktop → Settings → Developer → Edit Config |
-| **Claude Code (CLI)** | `~/.claude/settings.json` or project `.claude/settings.json` | Edit directly |
-| **OpenClaw** | `~/.openclaw/openclaw.json` (or equivalent) | See OpenClaw docs |
-| **Gemini CLI** | `~/.gemini/settings.json` or project config | See Gemini docs |
-| **agy (Antigravity CLI)** | No MCP server needed — agy talks to GitHub through the `gh` CLI (`gh auth login`). Its AMP customizations live in `~/.gemini/config/` (`skills/`, `hooks.json`) | `npm run hooks:install:agy` |
-| **Other agents** | Check the agent's MCP documentation | — |
+```yaml
+mcp_servers:
+  github:
+    command: /bin/sh
+    args:
+      - -c
+      - 'GITHUB_PERSONAL_ACCESS_TOKEN=$(/opt/homebrew/bin/gh auth token -u <github-user>) exec /opt/homebrew/bin/github-mcp-server stdio --tools=get_file_contents,issue_read,issue_write,list_issues,search_issues,add_issue_comment'
+```
 
-**After saving the config:**
-- Restart the agent application (or reload the config)
-- The agent should now be able to call GitHub tools like `get_file_contents`, `create_issue`, `list_issues`, etc.
+**agy (Antigravity CLI)** — no MCP server: agy uses the `gh` CLI directly
+(mode A). Run `npm run hooks:install:agy`.
 
-> **Security note:** the token is in plaintext in these config files. Treat them as secrets. If your agent supports environment-variable interpolation, read from Keychain instead of hard-coding.
+Docker instead of the binary: end the wrapper with
+`exec docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN -e GITHUB_TOOLS ghcr.io/github/github-mcp-server`
+and put `GITHUB_TOOLS=<the six tools>` before it. Don't use the old
+`@modelcontextprotocol/server-github` npm package: it is deprecated and lacks
+`issue_read` / `issue_write`, the tools AMP calls.
+
+**After saving the config:** restart the agent, then ask it to *"list the open
+issues in the memory repository"*. Per-agent detail (Hermes MCP SDK, OpenClaw's
+`mcporter` skill) is in [PROTOCOL.md §2](./PROTOCOL.md) and
+[fullInstallation.md](./fullInstallation.md).
 
 ---
 
@@ -514,7 +561,7 @@ Before you consider the setup complete, confirm each item:
 
 - [ ] Repo is pushed to GitHub and visible at `github.com/<you>/<repo>`
 - [ ] **Settings → Actions → General → Workflow permissions** is set to **Read and write**
-- [ ] At least one fine-grained PAT exists and is saved securely
+- [ ] Each agent has its own credential — your `gh` login (mode A) or a fine-grained PAT in the Keychain (mode B)
 - [ ] `npm install` and `npm run build` both succeed locally with no errors
 - [ ] **Index Scheduler** workflow ran successfully (green ✅ in the Actions tab)
 - [ ] `INDEX.md` shows a recent `Last Compiled` timestamp
@@ -950,6 +997,46 @@ access and that would let the librarian post or edit comments. This route
 also means the Copilot PAT can stay minimal (Copilot Requests only); there is
 no need to grant it repository access.
 
+## What's new in v2.13
+
+**Tightening, no format change.** Credentials, for one person or several.
+
+Three agents on one machine had fine-grained PATs pasted into their MCP
+configs. The PATs stopped authenticating, nobody was told, and the agents
+answered `Bad credentials` while `gh` on the same machine kept working. And
+the one-PAT-per-agent rule could never have served a team on a repo in a
+personal account: GitHub does not let outside collaborators use fine-grained
+PATs at all. So (PROTOCOL.md §2):
+
+- **Two questions pick the credential** — can a person log in interactively
+  on this machine, and who owns the memory repo. Not the number of machines,
+  and not concurrent writers (the Issues API handles those).
+- **Mode A, your `gh` login**, for every machine a person uses: `gh auth
+  login` once, no expiry, nothing to paste. **Mode B, a fine-grained PAT for
+  the memory repo only**, for unattended hosts or where one-repo reach is
+  required. **Mode C, a GitHub App**, for fleets and for one-repo reach on a
+  personal-account repo. A classic PAT is a fallback only.
+- **Collaboration:** every person uses their own credential. On a
+  personal-account repo that means their own `gh auth login`; move the repo
+  into an organization if members need fine-grained PATs.
+- **No token in any agent config.** The config launches the MCP server
+  through a one-line wrapper that reads `gh auth token` or the Keychain at
+  start.
+- **GitHub's official MCP server as a local binary** (`brew install
+  github-mcp-server`), held by `--tools=` to exactly the six tools AMP uses —
+  `GITHUB_TOOLSETS=repos,issues` also exposed `create_repository`,
+  `push_files`, `delete_file` and more (§11). The deprecated
+  `@modelcontextprotocol/server-github` is out: it lacks `issue_read` and
+  `issue_write`, the tools the protocol names.
+- `npm run setup` asks for the mode (A by default), installs the server, and
+  registers the wrapper — replacing a deprecated `server-github` entry if it
+  finds one. Lifecycle hooks fall back to `gh auth token` when no token is in
+  the environment, so the capture checkpoint's remote check works on mode A
+  machines.
+
+Upgrading: re-run `npm run setup -- --only mcp` (Claude Code), and swap the
+`github` entry in each other agent's config for the Step 7 wrapper.
+
 ## What's new in v2.12
 
 **Tightening, no format change.** L1 is now the level of runtimes that
@@ -1282,8 +1369,19 @@ behaviour, change `compile_index.ts`.
 **Treating `.rxai-cache/` as authoritative.** The cache can be stale. Before any
 write or duplicate check, refresh from GitHub MCP/API.
 
-**Using a classic PAT instead of fine-grained.** Classic PATs work but expose
-your entire account. Fine-grained PATs scope to a single repo.
+**Pasting a token into an agent's config.** It expires or gets revoked, and the
+agent starts answering `Bad credentials` while `gh` on the same machine still
+works. Since v2.13 the config holds a launcher that reads `gh auth token` or the
+Keychain at start (Step 7), so there is no token in it to go stale.
+
+**Sharing one token between people.** Every memory is attributed to the token's
+owner; a shared token makes everyone the same author. Each person uses their own
+`gh` login or PAT (Step 5).
+
+**Handing collaborators a fine-grained PAT plan.** On a repo in your personal
+account, collaborators *cannot* use fine-grained PATs — GitHub excludes them.
+They use their own `gh auth login`, or you move the repo into an organization
+(Step 5).
 
 ## Troubleshooting
 
@@ -1323,9 +1421,18 @@ scheduler. It should populate.
 
 ### Agent says it can't see issues
 
-- Check the PAT is set in the MCP config and not expired
-- Check Repository access on the PAT actually includes this repo
-- Check `GITHUB_TOOLSETS=repos,issues` is set — without it the agent has no tools
+- **`Bad credentials`** → the credential the MCP server started with is dead.
+  Mode A: run `gh auth status`, then `gh auth login` if needed. Mode B: the PAT
+  expired or was revoked — create a new one and update the Keychain entry
+  (Step 6). A token pasted into the config (pre-v2.13 setups) is the usual
+  culprit: switch to the Step 7 launcher.
+- Mode B: check the PAT's Repository access actually includes this repo, and
+  that its resource owner is the repo's owner
+- The agent calls tools that don't exist (`issue_read`, `issue_write`) → it is
+  still on the deprecated `@modelcontextprotocol/server-github`; switch to
+  `github-mcp-server` (Step 7)
+- No GitHub tools at all → the server failed to start; run the wrapper command
+  in a terminal and read its error (often a relative path: use absolute ones)
 
 ### Weights look wrong after a few days
 

@@ -38,7 +38,9 @@ import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const TEMPLATE_SLUGS = ["RxAi-Aus/AgentMemory"];
+// The upstream repos a user may clone: the public release first, then the
+// canonical template. Either one as origin means "create a new memory repo".
+const TEMPLATE_SLUGS = ["RxAi-Aus/amp", "RxAi-Aus/AgentMemory"];
 const KEYCHAIN_SERVICE = "rxai-amp-gh-token";
 
 // ---------------------------------------------------------------- helpers --
@@ -157,7 +159,8 @@ const ctx = {
   mode: "create",            // "create" | "adopt"
   templateOrigin: false,
   originSlug: null,
-  patToken: null,            // memory only — never persisted by this script
+  credentialMode: "A",       // PROTOCOL.md §2 credential mode chosen in stepCredential
+  ghLogin: null,             // gh login used by the mode A launcher (-u)
   todo: [],
   createDeferred: false,     // repo creation runs in stepPush
 };
@@ -407,18 +410,50 @@ function keychainHasToken() {
     : new RegExp(["(^|\\n)GH_", "TOKEN", "="].join("")).test(existsSync(path.join(ROOT, ".env")) ? readFileSync(path.join(ROOT, ".env"), "utf8") : "");
 }
 
-const stepPat = {
-  id: "pat", title: "Fine-grained PAT for agents", required: false,
+// PROTOCOL.md §2/§11 (v2.13): the official server, held to exactly the §10 tools.
+const AMP_TOOLS = "get_file_contents,issue_read,issue_write,list_issues,search_issues,add_issue_comment";
+
+/** Absolute path of a command, or null. Agent configs need absolute paths:
+ *  desktop agents launched from the Dock do not inherit the shell PATH. */
+function absPath(cmd) {
+  const r = run("/bin/sh", ["-c", `command -v ${cmd}`], { allowFail: true });
+  return r.ok && r.stdout.startsWith("/") ? r.stdout : null;
+}
+
+/** The one-line launcher an agent config runs (PROTOCOL.md §2 MCP Server Configuration). */
+function mcpWrapper(credentialCmd, serverPath) {
+  return `GITHUB_PERSONAL_ACCESS_TOKEN=$(${credentialCmd}) exec ${serverPath} stdio --tools=${AMP_TOOLS}`;
+}
+
+const stepCredential = {
+  id: "credential", title: "Agent credential (PROTOCOL §2: mode A gh login, or B fine-grained PAT)", required: false,
   async run() {
-    if (keychainHasToken()) { ok("agent token already stored"); return; }
-    if (YES || DRY) {
-      ctx.todo.push(`Create a fine-grained PAT (Contents:R, Issues:RW, Metadata:R, only ${ctx.slug}) at https://github.com/settings/personal-access-tokens/new — then store it: macOS \`security add-generic-password -a "$USER" -s ${KEYCHAIN_SERVICE} -U -w <token>\` or .env GH_TOKEN=`);
-      info("PAT step queued to todo (needs the browser)");
+    let mode = "A";
+    if (!YES && !DRY) {
+      const answer = await ask(
+        "Credential mode — A: this machine's gh login (no expiry, recommended) · B: fine-grained PAT (unattended host, one-repo reach)",
+        "A",
+      );
+      if (answer.toUpperCase().startsWith("B")) mode = "B";
+    }
+    ctx.credentialMode = mode;
+    if (mode === "A") {
+      const login = gh(["api", "user", "--jq", ".login"]).stdout;
+      const repoPending = DRY && ctx.createDeferred; // created later, in the push step
+      if (login && (repoPending || gh(["api", `repos/${ctx.slug}/issues?per_page=1`]).ok)) {
+        ctx.ghLogin = login;
+        ok(`mode A: gh login ${login} ${repoPending ? `will own ${ctx.slug} (created in the push step)` : `reaches ${ctx.slug} issues`}`);
+        return;
+      }
+      ctx.todo.push(`gh auth login as an account with write access to ${ctx.slug}, then npm run setup:verify`);
+      warn(`mode A: gh ${login ? `login ${login} cannot reach` : "is not logged in for"} ${ctx.slug} — queued to todo`);
       return;
     }
+    if (keychainHasToken()) { ok("mode B: agent token already stored"); return; }
     info(`Create a fine-grained PAT: https://github.com/settings/personal-access-tokens/new`);
-    info(`  Repository access: Only select repositories → ${ctx.slug}`);
-    info("  Permissions: Contents Read-only · Issues Read and write · Metadata Read-only · 90-day expiry");
+    info(`  Resource owner: ${ctx.owner} · Repository access: Only select repositories → ${ctx.slug}`);
+    info("  Permissions: Contents Read-only · Issues Read and write · Metadata Read-only · note the expiry date");
+    info("  (Collaborators on another person's account cannot use fine-grained PATs — choose mode A.)");
     let token = await askHidden("Paste token (input hidden, Enter to skip): ");
     for (let attempt = 0; token && attempt < 2; attempt++) {
       const h = { Authorization: `Bearer ${token}`, "User-Agent": "rxai-amp-setup" };
@@ -428,8 +463,7 @@ const stepPat = {
       warn(`token failed validation (repo ${a.status}, issues ${b.status})`);
       token = attempt === 0 ? await askHidden("Paste corrected token (Enter to skip): ") : "";
     }
-    if (!token) { ctx.todo.push("Agent PAT not stored — see README Step 5/6"); return; }
-    ctx.patToken = token;
+    if (!token) { ctx.todo.push("Agent PAT not stored — see README Step 5"); return; }
     if (process.platform === "darwin") {
       // Token passes through argv once; acceptable single-user trade-off (see plan §9).
       apply("store token in macOS Keychain (service rxai-amp-gh-token)", () =>
@@ -443,38 +477,61 @@ const stepPat = {
       });
     }
   },
-  verify: () => keychainHasToken(),
+  verify: () => (ctx.credentialMode === "B" ? keychainHasToken() : gh(["auth", "status"]).ok),
 };
+
+/** Shell command that prints the credential at MCP launch — never the token itself. */
+function credentialCommand() {
+  if (ctx.credentialMode === "B") {
+    return process.platform === "darwin"
+      ? `/usr/bin/security find-generic-password -a "$USER" -s ${KEYCHAIN_SERVICE} -w`
+      : `sed -n 's/^GH_TOKEN=//p' ${path.join(ROOT, ".env")}`;
+  }
+  // -u pins the account: with several gh logins the active one can change.
+  const login = ctx.ghLogin || gh(["api", "user", "--jq", ".login"]).stdout;
+  return `${absPath("gh") || "gh"} auth token${login ? ` -u ${login}` : ""}`;
+}
+
+async function ensureMcpServer() {
+  let serverPath = absPath("github-mcp-server");
+  if (serverPath) return serverPath;
+  if (absPath("brew") && !DRY && (await confirm("Install GitHub's official MCP server (brew install github-mcp-server)?", true))) {
+    run("brew", ["install", "github-mcp-server"], { allowFail: true, inherit: true, timeoutMs: 600000 });
+    serverPath = absPath("github-mcp-server");
+  }
+  return serverPath;
+}
 
 const stepMcp = {
   id: "mcp", title: "GitHub MCP registration per agent", required: false,
   async run() {
     const hasClaude = run("claude", ["--version"], { allowFail: true, timeoutMs: 15000 }).ok;
-    // The wizard registers the npx fallback because it cannot assume Docker.
-    // PROTOCOL.md §2 (v2.9) documents the official ghcr.io/github/github-mcp-server
-    // Docker image as the primary configuration — upgrade when Docker is available.
-    const mcpCmd = `claude mcp add github --scope user -e GITHUB_PERSONAL_ACCESS_TOKEN=<token> -- npx -y @modelcontextprotocol/server-github`;
-    if (hasClaude) {
-      const already = run("claude", ["mcp", "get", "github"], { allowFail: true, timeoutMs: 20000 }).ok;
-      if (already) ok("Claude Code: github MCP server already registered");
-      else if (DRY) info(`[dry-run] would: ${mcpCmd}`);
-      else if (await confirm("Register github MCP server for Claude Code (user scope)?", true)) {
-        let token = ctx.patToken;
-        if (!token && process.platform === "darwin") {
-          token = run("security", ["find-generic-password", "-a", process.env.USER || "", "-s", KEYCHAIN_SERVICE, "-w"], { allowFail: true }).stdout;
-        }
-        if (!token) { ctx.todo.push(mcpCmd); warn("no token available — MCP registration queued to todo"); }
-        else {
-          const r = run("claude", ["mcp", "add", "github", "--scope", "user",
-            "-e", `GITHUB_PERSONAL_ACCESS_TOKEN=${token}`, "--",
-            "npx", "-y", "@modelcontextprotocol/server-github"], { allowFail: true, timeoutMs: 30000 });
-          if (r.ok) ok("Claude Code: github MCP registered (note: token lands in ~/.claude.json plaintext)");
-          else { warn(`claude mcp add failed: ${r.stderr.slice(0, 120)}`); ctx.todo.push(mcpCmd); }
-        }
+    const serverPath = await ensureMcpServer();
+    const wrapper = mcpWrapper(credentialCommand(), serverPath || "/opt/homebrew/bin/github-mcp-server");
+    const mcpCmd = `claude mcp add github --scope user -- /bin/sh -c '${wrapper}'`;
+    if (!serverPath) {
+      ctx.todo.push("Install github-mcp-server (brew install github-mcp-server, or a release binary from github/github-mcp-server) — PROTOCOL.md §2");
+      ctx.todo.push(mcpCmd);
+      warn("github-mcp-server not installed — MCP registration queued to todo");
+    } else if (hasClaude) {
+      const existing = run("claude", ["mcp", "get", "github"], { allowFail: true, timeoutMs: 20000 });
+      // Pre-v2.13 entries: the deprecated server-github, or no §11 --tools allow-list.
+      const stale = existing.ok && (existing.stdout.includes("server-github") || !existing.stdout.includes("--tools="));
+      if (existing.ok && !stale) ok("Claude Code: github MCP server already registered");
+      else if (DRY) info(`[dry-run] would: ${stale ? "replace the pre-v2.13 github entry; " : ""}${mcpCmd}`);
+      else if (await confirm(stale
+        ? "Claude Code's github MCP predates v2.13 (deprecated server or no --tools allow-list, PROTOCOL §2/§11). Replace it?"
+        : "Register github MCP server for Claude Code (user scope)?", true)) {
+        if (stale) run("claude", ["mcp", "remove", "github", "--scope", "user"], { allowFail: true, timeoutMs: 20000 });
+        const r = run("claude", ["mcp", "add", "github", "--scope", "user", "--", "/bin/sh", "-c", wrapper],
+          { allowFail: true, timeoutMs: 30000 });
+        if (r.ok) ok("Claude Code: github MCP registered (the config holds the launcher, not the token)");
+        else { warn(`claude mcp add failed: ${r.stderr.slice(0, 120)}`); ctx.todo.push(mcpCmd); }
       }
     } else {
       ctx.todo.push(mcpCmd + "   # once Claude Code CLI is installed");
     }
+    if (serverPath) info(`other MCP agents: register the same launcher — /bin/sh -c '${wrapper}' (PROTOCOL.md §2 Per-Agent Configuration)`);
 
     const detected = detectAgents().filter((a) => a.id !== "claudecowork").map((a) => a.id);
     if (YES || DRY) { info(`other agents detected: ${detected.join(", ") || "none"} — see adapters/*/README.md`); return; }
@@ -490,7 +547,7 @@ const stepMcp = {
       const args = ["scripts/install-codex.mjs", "--repo-path", ROOT, "--repo-slug", ctx.slug, "--agent", "codex"];
       if (DRY) args.push("--dry-run");
       run("node", args, { inherit: true, allowFail: true });
-      info("still yours to do: export RXAI_AMP_AGENT=codex in the environment Codex runs under, and keep the github MCP entry in ~/.codex/config.toml");
+      info("still yours to do: export RXAI_AMP_AGENT=codex in the environment Codex runs under, and register the launcher above in ~/.codex/config.toml");
     }
     if (others.includes("openclaw")) info("openclaw: follow adapters/openclaw/README.md (mcporter + digest + RXAI_AMP_AGENT=openclaw)");
     if (others.includes("hermes")) info("hermes: L0/L1 — optional digest per adapters/hermes/README.md");
@@ -732,7 +789,7 @@ const stepValidate = {
 };
 
 const STEPS = [stepPreflight, stepResolveRepo, stepBuild, stepSeedReset, stepPush,
-  stepActionsPerms, stepLabels, stepRepoWorkflows, stepPat, stepMcp, stepLifecycle, stepValidate];
+  stepActionsPerms, stepLabels, stepRepoWorkflows, stepCredential, stepMcp, stepLifecycle, stepValidate];
 
 // --------------------------------------------------------------- checklist --
 

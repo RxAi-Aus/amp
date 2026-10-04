@@ -26,7 +26,10 @@ replaced, the rest of your SOUL.md persona is never touched, and a `.amp-bak`
 backup is written first.
 
 Then, per environment Hermes runs in: `RXAI_AMP_AGENT=hermes` (never
-globally), and its own fine-grained PAT in the MCP server registration.
+globally), and a GitHub MCP registration whose launcher reads the credential at start
+(PROTOCOL.md §2, v2.13 — `gh auth token` on your own machine, a
+fine-grained PAT from the keychain on an unattended host; never a literal
+token in `config.yaml`).
 
 ## The folderless contract
 

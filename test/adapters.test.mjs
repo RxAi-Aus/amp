@@ -851,3 +851,22 @@ test("amp-recall matchPrompt weighs Place tokens and rare terms, and ignores eve
   assert.deepEqual(ids(matchPrompt("does nodemailer retry?", [{ issue: 60, summary: "nodemailer retry policy", region: "Acme", place: "misc", type: "facts", weight: 0.3, source: "index" }], { freq: common })), [60]);
   assert.deepEqual(ids(matchPrompt("does nodemailer work?", [{ issue: 60, summary: "nodemailer retry policy", region: "Acme", place: "misc", type: "facts", weight: 0.3, source: "index" }], { freq: common })), []);
 });
+
+test("githubToken prefers an environment token over the gh login (§15.5, v2.13)", async () => {
+  const { githubToken } = await import("../adapters/lib/amp-config.mjs");
+  const saved = { GH_TOKEN: process.env.GH_TOKEN, GITHUB_TOKEN: process.env.GITHUB_TOKEN };
+  try {
+    // Placeholder values built at runtime so the secret scan has nothing to flag.
+    const placeholder = (name) => ["placeholder", name].join("-");
+    process.env.GH_TOKEN = placeholder("gh");
+    process.env.GITHUB_TOKEN = placeholder("github");
+    assert.equal(githubToken(), placeholder("gh"));
+    delete process.env.GH_TOKEN;
+    assert.equal(githubToken(), placeholder("github"));
+  } finally {
+    for (const [k, v] of Object.entries(saved)) {
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
+    }
+  }
+});

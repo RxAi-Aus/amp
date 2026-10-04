@@ -151,9 +151,12 @@ mechanism; `--dry-run` prints the plan without changing anything):
    (the #1 silent failure: without this the indexer cannot commit)
 7. **labels** — seeds the §6 labels (`type:*`, `from:*`, `unindexed`, `archived`)
 8. **repo-workflows** — configures or disables the daily AMP Librarian
-9. **pat** — walks you through a fine-grained PAT (this repo only,
-   Issues+Contents read/write) and stores it in the macOS Keychain
-10. **mcp** — registers the GitHub MCP server for Claude Code; **detects the
+9. **credential** — picks the PROTOCOL.md §2 credential mode: **A**, this
+   machine's `gh` login (default), or **B**, a fine-grained PAT (this repo
+   only) stored in the macOS Keychain for unattended hosts
+10. **mcp** — installs GitHub's official `github-mcp-server` (brew) and
+    registers it for Claude Code through a launcher that reads the credential
+    at start (replacing a deprecated `server-github` entry); **detects the
     other agents** on your machine by probing their config roots and points
     at each one's installer
 11. **lifecycle** — runs the per-agent installers you approve (Claude, agy,
@@ -207,9 +210,14 @@ Session ledgers live beside it in `~/.rxai-amp/sessions/` (mode 0700; issue
 numbers and truncated titles only — never bodies, never tokens). They are
 advisory: they never authorize a write and are never committed.
 
-**Tokens.** Each MCP-based agent uses its **own** fine-grained PAT, scoped to
-the memory repo only, toolsets `repos,issues`. agy is the exception — it uses
-the `gh` CLI's keychain OAuth and needs no PAT at all. PROTOCOL.md §2 makes
+**Credentials (v2.13).** On a machine you log in to, every agent uses your
+`gh` login (mode A): `gh auth login` once, no expiry. Unattended hosts use a
+fine-grained PAT for the memory repo only (mode B). Collaborators each use
+their own credential — on a repo in a personal account that means their own
+`gh auth login`, because GitHub bars outside collaborators from fine-grained
+PATs. MCP configs never hold a token: they launch the official
+`github-mcp-server` through a one-line wrapper that reads it at start, with
+`--tools=` limited to the six tools AMP uses. agy uses the `gh` CLI directly. PROTOCOL.md §2 makes
 transport non-normative: MCP or `gh`, what binds is that memory is written
 only as canonical GitHub Issues on this repo.
 
@@ -241,9 +249,7 @@ Installs, idempotently (foreign hooks preserved, backup written first):
 MCP registration (the wizard offers this; manual form):
 
 ```bash
-claude mcp add github --scope user \
-  -e GITHUB_PERSONAL_ACCESS_TOKEN=<token> \
-  -- npx -y @modelcontextprotocol/server-github
+claude mcp add github --scope user -- /bin/sh -c 'GITHUB_PERSONAL_ACCESS_TOKEN=$(/opt/homebrew/bin/gh auth token -u <github-user>) exec /opt/homebrew/bin/github-mcp-server stdio --tools=get_file_contents,issue_read,issue_write,list_issues,search_issues,add_issue_comment'
 ```
 
 Nothing else to do — the hooks carry identity `claudecowork` by default.
@@ -307,11 +313,8 @@ and the GitHub MCP entry in `~/.codex/config.toml`:
 
 ```toml
 [mcp_servers.github]
-command = "npx"
-args = ["-y", "@modelcontextprotocol/server-github"]
-[mcp_servers.github.env]
-GITHUB_PERSONAL_ACCESS_TOKEN = "<codex's own fine-grained PAT>"
-GITHUB_TOOLSETS = "repos,issues"
+command = "/bin/sh"
+args = ["-c", "GITHUB_PERSONAL_ACCESS_TOKEN=$(/opt/homebrew/bin/gh auth token -u <github-user>) exec /opt/homebrew/bin/github-mcp-server stdio --tools=get_file_contents,issue_read,issue_write,list_issues,search_issues,add_issue_comment"]
 ```
 
 Codex's only deterministic cue is the capture floor's
@@ -336,8 +339,8 @@ from OpenClaw's own `MEMORY.md`/`memory/*.md`, which stay untouched.
 Two things stay yours:
 
 1. **MCP path**: enable OpenClaw's `mcporter` skill and register the GitHub
-   server in `~/.mcporter/config.json` (same `npx` block as Codex above, with
-   OpenClaw's own PAT).
+   server in `~/.mcporter/config.json` — an `mcpServers.github` entry with
+   `"command": "/bin/sh"` and the same `-c` launcher as Codex above.
 2. **Identity**: set `RXAI_AMP_AGENT=openclaw` in OpenClaw's environment.
 
 To let OpenClaw read the index files *locally* (faster than MCP reads),
@@ -544,12 +547,13 @@ issue; the full index (`REGION-*.md`, weights) recompiles every 6 hours.
    debugging can carry a live PAT. Treat transcripts as sensitive, and rotate
    any token that ever appeared in one.
 
-- **One credential per agent**, fine-grained, scoped to the memory repo only
-  (Issues + Contents). agy needs none (keychain OAuth via `gh`).
-- MCP registrations store the PAT **in plaintext** in the agent's config
-  (`~/.claude.json`, `~/.codex/config.toml`, `~/.mcporter/config.json`).
-  Acceptable for a single-user machine; rotate from one place — the
-  fine-grained PAT page — and update each file.
+- **One credential per person and per unattended host** (PROTOCOL.md §2):
+  your `gh` login on machines you use, a repo-scoped fine-grained PAT on
+  unattended hosts. Never share one between people.
+- **No token in agent configs** (`~/.claude.json`, `~/.codex/config.toml`,
+  `~/.mcporter/config.json`, `~/.hermes/config.yaml`): they hold the launcher,
+  which reads `gh auth token` or the keychain at start. A pasted token goes
+  stale silently — the v2.13 failure mode — and leaks with any printed config.
 - **Issues bypass the pre-commit secret/privacy scan** — never paste tokens into
   memory bodies or comments. The scan (`npm run hooks:install`) protects
   commits to the repo itself.

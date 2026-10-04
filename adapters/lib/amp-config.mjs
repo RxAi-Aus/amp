@@ -136,14 +136,32 @@ export function resolveConfig(cwd = process.cwd()) {
   return { home: ampHome(), repoPath, repoSlug, agent, runtime, recallTier };
 }
 
-/** First token found in the environment, same trio as cache_issues.ts. */
+let cachedGhToken;
+
+/**
+ * First token found in the environment (same trio as cache_issues.ts), else
+ * the `gh` login's token (PROTOCOL.md §15.5, v2.13 — Mode A hosts carry no
+ * token in the environment). Held in memory only; null when neither exists.
+ */
 export function githubToken() {
-  return (
+  const fromEnv =
     process.env.GH_TOKEN ||
     process.env.GITHUB_TOKEN ||
-    process.env.GITHUB_PERSONAL_ACCESS_TOKEN ||
-    null
-  );
+    process.env.GITHUB_PERSONAL_ACCESS_TOKEN;
+  if (fromEnv) return fromEnv;
+  if (cachedGhToken === undefined) {
+    try {
+      cachedGhToken =
+        execFileSync("gh", ["auth", "token"], {
+          encoding: "utf8",
+          timeout: 5000,
+          stdio: ["ignore", "pipe", "ignore"],
+        }).trim() || null;
+    } catch {
+      cachedGhToken = null; // gh missing or logged out → fail soft
+    }
+  }
+  return cachedGhToken;
 }
 
 /** Read all of stdin (hook input JSON). Returns {} on empty/invalid input. */

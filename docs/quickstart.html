@@ -471,10 +471,12 @@
           <tr><td>Git 2.x</td><td><code>git --version</code></td><td></td></tr>
           <tr><td>Node.js 22</td><td><code>node --version</code></td><td><span class="t" lang="en">npm comes with it</span></td></tr>
           <tr><td>GitHub CLI 2.x</td><td><code>gh auth status</code></td><td><span class="t" lang="en"><code>brew install gh</code>, then <code>gh auth login</code></span></td></tr>
+          <tr><td><span class="t" lang="en">GitHub MCP server</span></td><td><code>github-mcp-server --version</code></td><td><span class="t" lang="en"><code>brew install github-mcp-server</code> — the wizard offers to install it</span></td></tr>
           <tr><td><span class="t" lang="en">A GitHub account</span></td><td></td><td><span class="t" lang="en">Your memories live in a private repository on it</span></td></tr>
         </tbody>
       </table>
     </div>
+    <p class="note t" lang="en">Working with others? Each person connects with their own <code>gh auth login</code>. On a repository in a personal account, collaborators cannot use fine-grained tokens; move it into an organization if members need one-repository tokens (<a href="https://github.com/RxAi-Aus/amp#step-5--choose-each-agents-credential-personal-use-or-collaboration">README Step 5</a>).</p>
     <p class="note t" lang="en">The setup wizard runs on macOS and Linux. On Windows, follow the <a href="https://github.com/RxAi-Aus/amp#step-by-step-installation-guide">step-by-step guide</a> in the README.</p>
   </section>
 
@@ -489,7 +491,7 @@ npm install
 npm run setup -- --dry-run   <span class="c"># <span class="t" lang="en">see every step first; changes nothing</span></span>
 npm run setup</pre>
     <div class="prose">
-      <p class="t" lang="en">The wizard creates a private repository for your memories (it never pushes to the template), lets GitHub Actions write the index, adds the issue labels the protocol uses, walks you through a fine-grained access token and where to keep it, registers the GitHub MCP server, and finishes by compiling the index and posting a real test issue. If a step fails it prints the manual command for it; running the wizard again resumes, and it never resets a repository that is already live.</p>
+      <p class="t" lang="en">The wizard creates a private repository for your memories (it never pushes to the template), lets GitHub Actions write the index, adds the issue labels the protocol uses, connects your agents with your own <code>gh</code> login (a fine-grained token only for machines nobody logs in to), installs and registers GitHub’s official MCP server without writing any token into its config, and finishes by compiling the index and posting a real test issue. If a step fails it prints the manual command for it; running the wizard again resumes, and it never resets a repository that is already live.</p>
     </div>
   </section>
 

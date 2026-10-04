@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repository is
 
-RxAi AMP (Agent Memory Protocol) — a shared memory system for AI agents built on GitHub Issues. Each issue is one memory atom, titled `[FROM:<sender>→<recipient>][REGION:<area>][PLACE:<subtopic>][TYPE:<kind>] short intent`; comments are replies and outcome markers. GitHub Actions compiles issues into navigable index files. **PROTOCOL.md is the source of truth** (currently v2.12); README.md may lag behind it — resolve conflicts in favor of PROTOCOL.md. Protocol changes go into PROTOCOL.md first, then README.md, scripts, workflows, and AGENTS.md are kept consistent.
+RxAi AMP (Agent Memory Protocol) — a shared memory system for AI agents built on GitHub Issues. Each issue is one memory atom, titled `[FROM:<sender>→<recipient>][REGION:<area>][PLACE:<subtopic>][TYPE:<kind>] short intent`; comments are replies and outcome markers. GitHub Actions compiles issues into navigable index files. **PROTOCOL.md is the source of truth** (currently v2.13); README.md may lag behind it — resolve conflicts in favor of PROTOCOL.md. Protocol changes go into PROTOCOL.md first, then README.md, scripts, workflows, and AGENTS.md are kept consistent.
 
 `AGENTS.md` contains the full repository guidelines (including the memory read/write protocol for agent sessions). The `.claude/skills/rxai-amp` skill teaches the exact memory GET/STORE steps — use it for memory operations, not for code edits. The `/amp` slash command (`.claude/commands/amp.md`) is the user-invocable entry point: `/amp update <text>` posts a memory issue to the connected repo via `gh`, deferring to the `rxai-amp` skill for formats.
 

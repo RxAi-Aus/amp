@@ -29,8 +29,10 @@ Override the target file with `-- --target /path/to/AGENTS.md`.
 Then the pieces an installer cannot own:
 
 1. **MCP path** — enable the `mcporter` skill and register the GitHub server
-   in `~/.mcporter/config.json` with OpenClaw's own fine-grained PAT
-   (toolsets `repos,issues`; same `npx` block as `adapters/codex/README.md`).
+   in `~/.mcporter/config.json` — the `/bin/sh -c` launcher from
+   PROTOCOL.md §2 (v2.13): official `github-mcp-server`, `--tools=` allow-list,
+   credential read at start (`gh auth token`, or a keychain PAT on an
+   unattended host), never a literal token.
 2. **Identity** — `RXAI_AMP_AGENT=openclaw` in OpenClaw's environment
    (never globally — other agents share the shell).
 3. **Capture floor** — per working repo:

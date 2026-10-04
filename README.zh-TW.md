@@ -1,4 +1,4 @@
-# RxAi AMP · 代理程式記憶協定 v2.12
+# RxAi AMP · 代理程式記憶協定 v2.13
 
 > 一套讓多個 AI 代理程式（如 Claude、Codex、OpenClaw、Hermes）共用同一份長期記憶、並互相溝通的系統 —— 全部建立在**一個 GitHub 儲存庫**之上。
 >
@@ -8,7 +8,7 @@
 
 ## 30 秒版本
 
-代理程式用**結構化標題**發 GitHub **Issue（議題）**當作一則記憶；GitHub **Actions** 持續把這些 Issue 編成索引；一套**信心權重系統**讓「成功」的模式浮上來、「失敗」的模式沉下去。沒有資料庫、沒有後端伺服器 —— 記憶就是可以 `git clone` 的純文字，人類看得懂、可稽核、有版本歷史。現行版本 **v2.12**：L1 只保留給沒有 lifecycle hook 的 folderless 執行環境，能跑 hook 的執行環境一律以 L2 參與，adapter 壞掉時退化為「靜默召回」而不是手動翻索引；v2.11 把注入上限定在摘要層、在 Claude Code 上依題目展開，並讓 Recall manifest 的 `(used → success)` 回饋權重（§4.4c）。v2.9 新增自動化測試套件與 CI 驗證（`npm test` + `verify.yml`）、Rule 14 代理迴圈防護正式轉為規範性條文（`agent_loop_guard.ts`）、官方 Docker 版 GitHub MCP 伺服器成為主要設定，以及 §16 安全考量與威脅模型章節。v2.8 新增代理生命週期契約(§15)、lifecycle adapters、`/amp` 指令與 `npm run setup` 一鍵安裝精靈。
+代理程式用**結構化標題**發 GitHub **Issue（議題）**當作一則記憶；GitHub **Actions** 持續把這些 Issue 編成索引；一套**信心權重系統**讓「成功」的模式浮上來、「失敗」的模式沉下去。沒有資料庫、沒有後端伺服器 —— 記憶就是可以 `git clone` 的純文字，人類看得懂、可稽核、有版本歷史。現行版本 **v2.13**：代理程式的 GitHub 憑證改由「這台機器有沒有人能登入」與「repo 屬於誰」兩個問題決定——自己的電腦用 `gh` 登入，無人值守的主機用 fine-grained PAT，設定檔不再放權杖，官方 MCP 伺服器只開放 AMP 用到的六個工具，並寫明個人帳號 repo 的多人協作做法（§2）。v2.12 起 L1 只保留給沒有 lifecycle hook 的 folderless 執行環境，能跑 hook 的執行環境一律以 L2 參與，adapter 壞掉時退化為「靜默召回」而不是手動翻索引；v2.11 把注入上限定在摘要層、在 Claude Code 上依題目展開，並讓 Recall manifest 的 `(used → success)` 回饋權重（§4.4c）。v2.9 新增自動化測試套件與 CI 驗證（`npm test` + `verify.yml`）、Rule 14 代理迴圈防護正式轉為規範性條文（`agent_loop_guard.ts`）、官方 Docker 版 GitHub MCP 伺服器成為主要設定，以及 §16 安全考量與威脅模型章節。v2.8 新增代理生命週期契約(§15)、lifecycle adapters、`/amp` 指令與 `npm run setup` 一鍵安裝精靈。
 
 ```
 你（人類）  ┐
@@ -179,7 +179,7 @@ GitHub Actions **不是代理程式** —— 它是「在各代理程式工作�
 
 ## 多代理程式如何共用同一份記憶
 
-目前參與的代理程式，每一個都用**自己專屬的憑證**（多數是細粒度 PAT，透過 **GitHub MCP 伺服器**）對共用的 Issue 記憶庫進行讀寫：
+目前參與的代理程式，每一個都用**自己專屬的憑證**（v2.13 起：自己的電腦用 `gh` 登入，無人值守主機用細粒度 PAT，透過官方 **GitHub MCP 伺服器**或 `gh` CLI）對共用的 Issue 記憶庫進行讀寫：
 
 | 代理程式 | 身分 | 本機位置 |
 |----------|------|----------|
@@ -225,36 +225,59 @@ BigQuery concepts 資料表（「AMP 可用 BigQuery 搜尋」）
 > 隨時重新體檢。以下為手動步驟參考。
 
 1. **建立記憶儲存庫**（一個 GitHub repo，可以是私有）並放入本協定檔案。
-2. **每個代理程式**：建立一個細粒度 PAT（只授權該儲存庫的 Contents 讀取 ＋ Issues 讀寫），設定 GitHub MCP 伺服器：
+2. **決定每個代理程式的憑證（v2.13，PROTOCOL.md §2）。** 代理程式透過 GitHub
+   **Issues API** 讀寫記憶，所以需要 API 憑證；SSH key 只能處理 `git`，不能用。
+   選哪一種只看兩件事：**這台機器有沒有人能互動登入**、**記憶 repo 屬於誰**。
+   跟電腦有幾台、幾個人同時寫入都無關（Issues API 本身就能處理同時寫入）。
+
+   | 模式 | 憑證 | 適用 | 外洩時影響範圍 | 會到期 |
+   |------|------|------|----------------|--------|
+   | **A** | 自己的 `gh` 登入（每台電腦 `gh auth login` 一次） | 有人會登入的電腦，幾台都行 | 帳號能碰到的所有 repo；MCP 工具白名單只允許讀檔與讀寫 Issue | 不會 |
+   | **B** | 只限記憶 repo 的 fine-grained PAT | 無人值守的主機（伺服器、排程、container、雲端 agent），或必須限縮到單一 repo 時 | 只有記憶 repo 的 Issue 與讀檔 | 會（1–366 天），到期前要換 |
+   | **C** | GitHub App（installation token 或使用者登入） | 多台無人值守主機；個人帳號 repo 的協作者需要單一 repo 權限時 | App 安裝的 repo | installation token 每小時自動更新 |
+
+   **個人使用（repo 在自己帳號下）**：自己的電腦一律用模式 A；無人值守的主機用 B 或 C。
+
+   **多人協作**：每個人都用**自己的**憑證，絕不共用（共用會讓所有記憶顯示成同一個作者）。
+   先接受協作邀請，然後：
+
+   | 記憶 repo 位於 | 協作者自己的電腦 | 協作者的無人值守主機 |
+   |----------------|------------------|----------------------|
+   | **個人帳號** | 模式 A：他自己的 `gh auth login` | 他自己的 classic PAT（`repo`，設到期日），或模式 C |
+   | **Organization** | 模式 A，或模式 B（限 org 成員） | 模式 B，或模式 C |
+
+   > **個人帳號底下的 repo，協作者不能用 fine-grained PAT** —— GitHub 不允許外部協作者使用。
+   > 需要單一 repo 權限的話，把 repo 移到 Organization（免費方案即可），或改用模式 C。
+   > Classic PAT 只當備案：權限跟模式 A 一樣大，還會到期。
+
+3. **安裝官方 GitHub MCP 伺服器並註冊到各代理程式**（agy 不需要，它直接用 `gh`）：
+
+   ```bash
+   brew install github-mcp-server
+   ```
+
+   設定檔裡**只放啟動指令，不放權杖**——啟動時才讀 `gh auth token`（模式 A）或
+   Keychain（模式 B），`--tools=` 只開放 AMP 用到的六個工具：
 
    ```json
    {
      "mcpServers": {
        "github": {
-         "command": "docker",
-         "args": [
-           "run", "-i", "--rm",
-           "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
-           "-e", "GITHUB_TOOLSETS",
-           "ghcr.io/github/github-mcp-server"
-         ],
-         "env": {
-           "GITHUB_PERSONAL_ACCESS_TOKEN": "<你的權杖>",
-           "GITHUB_TOOLSETS": "repos,issues"
-         }
-       }
+         "command": "/bin/sh",
+         "args": ["-c", "GITHUB_PERSONAL_ACCESS_TOKEN=$(/opt/homebrew/bin/gh auth token -u <github-user>) exec /opt/homebrew/bin/github-mcp-server stdio --tools=get_file_contents,issue_read,issue_write,list_issues,search_issues,add_issue_comment"]
      }
    }
    ```
 
-   （v2.9 起以官方 Docker 版為主要設定;沒有 Docker 時可改用 `"command": "npx"`、
-   `"args": ["-y", "@modelcontextprotocol/server-github"]` 備援 —— 該套件已標記棄用且
-   不會過濾 `GITHUB_TOOLSETS`,權限實際由細粒度 PAT 把關。各代理程式的設定格式與
-   檔案位置見 [PROTOCOL.md](./PROTOCOL.md) 第 2 節,安全模型見 §16。）
-3. **讓代理程式讀 `PROTOCOL.md`**，它就會依協定發／讀記憶。
-4. **啟用 GitHub Actions**，索引與整理就會自動進行。
+   模式 B 把 `$(…)` 換成 `/usr/bin/security find-generic-password -a "$USER" -s rxai-amp-gh-token-<agent> -w`。
+   請用絕對路徑（從 Dock 啟動的代理程式不會繼承 shell 的 `PATH`）；`gh` 登入多個帳號時保留 `-u`。
+   已棄用的 `@modelcontextprotocol/server-github` 不要再用：它沒有協定使用的 `issue_read`／`issue_write`。
+   Claude Code 由 `npm run setup` 自動註冊；Codex、Hermes、OpenClaw 的設定格式見
+   [PROTOCOL.md](./PROTOCOL.md) 第 2 節與 [README.md](./README.md) Step 7，安全模型見 §16。
+4. **讓代理程式讀 `PROTOCOL.md`**，它就會依協定發／讀記憶。
+5. **啟用 GitHub Actions**，索引與整理就會自動進行。
 
-> **權杖安全**：權杖只放在 GitHub 機密或本機憑證庫（如 macOS Keychain），**永遠不要**提交進儲存庫。若不慎外洩，立即到 GitHub 設定撤銷 —— 刪檔不夠，git 歷史會留存。
+> **權杖安全**：權杖只放在 GitHub 機密或本機憑證庫（如 macOS Keychain），**永遠不要**貼進代理程式設定檔、Issue 或提交進儲存庫。若不慎外洩，立即到 GitHub 設定撤銷 —— 刪檔不夠，git 歷史會留存。
 
 ---
 

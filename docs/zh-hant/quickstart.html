@@ -459,10 +459,12 @@
           <tr><td>Git 2.x</td><td><code>git --version</code></td><td></td></tr>
           <tr><td>Node.js 22</td><td><code>node --version</code></td><td><span class="t" lang="zh-Hant">npm 隨附</span></td></tr>
           <tr><td>GitHub CLI 2.x</td><td><code>gh auth status</code></td><td><span class="t" lang="zh-Hant"><code>brew install gh</code>，再執行 <code>gh auth login</code></span></td></tr>
+          <tr><td><span class="t" lang="zh-Hant">GitHub MCP 伺服器</span></td><td><code>github-mcp-server --version</code></td><td><span class="t" lang="zh-Hant"><code>brew install github-mcp-server</code>，精靈會主動詢問是否安裝</span></td></tr>
           <tr><td><span class="t" lang="zh-Hant">GitHub 帳號</span></td><td></td><td><span class="t" lang="zh-Hant">你的記憶會存在它底下的私人倉庫</span></td></tr>
         </tbody>
       </table>
     </div>
+    <p class="note t" lang="zh-Hant">多人協作？每個人用自己的 <code>gh auth login</code> 連接。個人帳號底下的倉庫，協作者無法使用細粒度權杖；如果成員需要只限單一倉庫的權杖，請把倉庫移到 Organization（<a href="https://github.com/RxAi-Aus/amp#step-5--choose-each-agents-credential-personal-use-or-collaboration">README Step 5</a>）。</p>
     <p class="note t" lang="zh-Hant">設定精靈支援 macOS 與 Linux。Windows 請照 README 的<a href="https://github.com/RxAi-Aus/amp#step-by-step-installation-guide">逐步安裝指南</a>操作。</p>
   </section>
 
@@ -477,7 +479,7 @@ npm install
 npm run setup -- --dry-run   <span class="c"># <span class="t" lang="zh-Hant">先看每個步驟；不會改任何東西</span></span>
 npm run setup</pre>
     <div class="prose">
-      <p class="t" lang="zh-Hant">精靈會替你的記憶建立一個私人倉庫（絕不推送到範本）、讓 GitHub Actions 能寫入索引、加上協定使用的 Issue 標籤、帶你建立細粒度存取權杖並妥善保存、註冊 GitHub MCP 伺服器，最後編譯索引並發一則真正的測試 Issue。某一步失敗時，它會印出該步的手動命令；再跑一次精靈就從中斷處繼續，而且絕不重置已經上線的倉庫。</p>
+      <p class="t" lang="zh-Hant">精靈會替你的記憶建立一個私人倉庫（絕不推送到範本）、讓 GitHub Actions 能寫入索引、加上協定使用的 Issue 標籤、用你自己的 <code>gh</code> 登入連接代理程式（只有無人登入的機器才用細粒度權杖）、安裝並註冊 GitHub 官方 MCP 伺服器且不把任何權杖寫進設定檔，最後編譯索引並發一則真正的測試 Issue。某一步失敗時，它會印出該步的手動命令；再跑一次精靈就從中斷處繼續，而且絕不重置已經上線的倉庫。</p>
     </div>
   </section>
 

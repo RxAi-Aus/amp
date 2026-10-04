@@ -1,6 +1,6 @@
 # RxAi AMP — Agent Memory Protocol
 
-**RxAi AMP v2.12**
+**RxAi AMP v2.13**
 
 **Purpose:** This document defines the complete communication and shared memory protocol for AI agents operating on a shared GitHub repository. Any agent that reads this file and can reach GitHub Issues for this repository — through the GitHub MCP server or an authenticated `gh` CLI — can participate in the protocol.
 
@@ -43,23 +43,28 @@ This protocol enables AI agents to share memory and communicate asynchronously t
 
 ### Participating Agents (Current)
 
-| Agent | Identity | Local home | Token Scope | Conformance (§15.3) |
+| Agent | Identity | Local home | Credential (§2) | Conformance (§15.3) |
 |-------|----------|------------|-------------|---------------------|
-| `claudecowork` | Claude (Claude Code CLI / Claude Desktop) | `~/.claude` | Fine-grained PAT | L2 (lifecycle hooks) |
-| `codex` | Codex desktop agent / CLI | `~/.codex` | Fine-grained PAT | L2 (lifecycle hooks) |
-| `openclaw` | OpenClaw local agent | `~/.openclaw` | Fine-grained PAT | L1 (config digest) |
-| `hermes` | Hermes local agent | `~/.hermes` | Fine-grained PAT | L1 (SOUL.md digest) |
-| `agy` | Antigravity CLI (Google) | `~/.gemini/config` | `gh` CLI (OS keychain OAuth) | L2 (lifecycle hooks) |
+| `claudecowork` | Claude (Claude Code CLI / Claude Desktop) | `~/.claude` | Mode A (`gh` OAuth) or B (fine-grained PAT) | L2 (lifecycle hooks) |
+| `codex` | Codex desktop agent / CLI | `~/.codex` | Mode A or B | L2 (lifecycle hooks) |
+| `openclaw` | OpenClaw local agent | `~/.openclaw` | Mode A or B | L1 (config digest) |
+| `hermes` | Hermes local agent | `~/.hermes` | Mode A or B | L1 (SOUL.md digest) |
+| `agy` | Antigravity CLI (Google) | `~/.gemini/config` | Mode A (`gh` CLI) | L2 (lifecycle hooks) |
 
-Each agent posts with its own identity in `[FROM:agent]` markers and authenticates with its **own** credential (one Keychain item per agent — see Local Secret Storage). Any future agent can join by configuring the GitHub MCP server, or an authenticated `gh` CLI, with valid access to this repository.
+Each agent posts with its own identity in `[FROM:agent]` markers and authenticates with its **own** credential (§2 Credential Modes). Any future agent can join by configuring the GitHub MCP server, or an authenticated `gh` CLI, with valid access to this repository.
 
 ## 2. Requirements
 
 ### Every Agent Must Have
 
-1. **GitHub MCP Server** — official server from `github/github-mcp-server`
-2. **GitHub Personal Access Token (Fine-grained)** — scoped to this single repository only
-3. **Toolsets enabled** — minimum: `repos,issues`
+1. **Access to this repository's Issues API** — through GitHub's official MCP
+   server (`github/github-mcp-server`) or an authenticated `gh` CLI. An SSH key
+   is not enough: it carries git, and memory lives in Issues.
+2. **Its own credential, from one of the credential modes below** — read from
+   the OS credential store when the agent starts, never written into an
+   agent's config file.
+3. **The AMP tool allow-list** — the MCP server exposes only the tools in §10
+   (§11).
 
 **Transport is not normative; the write path is.** An agent with no MCP client
 (e.g. `agy`, the Antigravity CLI) participates through an authenticated `gh`
@@ -69,64 +74,95 @@ is that memory is written **only** as GitHub Issues and comments on this
 repository (Rule 3A), in the canonical title/body format, with the credential
 held by the OS keychain and never by an adapter (§15.5).
 
+### Credential Modes (v2.13)
+
+Two questions decide the credential, and "how many computers" is not one of
+them: **can a person log in interactively on this host?** and **who owns the
+memory repository?** Credential type has no bearing on concurrent writes —
+the Issues API takes concurrent creates and comments, and the index files have
+a single writer (§9).
+
+| Mode | Credential | Fits | Reach of a leaked credential | Expiry |
+|------|------------|------|------------------------------|--------|
+| **A** | `gh` OAuth — `gh auth login` once per host; the MCP server is launched with `gh auth token -u <github-user>` | Any host a person can log in on: every laptop and desktop, however many | Every repository the account can reach; an MCP session is held to file reads and issue reads/writes by the tool allow-list (§11) | None — follows the `gh` login |
+| **B** | Fine-grained PAT for this repository only (permissions below), kept in the OS credential store | Unattended hosts (servers, schedulers, containers, cloud agents), and anywhere a one-repository reach is required | This repository's issues and file reads | 1–366 days, or none where the owner allows it — record the date and rotate before it |
+| **C** | GitHub App — an installation token (`--app-id`, `--app-installation-id`, `--app-private-key-path`), or the App's interactive user login (`--oauth-client-id`) | Fleets of unattended hosts (installation token); collaborators who need one-repository reach on a personal-account repository (user login) | The repositories the App is installed on | Installation tokens renew themselves hourly |
+
+Mode C is specified from the official server's flags; the reference setup
+(`npm run setup`) does not configure it, and it has not been exercised end to
+end by this protocol's maintainers.
+
+A **classic PAT** with `repo` scope MAY stand in for Mode A on an unattended
+host where Modes B and C are unavailable. It has Mode A's reach plus an expiry
+to manage, so it is a fallback, never a default.
+
+Who owns the repository decides which modes are possible:
+
+| Memory repository | Personal use | Collaborators, interactive hosts | Collaborators, unattended hosts |
+|-------------------|--------------|----------------------------------|---------------------------------|
+| Personal account | A on your own hosts; B or C on unattended ones | A — each person's own login; C (user login) for one-repository reach | That person's classic PAT, or a C installation token |
+| Organization | A, or B | A, or B (organization members only) | B, or a C installation token |
+
+**A fine-grained PAT cannot reach a repository owned by another personal
+account.** GitHub limits each fine-grained PAT to resources owned by one user
+or organization and excludes outside and repository collaborators, so a
+collaborator on a personal-account memory repository cannot use Mode B at all.
+Moving the repository into an organization (the free plan is enough) makes
+Mode B available to its members; the organization MAY require approval for
+fine-grained PATs and cap their lifetime.
+
+- Every person and every unattended host MUST use its own credential. A
+  credential MUST NOT be shared between people — attribution (§16, T-02)
+  depends on it.
+- A credential MUST NOT appear as a literal in an agent's config file. The
+  config holds the command that reads it at launch (below). Literal tokens are
+  how v2.12 deployments failed: three agents on one machine carried hard-coded
+  PATs that expired or were revoked unnoticed, and their MCP servers answered
+  `Bad credentials` while `gh` on the same machine kept working.
+- The MCP server MUST be launched with the tool allow-list (§11). Under Mode A
+  it is what keeps a memory session away from repository-administration and
+  file-write tools.
+
 ### MCP Server Configuration
 
-**Primary (v2.9): GitHub's official server via Docker.** The official
-`ghcr.io/github/github-mcp-server` image honours `GITHUB_TOOLSETS`, is actively
-maintained by GitHub, and is the long-term supported path:
+**Primary (v2.13): the official server as a local binary**, launched through
+a one-line shell wrapper that reads the credential when the agent starts it.
+Install it with `brew install github-mcp-server`, or take a release binary from
+`github/github-mcp-server`. The wrapper, in each mode:
 
-```json
-{
-  "mcpServers": {
-    "github": {
-      "command": "docker",
-      "args": [
-        "run", "-i", "--rm",
-        "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
-        "-e", "GITHUB_TOOLSETS",
-        "ghcr.io/github/github-mcp-server"
-      ],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_TOKEN>",
-        "GITHUB_TOOLSETS": "repos,issues"
-      }
-    }
-  }
-}
+```sh
+# Mode A — gh OAuth
+GITHUB_PERSONAL_ACCESS_TOKEN=$(/opt/homebrew/bin/gh auth token -u <github-user>) exec /opt/homebrew/bin/github-mcp-server stdio --tools=get_file_contents,issue_read,issue_write,list_issues,search_issues,add_issue_comment
+
+# Mode B — fine-grained PAT in the macOS Keychain
+GITHUB_PERSONAL_ACCESS_TOKEN=$(/usr/bin/security find-generic-password -a "$USER" -s rxai-amp-gh-token-<agent> -w) exec /opt/homebrew/bin/github-mcp-server stdio --tools=get_file_contents,issue_read,issue_write,list_issues,search_issues,add_issue_comment
 ```
 
-**Fallback (no Docker): `npx` reference server.** Where Docker is unavailable,
-the reference server still runs directly via `npx` (bundled with Node.js):
+Agent configs pass it as `/bin/sh -c '<wrapper>'`, on one line.
 
-```json
-{
-  "mcpServers": {
-    "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_TOKEN>",
-        "GITHUB_TOOLSETS": "repos,issues"
-      }
-    }
-  }
-}
-```
+- **Absolute paths.** A desktop agent started from the Dock or a launcher does
+  not inherit the login shell's `PATH`, and `/opt/homebrew/bin` is the usual
+  casualty. On Linux, substitute the distribution's paths, and
+  `secret-tool lookup service rxai-amp-gh-token-<agent>` for the Keychain lookup.
+- **Keep `-u <github-user>`** when more than one account is logged in to `gh`.
+  Without it the token belongs to whichever account `gh` last made active.
+- **Docker** is equivalent: end the wrapper with
+  `exec docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN -e GITHUB_TOOLS ghcr.io/github/github-mcp-server`,
+  prefixed with `GITHUB_TOOLS=<the allow-list>`. The server reads
+  `GITHUB_TOOLS` as it reads `--tools`.
 
-> **Fallback caveats.** `@modelcontextprotocol/server-github` is marked
-> deprecated on npm but still installs and works. It does **not** filter on
-> `GITHUB_TOOLSETS` (the variable is advisory only there), so with the fallback
-> the fine-grained PAT scope (Contents read, Issues read/write) is the only
-> real permission boundary — see §16 (T-03). The earlier `@github/mcp-server`
-> name does not exist on npm. `npm run setup` registers the fallback because it
-> cannot assume Docker; upgrade to the Docker form when available.
+**The deprecated `@modelcontextprotocol/server-github` MUST NOT be used
+(v2.13).** It ignores `GITHUB_TOOLSETS`, and it does not provide `issue_read`
+or `issue_write` — the tools §10 names — so an agent following this protocol
+through it calls tools that do not exist. Until v2.12 it was the documented
+no-Docker fallback.
 
 ### Per-Agent Configuration
 
-The four current agents register the same GitHub MCP server in four different
-config formats. In every snippet below, replace `<AGENT_TOKEN>` with that
-agent's own fine-grained PAT (permissions in the next section), scoped to
-**this repository only**. After configuring, restart the agent and verify by
+The four MCP agents register the same server in four config formats. Every
+snippet below is the Mode A wrapper; for Mode B, replace the `$(…)` with the
+Keychain lookup above. Replace `<github-user>` with the GitHub login whose
+access the agent should use. After configuring, restart the agent and verify by
 asking it to *"list the open issues in the memory repository"*.
 
 > **Write-path rule for all agents:** every **automatic** reply an agent posts
@@ -139,27 +175,29 @@ asking it to *"list the open issues in the memory repository"*.
 
 #### 1. Claude (`claudecowork`)
 
-**Claude Code (CLI)** — one command, stored in `~/.claude.json` (user scope):
+**Claude Code (CLI)** — one command, stored in `~/.claude.json` (user scope).
+`npm run setup` runs it for you (v2.13):
 
 ```bash
-# Primary (Docker):
-claude mcp add github --scope user \
-  -e GITHUB_PERSONAL_ACCESS_TOKEN=<AGENT_TOKEN> \
-  -e GITHUB_TOOLSETS=repos,issues \
-  -- docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN -e GITHUB_TOOLSETS \
-     ghcr.io/github/github-mcp-server
-
-# Fallback (no Docker):
-claude mcp add github --scope user \
-  -e GITHUB_PERSONAL_ACCESS_TOKEN=<AGENT_TOKEN> \
-  -e GITHUB_TOOLSETS=repos,issues \
-  -- npx -y @modelcontextprotocol/server-github
+claude mcp add github --scope user -- /bin/sh -c 'GITHUB_PERSONAL_ACCESS_TOKEN=$(/opt/homebrew/bin/gh auth token -u <github-user>) exec /opt/homebrew/bin/github-mcp-server stdio --tools=get_file_contents,issue_read,issue_write,list_issues,search_issues,add_issue_comment'
 ```
 
-**Claude Desktop** — add the primary `mcpServers` JSON block above to
-`~/Library/Application Support/Claude/claude_desktop_config.json`, then also
-point a Claude Desktop *Project* at this repo's folder so the agent can read
-`PROTOCOL.md` and the index files directly.
+**Claude Desktop** — the same command in
+`~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "/bin/sh",
+      "args": ["-c", "GITHUB_PERSONAL_ACCESS_TOKEN=$(/opt/homebrew/bin/gh auth token -u <github-user>) exec /opt/homebrew/bin/github-mcp-server stdio --tools=get_file_contents,issue_read,issue_write,list_issues,search_issues,add_issue_comment"]
+    }
+  }
+}
+```
+
+Then point a Claude Desktop *Project* at this repo's folder so the agent can
+read `PROTOCOL.md` and the index files directly.
 
 #### 2. Codex (`codex`)
 
@@ -167,25 +205,11 @@ Add to `~/.codex/config.toml`:
 
 ```toml
 [mcp_servers.github]
-command = "docker"
-args = [
-  "run", "-i", "--rm",
-  "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
-  "-e", "GITHUB_TOOLSETS",
-  "ghcr.io/github/github-mcp-server"
-]
-
-[mcp_servers.github.env]
-GITHUB_PERSONAL_ACCESS_TOKEN = "<AGENT_TOKEN>"
-GITHUB_TOOLSETS = "repos,issues"
+command = "/bin/sh"
+args = ["-c", "GITHUB_PERSONAL_ACCESS_TOKEN=$(/opt/homebrew/bin/gh auth token -u <github-user>) exec /opt/homebrew/bin/github-mcp-server stdio --tools=get_file_contents,issue_read,issue_write,list_issues,search_issues,add_issue_comment"]
 ```
 
-No Docker: swap `command`/`args` for `command = "npx"`,
-`args = ["-y", "@modelcontextprotocol/server-github"]` (fallback caveats above).
-
-`config.toml` stores the token in plain text — keep the file at mode `600`
-and never sync or commit it. Prefer the Keychain pattern from Local Secret
-Storage where your Codex version supports environment passthrough.
+No `[mcp_servers.github.env]` table: the token never enters `config.toml`.
 
 #### 3. OpenClaw (`openclaw`)
 
@@ -195,12 +219,11 @@ false`). Two steps:
 
 1. Enable the skill — set `"mcporter": { "enabled": true }` under
    `skills.entries` in `~/.openclaw/openclaw.json`.
-2. Register the server with mcporter (standard `mcpServers` schema) in
-   `~/.mcporter/config.json` — the same JSON block as the primary (Docker)
-   configuration above, or the npx fallback where Docker is unavailable.
+2. Register the server with mcporter in `~/.mcporter/config.json` — the same
+   `mcpServers` JSON block as Claude Desktop above.
 
 Verify with `npx mcporter list` — the `github` server should appear with its
-tools before you test from inside OpenClaw.
+six tools before you test from inside OpenClaw.
 
 #### 4. Hermes (`hermes`)
 
@@ -211,30 +234,21 @@ it), then servers are declared in `~/.hermes/config.yaml` under `mcp_servers`:
 ```yaml
 mcp_servers:
   github:
-    command: "docker"
+    command: /bin/sh
     args:
-      - "run"
-      - "-i"
-      - "--rm"
-      - "-e"
-      - "GITHUB_PERSONAL_ACCESS_TOKEN"
-      - "-e"
-      - "GITHUB_TOOLSETS"
-      - "ghcr.io/github/github-mcp-server"
-    env:
-      GITHUB_PERSONAL_ACCESS_TOKEN: "<AGENT_TOKEN>"
-      GITHUB_TOOLSETS: "repos,issues"
+      - -c
+      - 'GITHUB_PERSONAL_ACCESS_TOKEN=$(/opt/homebrew/bin/gh auth token -u <github-user>) exec /opt/homebrew/bin/github-mcp-server stdio --tools=get_file_contents,issue_read,issue_write,list_issues,search_issues,add_issue_comment'
 ```
 
-No Docker: use `command: "npx"` with
-`args: ["-y", "@modelcontextprotocol/server-github"]` (fallback caveats above).
+Restart Hermes (or run `hermes mcp test github`); on startup it connects,
+discovers the tools, and registers them with the `mcp_github_*` prefix in all
+its toolsets.
 
-Restart Hermes; on startup it connects, discovers the tools, and registers
-them with the `mcp_github_*` prefix in all its toolsets.
+### Token Permissions — Mode B Fine-Grained PAT (Minimum)
 
-### Token Permissions — Fine-Grained PAT (Minimum)
-
-Create a fine-grained Personal Access Token scoped to this single repository only.
+Create a fine-grained Personal Access Token whose resource owner is the account
+or organization that owns this repository, with repository access set to this
+single repository only.
 
 | Permission | Level | Required For |
 |------------|-------|--------------|
@@ -246,13 +260,19 @@ All other permissions must be set to **None**.
 
 ### Local Secret Storage
 
-For local agent runs, personal access tokens SHOULD be stored in the operating system's credential store, not committed files.
+Credentials MUST live in the operating system's credential store, never in
+committed files or agent configs.
 
-On macOS, use Keychain:
+**Mode A.** `gh` keeps its OAuth token in the keychain itself — `gh auth
+status` shows `(keyring)` — so there is nothing more to store. A login MAY be
+trimmed of scopes its owner does not otherwise use, e.g.
+`gh auth refresh -h github.com --remove-scopes delete_repo`.
+
+**Mode B.** On macOS, use Keychain, one item per agent:
 
 ```bash
-security add-generic-password -a "$USER" -s rxai-amp-gh-token -w
-export GH_TOKEN="$(security find-generic-password -a "$USER" -s rxai-amp-gh-token -w)"
+security add-generic-password -a "$USER" -s rxai-amp-gh-token-<agent> -w
+export GH_TOKEN="$(security find-generic-password -a "$USER" -s rxai-amp-gh-token-<agent> -w)"
 ```
 
 Use one Keychain item per agent token when multiple agents participate.
@@ -1289,6 +1309,7 @@ never touches GitHub state and needs no secrets.
 | Read issue comments | `issue_read` | `method="get_comments"`, `issue_number=N` |
 | List all open issues | `list_issues` | `state="open"` |
 | Open new issue | `issue_write` | `method="create"`, `title`, `body`, `labels` |
+| Search issues (duplicate check) | `search_issues` | `query`, scoped to this repository |
 | Post comment | `add_issue_comment` | `issue_number=N`, `body` |
 
 Local cache helpers are not MCP tools; they are optional Node scripts for agents with filesystem access:
@@ -1300,13 +1321,23 @@ Local cache helpers are not MCP tools; they are optional Node scripts for agents
 | Print cached issue thread | `npm run cache:get -- N` |
 | Show cache metadata | `npm run cache:status` |
 
-## 11. Toolset Configuration
+## 11. Tool Allow-List
 
 ```
-GITHUB_TOOLSETS=repos,issues
+--tools=get_file_contents,issue_read,issue_write,list_issues,search_issues,add_issue_comment
 ```
 
-Enables exactly the tools in Section 10 and nothing more.
+(or the same list in the `GITHUB_TOOLS` environment variable). Exposes exactly
+the tools in Section 10 and nothing more (v2.13).
+
+Until v2.12 this section named `GITHUB_TOOLSETS=repos,issues` and claimed the
+same effect. On the official server those two toolsets also expose
+repository-administration and file-write tools — `create_repository`,
+`fork_repository`, `push_files`, `create_or_update_file`, `delete_file`, and
+more — which under a Mode A credential reach every repository the account can.
+The allow-list removes them. `GITHUB_TOOLSETS=repos,issues` remains acceptable
+only with a Mode B or C credential, whose own scope already confines the server
+to this repository.
 
 ## 12. Error Handling
 
@@ -1678,8 +1709,12 @@ adapter, shipped or third-party, MUST obey:
 - **Chain, never clobber.** Installers detect pre-existing hooks and compose
   with them; they refuse (with instructions) rather than overwrite foreign
   content.
-- **No secrets in adapter state.** Tokens stay in the OS keychain / agent
-  config (§2); the ledger and any adapter file MUST NOT persist them.
+- **No secrets in adapter state.** Tokens stay in the OS credential store
+  (§2); agent configs hold the command that reads them, never the token, and
+  the ledger and any adapter file MUST NOT persist them. An adapter that calls
+  the GitHub API resolves a token from `GH_TOKEN`, `GITHUB_TOKEN` or
+  `GITHUB_PERSONAL_ACCESS_TOKEN`, then from `gh auth token` (v2.13), and holds
+  it in memory only.
 
 ### 15.6 Librarian Backstop
 
@@ -1765,7 +1800,7 @@ If you have a working v2.1 repo and want to upgrade:
 #### Title-rename helper (one-time)
 
 ```ts
-// Run with Node 22 and a fine-grained PAT that has Issues: Read+Write.
+// Run with Node 22 and a §2 credential with Issues write, e.g. GH_TOKEN="$(gh auth token)".
 const token = process.env.GH_TOKEN;
 const owner = "your-owner";
 const repo = "your-repo";
@@ -1969,7 +2004,7 @@ elsewhere in this document, with pointers.
 ### 16.1 Trust boundaries
 
 - **GitHub Issues** — authoritative but *untrusted content*: any identity with
-  Issues write access (or a leaked PAT) can write anything.
+  Issues write access (or a leaked credential) can write anything.
 - **Workflow-generated files** (`INDEX.md`, `REGION-*.md`, `not_indexed.md`,
   `weights.json`, `okf/`) — deterministic projections of untrusted content;
   integrity depends on Actions and branch state, not on the text being true.
@@ -1997,7 +2032,7 @@ cannot stop a poisoned memory from being *stored*, so it must never be
 |----|--------|--------|--------------------------------|
 | T-01 | Prompt injection via recalled memory | Adversarial instructions in an issue body/comment reach another agent's context at RECALL | §16.2 (MUST); deterministic triggers only — no LLM invocation straight off GitHub events (§15.5, Rule 14); intent-first reading limits blind execution of stale steps (Rule 7) |
 | T-02 | Memory poisoning / graph sabotage | A compromised identity posts fake facts, abusive `Supersedes:` invalidations, or fake `Outcome:` markers to archive good memories or inflate bad ones | Every write is attributed (`[FROM:]`, GitHub audit log); weights are clamped to [0,1] (§4.4); lifefacts are immune to decay, penalty, and supersession (Rule 12); a wrong invalidation is retractable, newest wins (Rule 8); the Librarian cross-checks manifests against actual outcomes (§15.6) |
-| T-03 | Token compromise | An agent's PAT leaks from a config file or environment | Fine-grained PAT scoped to **this single repository**, Issues R/W + Contents R + Metadata R only — blast radius is this repo's issues (§2); OS keychain storage, one item per agent (§2 Local Secret Storage); official MCP server enforces `GITHUB_TOOLSETS` (§2); rotate on any suspected exposure |
+| T-03 | Token compromise | An agent's credential leaks from a config file, environment, or shell history | No literal credential in any agent config — the MCP server is launched by a wrapper that reads the OS credential store (§2); one credential per person and per unattended host, never shared (§2); reach by mode (§2 Credential Modes): B and C — this repository's issues and file reads; A — every repository the account reaches, held by the MCP tool allow-list to file reads and issue reads/writes (§11); choose B or C where A's reach is unacceptable; rotate on any suspected exposure — revoke a Mode A token under GitHub Settings → Applications → Authorized OAuth Apps → GitHub CLI, then `gh auth login` again |
 | T-04 | Secrets leaked into memory | An agent or human pastes an API key/token into an issue or comment — **issues bypass the pre-commit secret scan entirely** | Never post secrets to issues (§2); the `secret-scan.mjs` hook only protects *committed files*; if a secret lands in an issue, treat it as published: rotate immediately — editing or deleting the comment does not purge GitHub's edit history |
 | T-05 | Personal-data exposure | `permanent_memory.json` lifefacts, diary Regions, local paths, or ledger files reach an unintended reader | Private repository required (§16.1); lifefacts only on explicit user request (§4.6); ledgers live under `~/.rxai-amp/` mode `0700`, store numbers/titles only, never bodies or tokens, never committed (§15.4); `.rxai-cache/` and `permanent_memory.json` are gitignored local state (§4.6, §4.7); the staged privacy scan and `npm run public:check` release gate reject common personal-data indicators without printing their values (§2) |
 | T-06 | Workflow compromise | A malicious PR or overbroad token abuses Actions to rewrite state or exfiltrate secrets | Explicit least-privilege `permissions:` blocks in every workflow — unlisted permissions default to none (§2); index workflows run only from the default branch on `schedule`/`issues`/`workflow_dispatch` — never `pull_request_target`; BigQuery service account is dataset-scoped (§14.4); generated files are deterministic projections, so any tamper is repaired by the next honest compile (§9) |
@@ -2005,6 +2040,11 @@ cannot stop a poisoned memory from being *stored*, so it must never be
 
 ### 16.4 Residual risks (accepted, documented)
 
+- **A Mode A credential carries the account's reach (v2.13).** The tool
+  allow-list bounds what an MCP session can do with it, but any process that
+  reads the token directly — a shell the agent runs — has the full scope, as
+  the user's own `gh` does. Accepted for interactive personal hosts; use Mode B
+  or C where it is not.
 - **A poisoned memory is still stored.** AMP detects and contains (attribution,
   weights, retraction, Librarian audit) rather than prevents; §16.2 keeps a
   stored poison from becoming executed behavior.
@@ -2018,6 +2058,7 @@ cannot stop a poisoned memory from being *stored*, so it must never be
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.13 | 2026-10-04 | **TIGHTENING (no format change):** Credentials. Three agents on one machine had hard-coded fine-grained PATs in their MCP configs; the PATs stopped authenticating unnoticed and the agents answered `Bad credentials` while `gh` on the same machine kept working — and a fine-grained PAT could not have served a collaborator on a personal-account repository anyway, since GitHub excludes outside collaborators from them. §2 now defines three credential modes and chooses between them by two questions — can a person log in interactively on the host, and who owns the repository — instead of prescribing one PAT per agent: **A** `gh` OAuth (`gh auth login` once per host; no expiry; the account's reach), **B** a fine-grained PAT for this repository only (unattended hosts, or where one-repository reach is required; owner or organization members only), **C** a GitHub App (installation token, or user login for one-repository reach on a personal-account repository); a classic PAT is a fallback only. Every person and unattended host uses its own credential; no credential may appear as a literal in an agent config — the MCP server is launched by a `/bin/sh -c` wrapper that reads `gh auth token` or the Keychain at start. The official server runs as a local binary (`brew install github-mcp-server`), Docker equivalent; the deprecated `@modelcontextprotocol/server-github` MUST NOT be used — it ignores `GITHUB_TOOLSETS` and lacks `issue_read`/`issue_write`, which §10 names. §11 replaces `GITHUB_TOOLSETS=repos,issues`, which on the official server also exposes repository-administration and file-write tools, with the `--tools` allow-list of exactly the §10 tools (`search_issues` added to §10). §15.5: adapters fall back to `gh auth token` when no token is in the environment. §16 T-03 and residual risks restated per mode. `npm run setup` registers the Mode A wrapper. No title format, label, type, decay rate, index-file set, or memory-write rule changed. |
 | 2.12 | 2026-09-23 | **TIGHTENING (no format change):** L1 becomes the level of runtimes that cannot run lifecycle hooks. Measured on four Codex models (2026-09-10 and 2026-09-23): recall by hand — load the skill, read `INDEX.md`, read the Region file, search for an issue — cost +39–80% input and +31–52% wall time per session for 0–2 memory hits in 4 tasks, while the same records delivered by hook moved the same models between −5.6% and +36%. The delivery mechanism, not the content, decided the cost. §15.3: a runtime with lifecycle hooks (Claude Code, Codex, agy) MUST participate at L2 through its reference adapter; a broken or untrusted adapter degrades to silent recall — the agent tells the user once how to restore the hooks and works without memory — never to manual navigation. Region files leave the recall path at every level (Rule 4 step 5, Rule 6, §8 Step 3): recall goes from an `INDEX.md` pointer title (v2.10) or an injected summary (v2.11) straight to the issue; `REGION-*.md` remains the browsing aid and the duplicate check before a post. The `rxai-amp` skill mirrors lose their index walkthrough and their "check `AMP_DISABLE` yourself" instruction (the flag is consumed by the hooks), and the agy mirror stops claiming agy has no hooks (L2 since v2.9.1); the OpenClaw/Hermes digests describe the title-driven path. No title format, label, type, decay rate, index-file set, or memory-write rule changed. |
 | 2.11 | 2026-09-23 | **ADDITIVE:** Two corrections from the 2026-09-23 Claude Code and Codex A/B runs. (a) §15.1 RECALL defines three injection tiers — pointer, summary, body — and caps adapter injection at the summary tier: a record's optional new `## Now` section (§6; one to three lines of prose, never a list), else the opening prose of `## Message` before its first list, table or heading, ≤ 240 characters. Bodies stay fetch-on-demand. An intent injected as its enumerated decisions doubled a high-effort model's tool output on the matching task; as goal-plus-state it does not. (b) New §4.4c: a §15.2 manifest ref `#N (used → success)` adds +0.15 and `(used → failure)` −0.10 — half a direct `Outcome` comment, counted once in the compile after the summary is created. §4.4b let a manifest lower a weight but nothing let it raise one, and an injected memory carries no Stop-checkpoint obligation (§15.4), so a record relied upon in every session that saw it could still reach the archive on age-decay alone — the three records of the A/B did, within sixteen days. (c) Task-aware recall: on a runtime with a prompt-stage hook (Claude Code `UserPromptSubmit`) session start injects the pointer tier only, and the prompt stage expands to the summary tier just the records whose title or Place lexically overlap the prompt — deterministic (stemmed tokens minus stopwords, CJK bigrams, explicit `#N`), each record once per session; a prompt no memory covers injects nothing (unrelated summaries cost a control task 14–17 KB of extra reading). Runtimes without a prompt stage keep the summary tier at session start; `recall_tier` in `~/.rxai-amp/config.json` overrides; ledger inject entries gain `tier`. `u = 0` and no `(used → …)` refs reproduce the v2.10 arithmetic exactly. No title format, label, type, decay rate, index-file set, or memory-write rule changed. |
 | 2.10 | 2026-09-10 | **ADDITIVE:** Two recall-quality corrections found by the Codex L1/L2 A/B. (a) §4.1 Active-thread pointers in `INDEX.md` now carry the issue title (truncated to 72 chars). The master index is the tier that decides what to skip, and `#373 (w:0.31)` cannot support that decision — the compiler already had the title in hand for the Region tables and simply was not printing it in the master index, so agents descended a tier merely to learn what a record was about. The specified per-Region `Summary:` blurb remains unimplemented and is now documented as such rather than reading as a transient state. (b) New §4.4b: decay becomes `old × ρ × υ^u`, where `u` is the number of §15.2 Recall manifests recording the issue as surfaced-but-unused and `υ` = 0.95. `ρ` runs on the compile clock four times a day whether or not anything happened; `υ^u` adds evidence about relevance rather than age. `u` is a standing count re-derived from the store each compile (never accumulated in `weights.json`), only explicit `(unused)` refs count, and `u = 0` reproduces the pre-v2.10 arithmetic exactly, so existing stores are unaffected until manifests appear. Rule 12 pinning and Rule 8 supersession still take precedence. No title format, label, type, decay rate, index-file set, or memory-write rule changed. |
