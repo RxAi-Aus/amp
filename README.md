@@ -8,8 +8,8 @@ are replies, GitHub Actions are the indexer, `INDEX.md` + `not_indexed.md` are t
 navigation layer that lifecycle hooks inject into each session (`REGION-*.md` is
 the browsing aid), and `.rxai-cache/` is an optional local speed layer.
 
-**Connecting every agent on your machine** (Claude Code, agy, Codex, OpenClaw,
-Hermes) is covered end-to-end in **[fullInstallation.md](./fullInstallation.md)** —
+**Connecting every agent on your machine** (Claude Code, agy, Codex — including
+the ChatGPT Desktop app, which runs Codex — OpenClaw, Hermes) is covered end-to-end in **[fullInstallation.md](./fullInstallation.md)** —
 the comprehensive per-agent installation guide.
 
 If you only have 30 seconds: agents post issues with structured titles, GitHub Actions
@@ -177,14 +177,16 @@ Before you begin, make sure you have the following installed on your machine:
 
 The memory repo is a **shared brain** — all your agents read and write to the same repo via GitHub Issues. You only need **one copy** on your machine, but it should live somewhere your primary agent can access it as a workspace/project folder.
 
+> **macOS: keep it out of protected folders.** `~/Documents`, `~/Desktop`, `~/Downloads`, iCloud Drive and external or network volumes are protected by macOS privacy controls (TCC). Each app that runs an agent (Terminal, Claude Desktop, Codex / ChatGPT Desktop, …) needs its own grant, and a launchd job such as `board:schedule` has no window in which to ask. The AMP hooks fail soft, so a denied read shows up only as recall silently missing. Put the clone in an unprotected folder every agent can reach. For most people that is your home folder (`~/AgentMemory`), but any unprotected path works. If it must live in a protected folder, grant **Full Disk Access** (System Settings → Privacy & Security) to every app that runs an agent.
+
 | Agent you use | Recommended clone location | Why |
 |---------------|---------------------------|-----|
 | **OpenClaw** | Inside OpenClaw's workspace folder (e.g. `~/openclaw-workspace/AgentMemory`) | OpenClaw needs the repo in its workspace to read local files like `INDEX.md` and `PROTOCOL.md` directly |
-| **Claude Desktop** | Inside your Claude Desktop projects folder (e.g. `~/Claude/AgentMemory` or `~/Documents/AgentMemory`) | Claude Desktop's "Projects" feature lets you attach a folder — point it at this repo so the agent can read the protocol files |
-| **Claude Code (CLI)** | Any convenient directory (e.g. `~/Documents/AgentMemory`) | Claude Code can access any directory you `cd` into |
-| **Hermes** | Any convenient directory (e.g. `~/Documents/AgentMemory`) — or **no clone at all** | Hermes' default local terminal backend runs on your machine and can read any path; unlike OpenClaw there is no workspace registration. It can also run fully folderless via its native MCP client (see `adapters/hermes/README.md`) |
-| **agy (Antigravity CLI)** | Any convenient directory (e.g. `~/Documents/AgentMemory`) | agy reads any directory you `cd` into; it also picks up `.agents/skills/` from the repo it is standing in |
-| **Gemini CLI / other** | Any convenient directory (e.g. `~/Documents/AgentMemory`) | Configure the agent's workspace setting to point here |
+| **Claude Desktop** | Inside your Claude Desktop projects folder (e.g. `~/AgentMemory`) | Claude Desktop's "Projects" feature lets you attach a folder — point it at this repo so the agent can read the protocol files |
+| **Claude Code (CLI)** | Any directory outside the protected folders (e.g. `~/AgentMemory`) | Claude Code can access any directory you `cd` into |
+| **Hermes** | Any directory outside the protected folders (e.g. `~/AgentMemory`) — or **no clone at all** | Hermes' default local terminal backend runs on your machine and can read any path; unlike OpenClaw there is no workspace registration. It can also run fully folderless via its native MCP client (see `adapters/hermes/README.md`) |
+| **agy (Antigravity CLI)** | Any directory outside the protected folders (e.g. `~/AgentMemory`) | agy reads any directory you `cd` into; it also picks up `.agents/skills/` from the repo it is standing in |
+| **Gemini CLI / other** | Any directory outside the protected folders (e.g. `~/AgentMemory`) | Configure the agent's workspace setting to point here |
 
 > **Important:** You don't need a separate clone per agent. All agents share the same repo via GitHub — the local clone is just for running the build tools and reviewing files. Each agent connects to GitHub through its MCP server, not through the local filesystem.
 
@@ -197,8 +199,8 @@ The memory repo is a **shared brain** — all your agents read and write to the 
 # For OpenClaw:
 cd ~/openclaw-workspace
 
-# For Claude Desktop / general use:
-cd ~/Documents
+# For Claude Desktop / general use (your home folder, not ~/Documents):
+cd ~
 
 # Then clone
 git clone https://github.com/RxAi-Aus/AgentMemory.git
@@ -211,7 +213,7 @@ cd AgentMemory
 2. Click **Fork** (top-right)
 3. Clone your fork to the appropriate location:
    ```bash
-   cd ~/Documents   # or ~/openclaw-workspace, etc.
+   cd ~   # or ~/openclaw-workspace, etc. (avoid ~/Documents on macOS)
    git clone https://github.com/<your-username>/AgentMemory.git
    cd AgentMemory
    ```

@@ -24,7 +24,7 @@ function line(model: string, id: string, input: number, output: number, text = '
 function fixture(): TokmonConfig {
   const projects = mkdtempSync(join(tmpdir(), 'tokmon-proj-'));
   // memory project
-  const mem = join(projects, '-Users-x-Documents-AgentMemory');
+  const mem = join(projects, '-Users-x-AgentMemory');
   mkdirSync(mem);
   writeFileSync(join(mem, 'sess1.jsonl'), [
     line('claude-fable-5', 'msg_1', 100, 50),
@@ -33,7 +33,7 @@ function fixture(): TokmonConfig {
     line('claude-fable-5', 'msg_2', 200, 80),
   ].join('\n'));
   // other project with one AMP-marked request
-  const other = join(projects, '-Users-x-Documents-OtherApp');
+  const other = join(projects, '-Users-x-OtherApp');
   mkdirSync(other);
   writeFileSync(join(other, 'sess2.jsonl'), [
     line('claude-fable-5', 'msg_3', 10, 5, 'plain request'),

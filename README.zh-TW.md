@@ -81,8 +81,8 @@ Issue 本文可以加一段 `## Now`（v2.11，可選）：一到三行散文，
 Codex 沒有 prompt 階段的 hook，維持在 session 開始就注入摘要；`~/.rxai-amp/config.json`
 的 `recall_tier` 可以覆寫。
 
-v2.12 起，層級由 runtime 決定：有 lifecycle hook 的 runtime（Claude Code、Codex、agy）
-一律以 L2 參與，L1 只留給沒有 hook 的 folderless agent（OpenClaw、Hermes）。Hook 壞掉或
+v2.12 起，層級由 runtime 決定：有 lifecycle hook 的 runtime（Claude Code、Codex〔含 ChatGPT Desktop〕、agy）
+一律以 L2 參與，L1 只留給沒有 hook 的 folderless agent（Hermes，以及不跑在 Codex runtime 上的 OpenClaw 模型；跑在 Codex runtime 上的 OpenClaw 會觸發 Codex hook、以 `openclaw` 身分記錄）。Hook 壞掉或
 沒被信任時，降級成「不注入召回、提醒使用者一次怎麼修」，**不是**退回手動導覽——量過了：
 四個 Codex 模型自己載 skill、讀 INDEX、讀 REGION、找 issue，輸入多 39–80%、時間多
 31–52%，四題只命中 0–2 題；同樣的紀錄由 hook 送到手上，只是 −5.6% 到 +36%。L1 的手動
@@ -184,8 +184,8 @@ GitHub Actions **不是代理程式** —— 它是「在各代理程式工作�
 | 代理程式 | 身分 | 本機位置 |
 |----------|------|----------|
 | `claudecowork` | Claude（Claude Code CLI／Claude Desktop） | `~/.claude` |
-| `codex` | Codex 桌面代理 | `~/.codex` |
-| `openclaw` | OpenClaw 本機代理 | `~/.openclaw` |
+| `codex` | Codex CLI 與 ChatGPT Desktop（Work 對話就是 Codex session，`npm run hooks:install:codex` 一次接好兩者） | `~/.codex` |
+| `openclaw` | OpenClaw 本機代理（`agentRuntime: codex` 的模型走 Codex hook，屬 L2） | `~/.openclaw` |
 | `hermes` | Hermes 本機代理 | `~/.hermes` |
 | `agy` | Antigravity CLI（Google） | `~/.gemini/config` |
 
@@ -225,6 +225,11 @@ BigQuery concepts 資料表（「AMP 可用 BigQuery 搜尋」）
 > 隨時重新體檢。以下為手動步驟參考。
 
 1. **建立記憶儲存庫**（一個 GitHub repo，可以是私有）並放入本協定檔案。
+   **本機 clone 的位置（macOS）**：不要放在 `~/Documents`、`~/Desktop`、`~/Downloads`、
+   iCloud 雲碟或外接硬碟。這些資料夾受 macOS 隱私保護（TCC），每個執行 agent 的 App
+   都要分別授權，`board:schedule` 這類 launchd 排程更沒有畫面可以詢問。hook 失敗時會靜默跳過，
+   看起來就像 AMP 沒有召回任何記憶。一般放在家目錄（`~/AgentMemory`）即可，位置因人而異，
+   只要是所有 agent 都讀得到、不受保護的資料夾就行；否則要對每個執行 agent 的 App 開啟「完全取用磁碟」。
 2. **決定每個代理程式的憑證（v2.13，PROTOCOL.md §2）。** 代理程式透過 GitHub
    **Issues API** 讀寫記憶，所以需要 API 憑證；SSH key 只能處理 `git`，不能用。
    選哪一種只看兩件事：**這台機器有沒有人能互動登入**、**記憶 repo 屬於誰**。

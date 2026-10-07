@@ -1,4 +1,4 @@
-# OpenClaw adapter — L1 (config digest)
+# OpenClaw adapter — L1 (config digest), L2 on the Codex runtime
 
 OpenClaw reaches the GitHub MCP server through its `mcporter` skill
 (PROTOCOL.md §2). It participates at conformance L1: the §15 obligations ride
@@ -7,6 +7,16 @@ memory files), and the git-hook floor covers commit boundaries. OpenClaw has
 its own file-based memory system — the digest is written to coexist with it:
 AMP memories are GitHub Issues, OpenClaw's `MEMORY.md`/`memory/*.md` stay
 untouched.
+
+**On the Codex runtime it is L2.** OpenClaw runs its OpenAI models on the
+Codex runtime (`agentRuntime: codex` in `~/.openclaw/openclaw.json`); those
+sessions are Codex sessions with `originator: "openclaw"` and fire the Codex
+lifecycle hooks from `~/.codex/hooks.json` (`npm run hooks:install:codex`):
+recall is injected and the Stop checkpoint runs. The hooks read the
+originator and act as `openclaw`, so the ledger and the capture check match
+the `[FROM:openclaw…]` issues it writes. The digest tells it not to read the
+index again when a RECALL block is already there. Models on other runtimes
+(the Copilot fallbacks, say) stay L1 on the digest alone.
 
 ## Install
 

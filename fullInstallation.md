@@ -24,8 +24,8 @@ When anything here disagrees with PROTOCOL.md, PROTOCOL.md wins.
 - [Part 3 — Connect each agent](#part-3--connect-each-agent)
   - [Claude Code (L2)](#claude-code-l2)
   - [agy / Antigravity CLI (L2)](#agy--antigravity-cli-l2)
-  - [Codex (L1)](#codex-l1)
-  - [OpenClaw (L1)](#openclaw-l1)
+  - [Codex and ChatGPT Desktop (L2)](#codex-and-chatgpt-desktop-l2)
+  - [OpenClaw (L1, L2 on the Codex runtime)](#openclaw-l1-l2-on-the-codex-runtime)
   - [Hermes (L0/L1)](#hermes-l0l1)
 - [Part 4 — The capture floor (do not skip)](#part-4--the-capture-floor-do-not-skip)
 - [Part 5 — Verify everything](#part-5--verify-everything)
@@ -86,17 +86,17 @@ adapter never blocks the agent's real work.
 
 What actually connects each agent, on one screen:
 
-| | Claude Code | agy (Antigravity) | Codex | OpenClaw | Hermes |
+| | Claude Code | agy (Antigravity) | Codex (CLI + ChatGPT Desktop) | OpenClaw | Hermes |
 |---|---|---|---|---|---|
 | **Identity** (`FROM:`) | `claudecowork` | `agy` | `codex` | `openclaw` | `hermes` |
-| **Conformance** | L2 | L2 | L1 | L1 | L1 (L0 without digest) |
-| **Transport to GitHub** | GitHub MCP server | **`gh` CLI** (no MCP client) | GitHub MCP (`~/.codex/config.toml`) | GitHub MCP via `mcporter` | native MCP client |
+| **Conformance** | L2 | L2 | L2 | L2 on its Codex runtime, else L1 | L1 (L0 without digest) |
+| **Transport to GitHub** | GitHub MCP server | **`gh` CLI** (no MCP client) | GitHub MCP (`~/.codex/config.toml`), `gh` fallback | GitHub MCP via `mcporter` | native MCP client |
 | **Installer** | `npm run hooks:install:claude` | `npm run hooks:install:agy` | `npm run hooks:install:codex` | `npm run hooks:install:openclaw` | `npm run hooks:install:hermes` |
-| **RECALL trigger** | `SessionStart` hook injects index | `PreInvocation` hook injects once per conversation | AGENTS.md digest (self-run) | digest (self-run) | digest / prose (self-run) |
-| **CAPTURE trigger** | `Stop` hook blocks once | `Stop` hook blocks once | git-floor `[AMP]` line (cue only) | git-floor line (cue only) | manifest discipline |
+| **RECALL trigger** | `SessionStart` hook injects index | `PreInvocation` hook injects once per conversation | `SessionStart` hook injects index | Codex hooks on its Codex runtime, else digest (self-run) | digest / prose (self-run) |
+| **CAPTURE trigger** | `Stop` hook blocks once | `Stop` hook blocks once | `Stop` hook blocks once | git-floor line (cue only) | manifest discipline |
 | **Skill location** | `~/.claude/skills/rxai-amp` | `~/.gemini/config/skills/rxai-amp` | `~/.codex/skills/rxai-amp` | — (digest only) | — (digest only) |
 | **Config root probed by setup** | `~/.claude` | `~/.gemini/config` | `~/.codex` | `~/.openclaw` | `~/.hermes` |
-| **Env var to set** | — (default) | — (hooks set it) | `RXAI_AMP_AGENT=codex` | `RXAI_AMP_AGENT=openclaw` | `RXAI_AMP_AGENT=hermes` |
+| **Env var to set** | — (default) | — (hooks set it) | — (hooks set it) | — (Codex hooks read the originator); `RXAI_AMP_AGENT=openclaw` off the Codex runtime | `RXAI_AMP_AGENT=hermes` |
 | **Adapter doc** | `adapters/claude-code/` | `adapters/agy/README.md` | `adapters/codex/README.md` | `adapters/openclaw/README.md` | `adapters/hermes/README.md` |
 
 Every agent also needs its `from:<agent>` **label** to exist on the memory
@@ -129,11 +129,20 @@ git --version && node -v && gh auth status
 One command does the whole thing:
 
 ```bash
+cd ~               # an unprotected folder every agent can reach; see the note below
 git clone https://github.com/<template-owner>/AgentMemory my-agent-memory
 cd my-agent-memory
 npm install        # prints a read-only hint if agents on this machine lack wiring
 npm run setup      # the interactive wizard
 ```
+
+**Where to clone (macOS).** Don't use `~/Documents`, `~/Desktop`, `~/Downloads`,
+iCloud Drive or an external volume. macOS privacy controls (TCC) make every app
+that runs an agent ask for access separately, and launchd jobs such as
+`board:schedule` cannot ask at all. The hooks fail soft, so a denied read looks
+like AMP simply not recalling anything. Your home folder (`~/my-agent-memory`)
+is the usual choice, but any unprotected path every agent can reach is fine.
+Otherwise, grant Full Disk Access to each app that runs an agent.
 
 `npm install` deliberately changes **nothing** outside the checkout — its
 `postinstall` only *reports* which agents it found without AMP wiring and the
@@ -285,31 +294,32 @@ Three agy-specific facts:
 
 Verify discovery: `agy --print-timeout 90s -p "/skills" | grep rxai-amp`
 
-### Codex (L1)
+### Codex and ChatGPT Desktop (L2)
 
 ```bash
 npm run hooks:install:codex         # add -- --dry-run to preview
 ```
 
-Codex has **no hook runtime**, so L1 means: the obligations ride into every
-session via config, and nothing fires automatically. The installer does three
-things idempotently:
+One install covers both: ChatGPT Desktop's Work chats are Codex sessions
+(`originator: "Codex Desktop"` in `~/.codex/sessions`) and read the same
+config. The installer, idempotently:
 
-- **skill** → `~/.codex/skills/rxai-amp` (sender `codex`, diary `codex-diary`,
-  and an explicit "nothing will trigger you — run the checklists yourself")
+- **hook runtime** → a self-contained copy under `~/.codex/rxai-amp`
+- **hooks** → `SessionStart` (recall, "Loading AMP memory"), `PostToolUse`,
+  `Stop` (block-once capture checkpoint) and `SessionEnd` merged into
+  `~/.codex/hooks.json`; foreign hooks — a Stop sound, say — are kept
+- **skill** → `~/.codex/skills/rxai-amp` (sender `codex`, diary `codex-diary`)
 - **digest** → spliced into `~/.codex/AGENTS.md` between
-  `<!-- rxai-amp-digest -->` sentinels (only our own block is ever replaced;
-  a `.amp-bak` backup is written first)
+  `<!-- rxai-amp-digest -->` sentinels, as the fallback when hooks are off
 - **label** → creates `from:codex` on the memory repo if missing
 
-Two things stay yours:
+Then switch the hooks on: `/hooks` in the Codex CLI, or **Settings → Hooks**
+in ChatGPT Desktop (the AMP entries are under *User config*). Codex skips
+hooks nobody has reviewed. A new session should start with an
+"RxAi AMP shared memory" block in context.
 
-```bash
-# in the environment Codex runs under — NOT your global shell profile:
-export RXAI_AMP_AGENT=codex
-```
-
-and the GitHub MCP entry in `~/.codex/config.toml`:
+The hooks set `RXAI_AMP_AGENT=codex` themselves. The GitHub MCP entry in
+`~/.codex/config.toml` stays yours (Codex can also write through `gh`):
 
 ```toml
 [mcp_servers.github]
@@ -317,11 +327,17 @@ command = "/bin/sh"
 args = ["-c", "GITHUB_PERSONAL_ACCESS_TOKEN=$(/opt/homebrew/bin/gh auth token -u <github-user>) exec /opt/homebrew/bin/github-mcp-server stdio --tools=get_file_contents,issue_read,issue_write,list_issues,search_issues,add_issue_comment"]
 ```
 
-Codex's only deterministic cue is the capture floor's
-`[AMP] commit <sha> logged for memory capture` line appearing in its shell
-output — that is the signal that the session now owes a memory or a decline.
+No separate ChatGPT plugin is needed, and one that offers its own recall
+would duplicate the hook's. ChatGPT on the web or on mobile runs no local
+hooks and is not connected by this setup.
 
-### OpenClaw (L1)
+### OpenClaw (L1, L2 on the Codex runtime)
+
+OpenClaw models configured with `agentRuntime: codex` run as Codex sessions
+(`originator: "openclaw"`), so with `npm run hooks:install:codex` done they
+fire the Codex hooks — recall injected, Stop checkpoint — and the hooks act
+as `openclaw`. The digest below still matters: it carries the identity and
+write formats, and it is all a model on another runtime gets.
 
 ```bash
 npm run hooks:install:openclaw      # add -- --dry-run to preview
@@ -341,7 +357,8 @@ Two things stay yours:
 1. **MCP path**: enable OpenClaw's `mcporter` skill and register the GitHub
    server in `~/.mcporter/config.json` — an `mcpServers.github` entry with
    `"command": "/bin/sh"` and the same `-c` launcher as Codex above.
-2. **Identity**: set `RXAI_AMP_AGENT=openclaw` in OpenClaw's environment.
+2. **Identity**: set `RXAI_AMP_AGENT=openclaw` in OpenClaw's environment (the
+   Codex hooks need nothing — they read the session's originator).
 
 To let OpenClaw read the index files *locally* (faster than MCP reads),
 register the memory clone as an OpenClaw **workspace** — unlike Claude/agy it
@@ -521,6 +538,7 @@ issue; the full index (`REGION-*.md`, weights) recompiles every 6 hours.
 | agy write fails in `-p` print mode | Permission prompt needs a TTY → approve the `gh` grant once in an interactive session |
 | Indexer never runs / index files stale | Actions workflow permissions not read+write (wizard step 6) → repo Settings → Actions → General → Workflow permissions |
 | Issue posted but not in `not_indexed.md` | Tracker latency → wait ≥90 s and pull again; a cancelled run self-heals on the next issue |
+| No RECALL block, or recall works in one agent but not another (macOS) | The clone is in a TCC-protected folder (`~/Documents`, `~/Desktop`, `~/Downloads`, iCloud Drive, external volume) and that agent's app was never granted access; the hooks fail soft → move the clone to an unprotected folder such as `~/` and rerun the installers (hook paths are absolute), or grant Full Disk Access to that app |
 | Claude hooks stopped after moving the repo | Hook commands hold absolute paths and fail soft → rerun `npm run hooks:install:claude` |
 | Foreign hook blocked the floor install | Installer refuses to clobber (§15.5) → move your hook into `.git/hooks/post-commit.d/50-custom` and rerun |
 | Everything must stop *now* | `AMP_DISABLE=1` in the environment silences every adapter instantly |

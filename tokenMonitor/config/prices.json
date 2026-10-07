@@ -1,0 +1,9 @@
+{
+  "source": "OpenAI GPT-6 Sol and Luna launch list prices, https://openai.com/index/introducing-gpt-6-sol-and-luna/",
+  "checked": "2026-09-23",
+  "unit": "USD per 1M tokens; reasoning tokens bill as output",
+  "models": {
+    "gpt-6-sol": { "input": 2.0, "cachedInput": 0.2, "output": 10.0 },
+    "gpt-6-luna": { "input": 0.1, "cachedInput": 0.01, "output": 0.5 }
+  }
+}

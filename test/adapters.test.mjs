@@ -193,6 +193,44 @@ test("codex keeps a trivial turn ledger open until SessionEnd", (t) => {
   assert.equal(ledger.status, "closed");
 });
 
+// OpenClaw runs its OpenAI models on the Codex runtime, so its sessions fire
+// the Codex hooks — launched with RXAI_AMP_AGENT=codex. The session's
+// originator (first rollout line) is what tells them apart; found 2026-10-06
+// when OpenClaw sessions were ledgered as codex and its [FROM:openclaw…]
+// captures could never satisfy the codex Stop check.
+test("codex shims take the session's originator as identity: openclaw stays openclaw, ChatGPT Desktop stays codex", async (t) => {
+  const { agentForOriginator, originatorFromTranscript } = await import("../adapters/codex/hooks/identity.mjs");
+  const home = mkdtempSync(path.join(tmpdir(), "amp-codex-identity-"));
+  t.after(() => rmSync(home, { recursive: true, force: true }));
+  const rollout = (name, originator) => {
+    const file = path.join(home, `${name}.jsonl`);
+    writeFileSync(file, JSON.stringify({ type: "session_meta", payload: { id: name, originator, cwd: home } }) + '\n{"type":"event_msg","payload":{"originator":"not-this-line"}}\n');
+    return file;
+  };
+  assert.equal(originatorFromTranscript(rollout("a", "openclaw")), "openclaw");
+  assert.equal(originatorFromTranscript(path.join(home, "missing.jsonl")), "");
+  assert.equal(agentForOriginator("openclaw"), "openclaw");
+  assert.equal(agentForOriginator("Codex Desktop"), null);
+  assert.equal(agentForOriginator(""), null);
+
+  const { AMP_DISABLE: _d, RXAI_AMP_REPO: _r, CODEX_INTERNAL_ORIGINATOR_OVERRIDE: _o, ...baseEnv } = process.env;
+  const env = { ...baseEnv, RXAI_AMP_HOME: path.join(home, "amp"), RXAI_AMP_SLUG: "test-owner/test-memory", RXAI_AMP_AGENT: "codex" };
+  const start = (sessionId, transcript, extraEnv = {}) => {
+    execFileSync("node", [path.join(root, "adapters/codex/hooks/session-start.mjs")], {
+      input: JSON.stringify({ session_id: sessionId, cwd: home, transcript_path: transcript }),
+      env: { ...env, ...extraEnv },
+      cwd: home,
+      encoding: "utf8",
+      timeout: 20_000,
+    });
+    return JSON.parse(readFileSync(path.join(home, "amp", "sessions", `${sessionId}.json`), "utf8")).agent;
+  };
+  assert.equal(start("s-openclaw", rollout("b", "openclaw")), "openclaw");
+  assert.equal(start("s-desktop", rollout("c", "Codex Desktop")), "codex");
+  assert.equal(start("s-none", undefined), "codex");
+  assert.equal(start("s-env", undefined, { CODEX_INTERNAL_ORIGINATOR_OVERRIDE: "openclaw" }), "openclaw");
+});
+
 // Every L1 digest must carry the three obligations, the sentinels the
 // installers splice on, and its agent's own identity (a copied digest that
 // still names another agent would post into the wrong diary).

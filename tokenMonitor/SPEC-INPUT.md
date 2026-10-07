@@ -96,7 +96,7 @@ The system spends tokens in five distinct cost centers:
 - FR-6 `--json` on every command for machine consumption; exit code 2 when
   budget OVER (CI-friendly).
 - FR-7 Config file `tokmon.config.json` (auto-created with defaults on first
-  run): `memoryRepoPath` (default `~/Documents/AgentMemory`),
+  run): `memoryRepoPath` (default `~/AgentMemory`),
   `claudeProjectsDir` (default `~/.claude/projects`), `budgets`
   (`recallInjectionTokens: 4000`), `models[]` — each `{ id, label, tokenizer:
   "o200k" | "approx", calibrationRatio, pricePerMTokInput, pricePerMTokOutput,

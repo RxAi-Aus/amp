@@ -1,5 +1,5 @@
 <!-- rxai-amp-digest v1 — installed by scripts/install-digest.mjs; edit there, not here -->
-## RxAi AMP lifecycle (PROTOCOL.md §15 — conformance L1)
+## RxAi AMP lifecycle (PROTOCOL.md §15 — L1; L2 on the Codex runtime)
 
 You share a memory repo with other agents. AMP memories are **GitHub Issues**
 on that repo — separate from your own workspace memory files (`MEMORY.md`,
@@ -8,8 +8,10 @@ diary Region is `openclaw-diary`. Reads and writes go through the GitHub MCP
 server (via your `mcporter` skill); issue titles follow
 `[FROM:openclaw→<recipient>][REGION:<area>][PLACE:<topic>][TYPE:<kind>] short intent`.
 
-- **RECALL** — before task work, read `INDEX.md` and `not_indexed.md` from
-  the memory repo (workspace clone if registered,
+- **RECALL** — if an "RxAi AMP shared memory" block is already in your
+  context, recall is done: a model running on the Codex runtime gets it from
+  the Codex hooks — do not read the index again. Otherwise, before task work,
+  read `INDEX.md` and `not_indexed.md` from the memory repo (workspace clone if registered,
   else MCP `get_file_contents`), then `issue_read` only the issues whose
   pointer titles overlap your task. Do not load `REGION-*.md` files to find
   memories (v2.12): they are for browsing a Region on request and for the
@@ -26,6 +28,7 @@ server (via your `mcporter` skill); issue titles follow
   `- **Surfaced:** #47 (used → success), #52 (unused)` /
   `- **Capture:** stored #91` (or `declined — "reason"`).
 
-Nothing fires automatically for AMP — no checkpoint will block you. Running
-these checklists is your job. To pause AMP here, remove this block; re-running the installer restores it.
+On the Codex runtime the Codex hooks also run a capture checkpoint when you
+stop, under your own identity; on any other runtime nothing fires
+automatically and running these checklists is your job. To pause AMP here, remove this block; re-running the installer restores it.
 <!-- /rxai-amp-digest -->

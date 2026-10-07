@@ -34,8 +34,8 @@ export interface TokmonConfig {
 // Prices verified against Anthropic docs 2026-08-08. o200k_base undercounts
 // Claude tokens by ~15-20%, hence calibrationRatio 1.18 for the Claude family.
 const DEFAULT_CONFIG: TokmonConfig = {
-  memoryRepoPath: '~/Documents/AgentMemory',
-  devRepoPath: '~/Documents/githubMemoryAgent',
+  memoryRepoPath: '~/AgentMemory',
+  devRepoPath: '~/githubMemoryAgent',
   claudeProjectsDir: '~/.claude/projects',
   memoryProjectMarkers: ['AgentMemory', 'githubMemoryAgent'],
   budgets: { recallInjectionTokens: 4000, warnRatio: 0.8 },

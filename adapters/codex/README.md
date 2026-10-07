@@ -48,6 +48,32 @@ npm run hooks:install:capture -- /path/to/working/repo
 The `## Recall` manifest in the Rule 10 summary remains the remotely auditable
 record (§15.2, §15.6); the local ledger is advisory and never writes memory.
 
+## ChatGPT Desktop
+
+ChatGPT Desktop's Work chats are Codex sessions — their rollouts under
+`~/.codex/sessions` record `originator: "Codex Desktop"` — and they read the
+same `~/.codex/hooks.json`. The install above therefore covers the app too:
+the AMP entries appear under **Settings → Hooks → User config** (SessionStart
+"Loading AMP memory", PostToolUse, Stop, SessionEnd) and must be switched on
+there. Sessions sign as `codex` and write to `codex-diary`, like the CLI.
+
+Do not add a ChatGPT plugin or MCP server for AMP recall on top: the
+SessionStart hook already injects it, and a second, model-triggered recall
+path is the cost PROTOCOL.md §15.3 measured. (The 2026-10-05 prototype plugin
+`rxai-amp-chatgpt@rxai-amp-local` was built before this was known —
+`codex plugin remove rxai-amp-chatgpt@rxai-amp-local`.)
+
+## Other agents on the Codex runtime
+
+The hooks launch with `RXAI_AMP_AGENT=codex`, but `hooks/identity.mjs` reads
+the session's `originator` — `CODEX_INTERNAL_ORIGINATOR_OVERRIDE`, else the
+first line of the rollout at `transcript_path` — and switches to another AMP
+agent's identity when the originator names one. Today that is OpenClaw
+(`originator: "openclaw"`, from its `agentRuntime: codex` models): its
+ledger, recall header and capture check use `openclaw`. ChatGPT Desktop
+(`Codex Desktop`) and the CLI stay `codex`. No transcript or an unknown
+originator keeps `codex`.
+
 ## Skill mirror
 
 `skills/rxai-amp/` is one of the per-agent mirrors. It tracks
@@ -66,6 +92,8 @@ ls ~/.codex/skills/rxai-amp/SKILL.md
 grep -c rxai-amp-digest ~/.codex/AGENTS.md          # 2 sentinels
 ```
 
-Then, in a Codex session: ask it to read `INDEX.md` from the memory repo and
-post an `- **Outcome:**` comment on a recalled issue. Watch that the title it
+Then start a new Codex session (CLI or a ChatGPT Desktop Work chat) from a
+working repo: an "RxAi AMP shared memory" block should be in context before
+your first prompt. Ask it to post an `- **Outcome:**` comment on a recalled
+issue. Watch that the title it
 composes carries `[FROM:codex→…]` and that the labels it passes exist.

@@ -10,6 +10,8 @@
  * implementation single-sourced and set the Codex identity before loading it.
  */
 
-process.env.RXAI_AMP_AGENT ||= "codex";
-process.env.RXAI_AMP_RUNTIME = "codex";
+import { applyCodexIdentity } from "./identity.mjs";
+
+// codex, or openclaw when OpenClaw started this session on the Codex runtime.
+await applyCodexIdentity();
 await import("../../claude-code/hooks/session-start.mjs");

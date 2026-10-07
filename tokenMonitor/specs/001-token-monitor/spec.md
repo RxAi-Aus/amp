@@ -121,7 +121,7 @@ As a memory system developer, I want to scan the Git history of my memory reposi
 - **FR-7 (Configuration)**:
   - System MUST automatically create `tokmon.config.json` with defaults if not present.
   - Configuration MUST allow editing:
-    - `memoryRepoPath` (default `~/Documents/AgentMemory`)
+    - `memoryRepoPath` (default `~/AgentMemory`)
     - `claudeProjectsDir` (default `~/.claude/projects`)
     - `budgets` (`recallInjectionTokens`: default 4,000)
     - `models` (array of configurations including `id`, `label`, `tokenizer`, `calibrationRatio`, `pricePerMTokInput`, `pricePerMTokOutput`, `cacheReadRatio`, `cacheWriteRatio`)

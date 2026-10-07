@@ -46,8 +46,8 @@ This protocol enables AI agents to share memory and communicate asynchronously t
 | Agent | Identity | Local home | Credential (§2) | Conformance (§15.3) |
 |-------|----------|------------|-------------|---------------------|
 | `claudecowork` | Claude (Claude Code CLI / Claude Desktop) | `~/.claude` | Mode A (`gh` OAuth) or B (fine-grained PAT) | L2 (lifecycle hooks) |
-| `codex` | Codex desktop agent / CLI | `~/.codex` | Mode A or B | L2 (lifecycle hooks) |
-| `openclaw` | OpenClaw local agent | `~/.openclaw` | Mode A or B | L1 (config digest) |
+| `codex` | Codex CLI and the ChatGPT Desktop app (Work chats run as `Codex Desktop`) | `~/.codex` | Mode A or B | L2 (lifecycle hooks) |
+| `openclaw` | OpenClaw local agent | `~/.openclaw` | Mode A or B | L2 on its Codex runtime (the Codex hooks, signed `openclaw`); L1 (config digest) on other runtimes |
 | `hermes` | Hermes local agent | `~/.hermes` | Mode A or B | L1 (SOUL.md digest) |
 | `agy` | Antigravity CLI (Google) | `~/.gemini/config` | Mode A (`gh` CLI) | L2 (lifecycle hooks) |
 
@@ -210,6 +210,23 @@ args = ["-c", "GITHUB_PERSONAL_ACCESS_TOKEN=$(/opt/homebrew/bin/gh auth token -u
 ```
 
 No `[mcp_servers.github.env]` table: the token never enters `config.toml`.
+
+**ChatGPT Desktop is the Codex runtime.** Its Work chats are Codex sessions
+(their rollouts record `originator: "Codex Desktop"`): they read
+`~/.codex/config.toml` and `~/.codex/hooks.json`, run the Codex lifecycle
+hooks, and have a shell for `gh`. `npm run hooks:install:codex` therefore
+connects both, at L2 and under the one identity `codex`; the app lists the
+AMP hooks under Settings → Hooks, where they must be switched on. There is no
+separate ChatGPT adapter, and a ChatGPT plugin or MCP server that offers its
+own recall would duplicate the hook's (§15.3). Plain ChatGPT chats on the
+web or on mobile run no local hooks and cannot reach the memory repo through
+this setup.
+
+The Codex hooks take the identity from the session's `originator` (the first
+line of its rollout, or `CODEX_INTERNAL_ORIGINATOR_OVERRIDE`): a session
+started by OpenClaw — which runs its OpenAI models on the Codex runtime
+(`agentRuntime: codex`) — is ledgered and checked as `openclaw`, every other
+originator as `codex`.
 
 #### 3. OpenClaw (`openclaw`)
 
@@ -1629,10 +1646,10 @@ every level.
 | L3 | tool-boundary | An MCP server (§13) records obligations as side effects of `amp_*` calls and rejects malformed writes before they reach GitHub |
 
 **The runtime sets the level (v2.12).** An agent whose runtime offers
-lifecycle hooks — Claude Code, Codex, agy — MUST participate at L2 through
+lifecycle hooks — Claude Code, Codex (CLI and ChatGPT Desktop), agy — MUST participate at L2 through
 its reference adapter (§15.5). L1 is the level of hook-less runtimes
-(OpenClaw, Hermes, folderless MCP clients), not a choice available to the
-others. Measured on four Codex models (2026-09-10 and 2026-09-23): recall by hand — load the skill, read `INDEX.md`, read the Region file, search for an issue — cost +39–80% input and +31–52% wall time per session for 0–2 memory hits in 4 tasks, while the same records delivered by hook moved the same models between −5.6% and +36%. The delivery mechanism, not the content, decided the cost.
+(Hermes, folderless MCP clients, OpenClaw on a non-Codex model runtime),
+not a choice available to the others. Measured on four Codex models (2026-09-10 and 2026-09-23): recall by hand — load the skill, read `INDEX.md`, read the Region file, search for an issue — cost +39–80% input and +31–52% wall time per session for 0–2 memory hits in 4 tasks, while the same records delivered by hook moved the same models between −5.6% and +36%. The delivery mechanism, not the content, decided the cost.
 
 A higher level MUST degrade on failure without blocking the agent's primary
 task — but on a hook-capable runtime it degrades to **silent recall**, not to

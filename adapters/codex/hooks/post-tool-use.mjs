@@ -9,6 +9,8 @@
  * shared observer. The installer matches Bash plus issue-related MCP tools.
  */
 
-process.env.RXAI_AMP_AGENT ||= "codex";
-process.env.RXAI_AMP_RUNTIME = "codex";
+import { applyCodexIdentity } from "./identity.mjs";
+
+// codex, or openclaw when OpenClaw started this session on the Codex runtime.
+await applyCodexIdentity();
 await import("../../claude-code/hooks/post-tool-use.mjs");

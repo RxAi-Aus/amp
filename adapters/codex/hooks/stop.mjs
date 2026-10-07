@@ -9,6 +9,8 @@
  * stop_hook_active and treats {decision:"block",reason} as a continuation.
  */
 
-process.env.RXAI_AMP_AGENT ||= "codex";
-process.env.RXAI_AMP_RUNTIME = "codex";
+import { applyCodexIdentity } from "./identity.mjs";
+
+// codex, or openclaw when OpenClaw started this session on the Codex runtime.
+await applyCodexIdentity();
 await import("../../claude-code/hooks/stop.mjs");

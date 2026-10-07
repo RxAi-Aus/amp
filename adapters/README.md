@@ -23,7 +23,7 @@ checks, read order). The session ledger is the connective state between them.
 | claudecowork | L2 | user-level hooks (`session-start`, `user-prompt-submit`, `post-tool-use`, `stop`, `session-end`) + user-level skill + git floor |
 | agy | L2 | global hooks (`pre-invocation`, `stop`) + global skill mirror + git floor (`adapters/agy/README.md`) |
 | codex | L2 | `SessionStart`/`PostToolUse`/`Stop`/`SessionEnd` + skill mirror + `AGENTS.md` digest + git floor, installed by `npm run hooks:install:codex` (`adapters/codex/README.md`) |
-| openclaw | L1 | workspace `AGENTS.md` digest + git floor, installed by `npm run hooks:install:openclaw` (`adapters/openclaw/README.md`) |
+| openclaw | L2 on its Codex runtime, else L1 | the Codex hooks (identity from the session's `originator`) when its model runs on `agentRuntime: codex`; workspace `AGENTS.md` digest + git floor, installed by `npm run hooks:install:openclaw` (`adapters/openclaw/README.md`) |
 | hermes | L1 | `~/.hermes/SOUL.md` digest (always loaded from HERMES_HOME), manifest-as-ledger, installed by `npm run hooks:install:hermes` (`adapters/hermes/README.md`) |
 
 **The runtime sets the level (v2.12, §15.3).** A runtime with lifecycle hooks
@@ -45,7 +45,7 @@ npm run hooks:install:claude          # add -- --dry-run to preview
 # agy / Antigravity CLI (hooks + skill into ~/.gemini/config/):
 npm run hooks:install:agy             # add -- --dry-run to preview
 
-# Codex (L2 hooks; the skill + digest carry the write formats and the capture/outcome floor):
+# Codex CLI and ChatGPT Desktop (same ~/.codex runtime; L2 hooks; the skill + digest carry the write formats and the capture/outcome floor):
 npm run hooks:install:codex           # add -- --dry-run to preview
 
 # OpenClaw (L1: §15 digest into its workspace AGENTS.md):

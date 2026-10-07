@@ -12,7 +12,8 @@
     "sessions": "npm run -s build && node dist/src/cli.js sessions",
     "benchmark:codex": "npm run -s build && node dist/src/codex_benchmark.js",
     "backfill": "npm run -s build && node dist/src/cli.js backfill",
-    "serve": "npm run -s build && node dist/src/cli.js serve"
+    "serve": "npm run -s build && node dist/src/cli.js serve",
+    "benchmark:claude": "npm run -s build && node dist/src/claude_benchmark.js"
   },
   "dependencies": {
     "gpt-tokenizer": "^3.0.1"

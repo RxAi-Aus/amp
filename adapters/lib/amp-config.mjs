@@ -164,16 +164,24 @@ export function githubToken() {
   return cachedGhToken;
 }
 
-/** Read all of stdin (hook input JSON). Returns {} on empty/invalid input. */
-export async function readStdinJson() {
-  try {
-    const chunks = [];
-    for await (const chunk of process.stdin) chunks.push(chunk);
-    const raw = Buffer.concat(chunks).toString("utf8").trim();
-    if (!raw) return {};
-    const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch {
-    return {};
-  }
+/**
+ * Read all of stdin (hook input JSON). Returns {} on empty/invalid input.
+ * Memoized per process: stdin can be read once, and a runtime shim (the
+ * Codex identity step) reads it before the shared hook it imports does.
+ */
+let stdinJson;
+export function readStdinJson() {
+  stdinJson ??= (async () => {
+    try {
+      const chunks = [];
+      for await (const chunk of process.stdin) chunks.push(chunk);
+      const raw = Buffer.concat(chunks).toString("utf8").trim();
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  })();
+  return stdinJson;
 }

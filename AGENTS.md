@@ -125,7 +125,7 @@ suggestions):**
   ```bash
   npm run hooks:install:claude              # Claude Code hooks + user-level skill (add -- --dry-run to preview)
   npm run hooks:install:agy                 # agy PreInvocation/Stop hooks + global skill into ~/.gemini/config
-  npm run hooks:install:codex               # Codex L2 (v2.9.2): hook runtime + ~/.codex/hooks.json merge; skill + digest stay as L1 fallback
+  npm run hooks:install:codex               # Codex L2 (v2.9.2): hook runtime + ~/.codex/hooks.json merge; skill + digest stay as L1 fallback; also covers ChatGPT Desktop (its Work chats are Codex sessions)
   npm run hooks:install:openclaw            # OpenClaw L1: §15 digest into its workspace AGENTS.md
   npm run hooks:install:hermes              # Hermes L1: §15 digest into ~/.hermes/SOUL.md
   npm run hooks:install:capture -- <repo>   # AMP post-commit capture hook into any working repo
