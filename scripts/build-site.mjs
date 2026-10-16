@@ -18,7 +18,7 @@
  *   - writes the language links at <!-- build:langs -->, plus a script that
  *     remembers the choice; the English page, which is also the x-default,
  *     sends a visitor who chose another language (or whose browser asks for
- *     one the page has) to that version
+ *     one the page has) to that version, unless the browser is automated
  *   - rewrites relative links for the page's folder: a link to another page
  *     goes to that page in the same language when it exists, else to English
  *   - adds a speculation-rules prefetch, so moving between pages starts warm
@@ -48,11 +48,14 @@ export const LANGS = {
 };
 
 // `path` is the page's URL path under a language folder ("" is the folder's
-// index). `modified` feeds the sitemap's <lastmod>.
+// index). `modified` feeds the sitemap's <lastmod>: the last change to what the
+// page says, kept equal to its visible date and dateModified (a new footer link
+// is not a change).
 export const PAGES = [
-  { src: "index.html", path: "", langs: ["en", "zh-Hant", "ja", "ko", "es"], modified: "2026-09-24" },
+  { src: "index.html", path: "", langs: ["en", "zh-Hant", "ja", "ko", "es"], modified: "2026-10-16" },
+  { src: "agent-memory.html", path: "agent-memory.html", langs: ["en", "zh-Hant"], modified: "2026-10-16" },
   { src: "benchmark.html", path: "benchmark.html", langs: ["en", "zh-Hant"], modified: "2026-09-24" },
-  { src: "quickstart.html", path: "quickstart.html", langs: ["en", "zh-Hant"], modified: "2026-09-24" },
+  { src: "quickstart.html", path: "quickstart.html", langs: ["en", "zh-Hant"], modified: "2026-10-04" },
   { src: "compare.html", path: "compare.html", langs: ["en", "zh-Hant"], modified: "2026-09-24" },
   { src: "404.html", path: "404.html", langs: ["en"], noindex: true },
 ];
@@ -176,8 +179,10 @@ function langSwitchScripts(page) {
   const redirect = `<script>
   // English is also the x-default. A visitor who chose another language before,
   // or whose browser asks for one this page has, goes to that version; a
-  // visitor on a language URL stays where the link sent them.
+  // visitor on a language URL stays where the link sent them. An automated
+  // browser (a crawler or an AI reader) gets the page it asked for.
   (function () {
+    if (navigator.webdriver) return;
     var alt = ${JSON.stringify(alt)};
     var l = null;
     try { l = localStorage.getItem("amp-lang"); } catch (e) {}

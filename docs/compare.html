@@ -6,8 +6,10 @@
 <script>
   // English is also the x-default. A visitor who chose another language before,
   // or whose browser asks for one this page has, goes to that version; a
-  // visitor on a language URL stays where the link sent them.
+  // visitor on a language URL stays where the link sent them. An automated
+  // browser (a crawler or an AI reader) gets the page it asked for.
   (function () {
+    if (navigator.webdriver) return;
     var alt = {"zh-Hant":"zh-hant/compare.html"};
     var l = null;
     try { l = localStorage.getItem("amp-lang"); } catch (e) {}
@@ -399,11 +401,13 @@
       animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
     }
     html[data-js] header > * { animation: amp-rise 640ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
-    html[data-js] header > h1 { animation-delay: 70ms; }
-    html[data-js] header > .lede { animation-delay: 140ms; }
+    /* The heading and lede are the largest paint: move them in, never hide them. */
+    html[data-js] header > h1 { animation-name: amp-lift; animation-delay: 70ms; }
+    html[data-js] header > .lede { animation-name: amp-lift; animation-delay: 140ms; }
     html[data-js] header > .chips { animation-delay: 210ms; }
   }
   @keyframes amp-rise { from { opacity: 0; transform: translateY(12px); } }
+  @keyframes amp-lift { from { transform: translateY(12px); } }
 
   /* ---------- quickstart / compare ---------- */
   .cmp th:not(:first-child), .cmp td:not(:first-child) { min-width: 136px; }
@@ -492,7 +496,7 @@
       <li><b><span class="t" lang="en">MCP memory server</span></b><span class="t" lang="en">One person wants a small local knowledge graph inside an MCP client, with nothing else to set up.</span></li>
     </ul>
     <div class="callout">
-      <p class="t" lang="en">What AMP does not try to do: its recall matches memories by title and place, not by embeddings, so semantic search across thousands of memories is not its goal. It needs GitHub. How much it saves depends on the model; the <a href="benchmark.html">benchmarks</a> show where it pays for itself and where it does not.</p>
+      <p class="t" lang="en">What AMP does not try to do: its recall matches memories by title and place, not by embeddings, so semantic search across thousands of memories is not its goal. It needs GitHub. How much it saves depends on the model; the <a href="benchmark.html">benchmarks</a> show where it pays for itself and where it does not. The <a href="agent-memory.html">agent memory guide</a> explains how it keeps memory consistent and accurate.</p>
     </div>
   </section>
 
@@ -514,6 +518,7 @@
   <footer>
     <nav class="foot-nav" aria-label="Pages">
       <a href="./"><span class="t" lang="en">Overview</span></a>
+      <a href="agent-memory.html"><span class="t" lang="en">Agent memory</span></a>
       <a href="quickstart.html"><span class="t" lang="en">Quickstart</span></a>
       <a href="compare.html" aria-current="page"><span class="t" lang="en">Compare</span></a>
       <a href="benchmark.html"><span class="t" lang="en">Benchmarks</span></a>

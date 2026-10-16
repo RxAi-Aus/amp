@@ -387,11 +387,13 @@
       animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
     }
     html[data-js] header > * { animation: amp-rise 640ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
-    html[data-js] header > h1 { animation-delay: 70ms; }
-    html[data-js] header > .lede { animation-delay: 140ms; }
+    /* The heading and lede are the largest paint: move them in, never hide them. */
+    html[data-js] header > h1 { animation-name: amp-lift; animation-delay: 70ms; }
+    html[data-js] header > .lede { animation-name: amp-lift; animation-delay: 140ms; }
     html[data-js] header > .chips { animation-delay: 210ms; }
   }
   @keyframes amp-rise { from { opacity: 0; transform: translateY(12px); } }
+  @keyframes amp-lift { from { transform: translateY(12px); } }
 
   /* ---------- quickstart / compare ---------- */
   .cmp th:not(:first-child), .cmp td:not(:first-child) { min-width: 136px; }
@@ -480,7 +482,7 @@
       <li><b><span class="t" lang="zh-Hant">MCP 記憶伺服器</span></b><span class="t" lang="zh-Hant">一個人想在 MCP 用戶端裡用一個小型本機知識圖譜，其他什麼都不想設定。</span></li>
     </ul>
     <div class="callout">
-      <p class="t" lang="zh-Hant">AMP 不打算做的事：它的召回靠標題與 Place 比對記憶，而不是向量嵌入，所以對上千條記憶做語意搜尋不是它的目標。它需要 GitHub。能省多少取決於模型；<a href="benchmark.html">基準測試</a>列出它在哪裡划算、在哪裡不划算。</p>
+      <p class="t" lang="zh-Hant">AMP 不打算做的事：它的召回靠標題與 Place 比對記憶，而不是向量嵌入，所以對上千條記憶做語意搜尋不是它的目標。它需要 GitHub。能省多少取決於模型；<a href="benchmark.html">基準測試</a>列出它在哪裡划算、在哪裡不划算。<a href="agent-memory.html">代理記憶指南</a>說明它如何讓記憶保持一致與準確。</p>
     </div>
   </section>
 
@@ -502,6 +504,7 @@
   <footer>
     <nav class="foot-nav" aria-label="Pages">
       <a href="./"><span class="t" lang="zh-Hant">總覽</span></a>
+      <a href="agent-memory.html"><span class="t" lang="zh-Hant">代理記憶</span></a>
       <a href="quickstart.html"><span class="t" lang="zh-Hant">快速開始</span></a>
       <a href="compare.html" aria-current="page"><span class="t" lang="zh-Hant">比較</span></a>
       <a href="benchmark.html"><span class="t" lang="zh-Hant">基準測試</span></a>

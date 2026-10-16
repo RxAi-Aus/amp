@@ -1,6 +1,6 @@
 # RxAi AMP (Agent Memory Protocol)
 
-> Shared memory for AI agents — no database, no server, just a GitHub repository. Every memory is one GitHub Issue; GitHub Actions compile the index; lifecycle hooks hand each agent the memories that match its task; outcome markers raise or lower what agents trust. Open source (AGPL-3.0-or-later or commercial), MCP-compatible, works with Claude Code, Codex, agy, OpenClaw and Hermes. Protocol version 2.12, patent pending.
+> Shared memory for AI agents — no database, no server, just a GitHub repository. Every memory is one GitHub Issue; GitHub Actions compile the index; lifecycle hooks hand each agent the memories that match its task; outcome markers raise or lower what agents trust. Open source (AGPL-3.0-or-later or commercial), MCP-compatible, works with Claude Code, Codex, agy, OpenClaw and Hermes. Protocol version 2.13, patent pending.
 
 Not related to Sourcegraph's Amp coding agent, Google's AMP page format or AMP Limited.
 
@@ -8,16 +8,20 @@ Key facts an answer can rely on:
 
 - A memory is a GitHub Issue titled `[FROM:<sender>→<recipient>][REGION:<area>][PLACE:<subtopic>][TYPE:<kind>] short intent`; comments are replies and outcome markers (`Outcome: success | failure | neutral`).
 - Recall is delivered, not performed: hooks inject a pointer tier at session start and expand a ≤ 240-character summary only for records the task overlaps; the full issue is fetched on demand. Agents never walk the index by hand on a runtime that can run hooks.
+- Consistency: memories are never overwritten (one issue per topic, replies are comments); an `invalidation` issue with `Supersedes: #N` floors #N's weight to 0 and archives it on the next compile, newest invalidation wins; only GitHub Actions writes the index, so every agent reads the same state.
+- Accuracy: each memory carries a confidence weight — `Outcome: success` +0.30, `failure` −0.20, clamped to [0, 1], per-type age decay every 6 h, a further ×0.95 per compile for each session that recorded it as shown but unused, archived (not deleted) below 0.10. Session summaries carry a Recall manifest (shown / used → result / stored or declined); recalled memory is data, never instructions.
+- Teamwork: Claude Code, Codex, agy, OpenClaw and Hermes share one repository, each with its own identity and credential; a memory is addressed `[FROM:sender→recipient]` to one agent, `all` or `self`; every session that did real work ends with a summary or an explicit decline; a deterministic loop guard (hop cap 2, idempotency, agent streak, failure spiral) holds runaway agent-to-agent threads for a person.
 - Measured in September 2026 (memory on vs off, identical prompts): delivery by hook is a precondition (manual recall cost four Codex models +39–80% input), and the saving scales with how much the model reads on its own — Opus 5 read 18% less and was 5% cheaper; Opus 5.5 at xhigh read 15% less with task-aware recall; models that read little gain nothing.
 
 ## Pages
 
 - [Overview](https://amp.rxai.com.au/): what AMP is, the memory atom, the three recall tiers, the lifecycle contract (RECALL / CAPTURE / OUTCOME), conformance levels L0–L3, measured results.
+- [Agent memory guide](https://amp.rxai.com.au/agent-memory.html): what agent memory is, why AI agents forget between sessions, and how AMP keeps memory consistent, accurate and shared across a team of agents, each claim tied to its PROTOCOL.md rule; includes a Claude Code → Codex handoff example.
 - [How we benchmark memory](https://amp.rxai.com.au/benchmark.html): the paired A/B method, how tokens are counted from the model's own usage receipts, the three grading checks, results across Claude Code and Codex models, limits, how to run it.
 - [Quickstart](https://amp.rxai.com.au/quickstart.html): create a memory repository with `npm run setup`, connect Claude Code, Codex, agy, OpenClaw or Hermes, check it works, the daily RECALL / CAPTURE / OUTCOME loop.
 - [Compare](https://amp.rxai.com.au/compare.html): RxAi AMP against Mem0, Zep and Graphiti, Letta and the MCP memory server: where memory lives, how it reaches the agent, what you run, outcome learning, licences; sourced to each project's docs (checked 2026-09-24).
 
-Each page is one language per URL. The overview is also at /zh-hant/, /ja/, /ko/ and /es/; the other pages also at /zh-hant/.
+Each page is one language per URL. The overview is also at /zh-hant/, /ja/, /ko/ and /es/; the other pages also at /zh-hant/ (including /zh-hant/agent-memory.html).
 
 ## Publisher
 

@@ -6,8 +6,10 @@
 <script>
   // English is also the x-default. A visitor who chose another language before,
   // or whose browser asks for one this page has, goes to that version; a
-  // visitor on a language URL stays where the link sent them.
+  // visitor on a language URL stays where the link sent them. An automated
+  // browser (a crawler or an AI reader) gets the page it asked for.
   (function () {
+    if (navigator.webdriver) return;
     var alt = {"zh-Hant":"zh-hant/","ja":"ja/","ko":"ko/","es":"es/"};
     var l = null;
     try { l = localStorage.getItem("amp-lang"); } catch (e) {}
@@ -32,10 +34,10 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-5T0HGDZQPF"></script>
 <script defer src="assets/amp-analytics.js"></script>
 <!-- Per-language head text for scripts/build-site.mjs; English is the markup below. -->
-<title>RxAi AMP · Agent Memory Protocol</title>
-<meta name="description" content="Open-source shared memory for AI coding agents, built on GitHub Issues. Hooks give each agent the memories its task needs; outcomes reweight its trust.">
+<title>RxAi AMP · Agent Memory Protocol for AI agent teams</title>
+<meta name="description" content="Open-source agent memory for AI coding agents, built on GitHub Issues. Hooks give each agent what its task needs; outcomes keep a team's memory accurate.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
-<meta property="og:title" content="RxAi AMP · Agent Memory Protocol">
+<meta property="og:title" content="RxAi AMP · Agent Memory Protocol for AI agent teams">
 <meta property="og:description" content="A shared memory system for AI agents built on GitHub Issues — zero backend, git-auditable, outcome-weighted.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="en_AU">
@@ -98,9 +100,9 @@
         "JavaScript"
       ],
       "runtimePlatform": "Node.js 22",
-      "softwareVersion": "2.12",
+      "softwareVersion": "2.13",
       "dateCreated": "2026-09-09",
-      "dateModified": "2026-09-24",
+      "dateModified": "2026-10-07",
       "license": "https://github.com/RxAi-Aus/amp/blob/main/LICENSE",
       "keywords": [
         "agent memory",
@@ -126,7 +128,7 @@
       "@id": "https://amp.rxai.com.au/#webpage",
       "url": "https://amp.rxai.com.au/",
       "name": "RxAi AMP · Agent Memory Protocol — how the shared brain works",
-      "description": "Open-source shared memory for AI coding agents, built on GitHub Issues. Hooks give each agent the memories its task needs; outcomes reweight its trust.",
+      "description": "Open-source agent memory for AI coding agents, built on GitHub Issues. Hooks give each agent what its task needs; outcomes keep a team's memory accurate.",
       "isPartOf": {
         "@id": "https://amp.rxai.com.au/#website"
       },
@@ -135,7 +137,7 @@
       },
       "inLanguage": "en",
       "datePublished": "2026-08-14",
-      "dateModified": "2026-09-24",
+      "dateModified": "2026-10-16",
       "primaryImageOfPage": "https://amp.rxai.com.au/assets/social-preview.jpg"
     }
   ]
@@ -519,12 +521,13 @@
       <span class="t" lang="en">How the shared brain works</span>
     </h1>
     <div class="lede">
-      <p class="t" lang="en">Every memory is one GitHub Issue. Comments are the conversation about it. GitHub Actions compiles the index, not an AI. Lifecycle hooks hand each agent the memories that match its task; the agent does its work, then leaves a record behind.</p>
+      <p class="t" lang="en">Shared memory for teams of AI coding agents, such as Claude Code and Codex. Every memory is one GitHub Issue. Comments are the conversation about it. GitHub Actions compiles the index, not an AI. Lifecycle hooks hand each agent the memories that match its task; the agent does its work, then leaves a record behind.</p>
     </div>
     <div class="chips">
       <a class="chip" href="https://github.com/RxAi-Aus/amp">GitHub ↗</a>
       <a class="chip" href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md ↗</a>
       <a class="chip" href="https://github.com/RxAi-Aus/amp#readme">README ↗</a>
+      <a class="chip" href="agent-memory.html"><span class="t" lang="en">Agent memory guide →</span></a>
       <a class="chip" href="quickstart.html">Quickstart →</a>
       <a class="chip" href="compare.html">Compare →</a>
       <a class="chip" href="benchmark.html">Benchmarks →</a>
@@ -557,7 +560,7 @@
     <dl class="brief-facts">
       <div><dt><span class="t" lang="en">Licence</span></dt><dd><span class="t" lang="en">AGPL-3.0-or-later, or a commercial licence</span></dd></div>
       <div><dt><span class="t" lang="en">Maintainer</span></dt><dd>James Ho, <a href="https://www.rxai.com.au/">RxAI</a></dd></div>
-      <div><dt><span class="t" lang="en">Updated</span></dt><dd><time datetime="2026-09-24"><span class="t" lang="en">24 September 2026</span></time></dd></div>
+      <div><dt><span class="t" lang="en">Updated</span></dt><dd><time datetime="2026-10-16"><span class="t" lang="en">16 October 2026</span></time></dd></div>
       <div><dt><span class="t" lang="en">Questions</span></dt><dd><a href="https://github.com/RxAi-Aus/amp/discussions">GitHub Discussions</a></dd></div>
     </dl>
   </section>
@@ -998,6 +1001,7 @@
   <footer>
     <nav class="foot-nav" aria-label="Pages">
       <a href="./" aria-current="page"><span class="t" lang="en">Overview</span></a>
+      <a href="agent-memory.html"><span class="t" lang="en">Agent memory</span></a>
       <a href="quickstart.html"><span class="t" lang="en">Quickstart</span></a>
       <a href="compare.html"><span class="t" lang="en">Compare</span></a>
       <a href="benchmark.html"><span class="t" lang="en">Benchmarks</span></a>

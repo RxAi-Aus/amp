@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://amp.rxai.com.au/</loc>
-    <lastmod>2026-09-24</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/"/>
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://amp.rxai.com.au/ja/"/>
@@ -12,7 +12,7 @@
   </url>
   <url>
     <loc>https://amp.rxai.com.au/zh-hant/</loc>
-    <lastmod>2026-09-24</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/"/>
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://amp.rxai.com.au/ja/"/>
@@ -22,7 +22,7 @@
   </url>
   <url>
     <loc>https://amp.rxai.com.au/ja/</loc>
-    <lastmod>2026-09-24</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/"/>
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://amp.rxai.com.au/ja/"/>
@@ -32,7 +32,7 @@
   </url>
   <url>
     <loc>https://amp.rxai.com.au/ko/</loc>
-    <lastmod>2026-09-24</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/"/>
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://amp.rxai.com.au/ja/"/>
@@ -42,13 +42,27 @@
   </url>
   <url>
     <loc>https://amp.rxai.com.au/es/</loc>
-    <lastmod>2026-09-24</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/"/>
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://amp.rxai.com.au/ja/"/>
     <xhtml:link rel="alternate" hreflang="ko" href="https://amp.rxai.com.au/ko/"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://amp.rxai.com.au/es/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/"/>
+  </url>
+  <url>
+    <loc>https://amp.rxai.com.au/agent-memory.html</loc>
+    <lastmod>2026-10-16</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/agent-memory.html"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/agent-memory.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/agent-memory.html"/>
+  </url>
+  <url>
+    <loc>https://amp.rxai.com.au/zh-hant/agent-memory.html</loc>
+    <lastmod>2026-10-16</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/agent-memory.html"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/agent-memory.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/agent-memory.html"/>
   </url>
   <url>
     <loc>https://amp.rxai.com.au/benchmark.html</loc>
@@ -66,14 +80,14 @@
   </url>
   <url>
     <loc>https://amp.rxai.com.au/quickstart.html</loc>
-    <lastmod>2026-09-24</lastmod>
+    <lastmod>2026-10-04</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/quickstart.html"/>
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/quickstart.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/quickstart.html"/>
   </url>
   <url>
     <loc>https://amp.rxai.com.au/zh-hant/quickstart.html</loc>
-    <lastmod>2026-09-24</lastmod>
+    <lastmod>2026-10-04</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/quickstart.html"/>
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/quickstart.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/quickstart.html"/>

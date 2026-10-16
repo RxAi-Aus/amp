@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  // English is also the x-default. A visitor who chose another language before,
+  // or whose browser asks for one this page has, goes to that version; a
+  // visitor on a language URL stays where the link sent them. An automated
+  // browser (a crawler or an AI reader) gets the page it asked for.
+  (function () {
+    if (navigator.webdriver) return;
+    var alt = {"zh-Hant":"zh-hant/agent-memory.html"};
+    var l = null;
+    try { l = localStorage.getItem("amp-lang"); } catch (e) {}
+    if (!l) { var n = (navigator.language || "").toLowerCase(); l = n.indexOf("zh") === 0 ? "zh-Hant" : n.slice(0, 2); }
+    if (alt[l]) location.replace(alt[l] + location.search + location.hash);
+  })();
+</script>
+<!-- Google tag (gtag.js) · GA4 property amp.rxai.com.au · Consent Mode v2:
+     everything denied until the visitor accepts (assets/amp-analytics.js shows
+     the banner); a stored choice is restored before gtag.js loads. -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied',
+    analytics_storage: 'denied', wait_for_update: 500
+  });
+  try { if (localStorage.getItem('amp-consent') === 'granted') gtag('consent', 'update', { analytics_storage: 'granted' }); } catch (e) {}
+  gtag('js', new Date());
+  gtag('config', 'G-5T0HGDZQPF', { cookie_expires: 63072000 });
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5T0HGDZQPF"></script>
+<script defer src="assets/amp-analytics.js"></script>
+<!-- Per-language head text for scripts/build-site.mjs; English is the markup below. -->
+<title>AI agent memory: accurate, consistent, shared · RxAi AMP</title>
+<meta name="description" content="Why AI agents forget, trust stale facts and talk past each other, and how RxAi AMP keeps agent memory consistent, accurate and shared across a team.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+<meta property="og:title" content="AI agent memory: accurate, consistent, shared · RxAi AMP">
+<meta property="og:description" content="Four ways agent memory goes wrong, and the mechanism RxAi AMP uses for each: delivery by hooks, invalidation, outcome weights and one shared store.">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_AU">
+<meta property="og:locale:alternate" content="zh_TW">
+<meta property="og:url" content="https://amp.rxai.com.au/agent-memory.html">
+<meta property="og:image" content="https://amp.rxai.com.au/assets/social-preview.jpg">
+<meta property="article:published_time" content="2026-10-16">
+<meta property="article:modified_time" content="2026-10-16">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://amp.rxai.com.au/assets/social-preview.jpg">
+<link rel="canonical" href="https://amp.rxai.com.au/agent-memory.html">
+<link rel="alternate" hreflang="en" href="https://amp.rxai.com.au/agent-memory.html">
+<link rel="alternate" hreflang="zh-Hant" href="https://amp.rxai.com.au/zh-hant/agent-memory.html">
+<link rel="alternate" hreflang="x-default" href="https://amp.rxai.com.au/agent-memory.html">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://www.rxai.com.au/#organization",
+      "name": "RxAI",
+      "url": "https://www.rxai.com.au",
+      "logo": "https://www.rxai.com.au/assets/images/logo.webp",
+      "sameAs": [
+        "https://github.com/RxAi-Aus"
+      ]
+    },
+    {
+      "@type": "TechArticle",
+      "@id": "https://amp.rxai.com.au/agent-memory.html#article",
+      "headline": "AI agent memory that stays accurate, consistent and shared across a team",
+      "description": "Why AI agents forget, trust stale facts and talk past each other, and how RxAi AMP keeps agent memory consistent, accurate and shared across a team.",
+      "url": "https://amp.rxai.com.au/agent-memory.html",
+      "mainEntityOfPage": "https://amp.rxai.com.au/agent-memory.html",
+      "inLanguage": "en",
+      "datePublished": "2026-10-16",
+      "dateModified": "2026-10-16",
+      "author": {
+        "@type": "Person",
+        "name": "James Ho"
+      },
+      "publisher": {
+        "@id": "https://www.rxai.com.au/#organization"
+      },
+      "image": "https://amp.rxai.com.au/assets/social-preview.jpg",
+      "about": {
+        "@id": "https://amp.rxai.com.au/#software"
+      },
+      "isPartOf": {
+        "@id": "https://amp.rxai.com.au/#website"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "RxAi AMP",
+          "item": "https://amp.rxai.com.au/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Agent memory",
+          "item": "https://amp.rxai.com.au/agent-memory.html"
+        }
+      ]
+    }
+  ]
+}
+</script>
+<style>
+  /* Tokens and components follow index.html so the two pages read as one site. */
+  :root {
+    --paper: #FAFBFD;
+    --ink: #1A2334;
+    --muted: #55637A;
+    --line: #D9E0EA;
+    --panel: #F0F3F8;
+    --accent: #8B5A0E;
+    --accent-soft: #F5EAD4;
+    --ok: #287046;
+    --ok-soft: #E3F0E8;
+    --bad: #A83E38;
+    --bad-soft: #F6E5E4;
+    --ref: #2F5FA8;
+    --ref-soft: #E4ECF7;
+    --tag-place: #1F7A72;
+    --seg-cached: #BFD0EA;
+    --seg-new: #D99A2B;
+    --seg-out: #2E7D4F;
+    --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+    --shade: rgba(26, 35, 52, 0.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0E1420;
+      --ink: #E8ECF4;
+      --muted: #93A1B8;
+      --line: #263248;
+      --panel: #161F30;
+      --accent: #E0A83C;
+      --accent-soft: #2B2415;
+      --ok: #5BBF87;
+      --ok-soft: #14261C;
+      --bad: #E08078;
+      --bad-soft: #2C1817;
+      --ref: #7EA6E8;
+      --ref-soft: #15202F;
+      --tag-place: #5FBDB4;
+      --seg-cached: #2E4466;
+      --seg-new: #C98F2A;
+      --seg-out: #4FAE7A;
+      --shade: rgba(0, 0, 0, 0.55);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    line-height: 1.62;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 20px 24px 96px; }
+  code, .mono {
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.86em;
+  }
+  p code, li code, td code, .note code {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px;
+    overflow-wrap: anywhere;
+  }
+  a { color: var(--ref); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+  /* ---------- language switching ---------- */
+  .t { display: none; }
+  body[data-lang="en"]      .t[lang="en"],
+  body[data-lang="zh-Hant"] .t[lang="zh-Hant"] { display: revert; }
+
+  .langbar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+    padding: 14px 0 12px; margin-bottom: 22px;
+    background: var(--paper); border-bottom: 1px solid var(--line);
+  }
+  .langbar .home {
+    margin-right: auto; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;
+    color: var(--muted); text-decoration: none;
+  }
+  .langbar .home:hover { color: var(--accent); }
+  .langbar .lang {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;
+    border: 1px solid var(--line); background: var(--paper); color: var(--muted);
+    border-radius: 999px; padding: 4px 13px; text-decoration: none; display: inline-flex; align-items: center;
+  }
+  .langbar .lang:hover { border-color: var(--accent); color: var(--accent); }
+  .langbar .lang[aria-current="page"] {
+    color: var(--accent); border-color: var(--accent); background: var(--accent-soft); font-weight: 700;
+  }
+
+  /* ---------- header ---------- */
+  header { border-bottom: 2px solid var(--ink); padding-bottom: 28px; margin-bottom: 12px; }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 14px;
+  }
+  h1 {
+    font-size: clamp(30px, 5.4vw, 46px); font-weight: 800; letter-spacing: -0.02em;
+    line-height: 1.12; margin: 0 0 20px; text-wrap: balance;
+  }
+  .lede { max-width: 68ch; }
+  .lede p { margin: 14px 0 0; }
+  .chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
+  .chip {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
+    border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; color: var(--muted);
+  }
+  a.chip { color: var(--accent); border-color: var(--accent); text-decoration: none; font-weight: 700; }
+  a.chip:hover { background: var(--accent-soft); }
+
+  /* ---------- sections ---------- */
+  section { margin-top: 64px; }
+  .sec-head { display: flex; align-items: baseline; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 22px; }
+  .sec-head .mono-label {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
+    letter-spacing: 0.12em; color: var(--accent); white-space: nowrap;
+  }
+  h2 { font-size: 21px; font-weight: 750; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+  h3.sub { font-size: 16.5px; font-weight: 750; margin: 34px 0 10px; }
+  .note { color: var(--muted); font-size: 14.5px; max-width: 70ch; margin: 0 0 18px; }
+  p, li, dd { text-wrap: pretty; }
+  .prose { max-width: 70ch; }
+  .prose p { margin: 0 0 14px; }
+
+  /* ---------- twins ---------- */
+  .twins { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 30px; }
+  .twin { border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; background: var(--panel); }
+  .twin.on { border-color: var(--accent); background: var(--accent-soft); }
+  .twin .k {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; color: var(--muted);
+  }
+  .twin.on .k { color: var(--accent); }
+  .twin h3 { margin: 4px 0 8px; font-size: 17px; font-weight: 750; }
+  .twin ul { margin: 0; padding-left: 18px; font-size: 14px; color: var(--muted); }
+  .twin li + li { margin-top: 2px; }
+  .twin li.diff { color: var(--ink); font-weight: 650; }
+
+  /* ---------- cards ---------- */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  .step { border: 1px solid var(--line); border-radius: 10px; padding: 16px 16px 14px; background: var(--panel); display: flex; flex-direction: column; gap: 8px; }
+  .step .k {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; color: var(--accent);
+  }
+  .step h3 { margin: 0; font-size: 16px; font-weight: 750; }
+  .step p { margin: 0; font-size: 13.5px; color: var(--muted); }
+  .step .trigger {
+    margin-top: auto; padding-top: 8px; border-top: 1px dashed var(--line);
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--tag-place);
+    overflow-wrap: anywhere;
+  }
+
+  /* ---------- call bars ---------- */
+  .calls {
+    border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px 16px;
+    background: var(--panel); margin: 4px 0 12px;
+  }
+  .callrow { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; }
+  .callrow + .callrow { margin-top: 9px; }
+  .callrow .lbl { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .bar { display: flex; height: 18px; }
+  .bar span { display: block; height: 100%; }
+  .bar span:first-child { border-radius: 4px 0 0 4px; }
+  .bar span:last-child { border-radius: 0 4px 4px 0; }
+  .bar .c { background: var(--seg-cached); }
+  .bar .n { background: var(--seg-new); }
+  .bar .o { background: var(--seg-out); }
+  .keys { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 16px; padding-top: 12px; border-top: 1px dashed var(--line); font-size: 13px; color: var(--muted); }
+  .keys i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 7px; vertical-align: -1px; }
+  .keys .c { background: var(--seg-cached); } .keys .n { background: var(--seg-new); } .keys .o { background: var(--seg-out); }
+  .caption { font-size: 13.5px; color: var(--muted); max-width: 70ch; margin: 0 0 8px; }
+
+  /* ---------- tables ---------- */
+  .tscroll { overflow-x: auto; }
+  /* Anything that scrolls sideways shows a soft shadow on the clipped edge: the
+     local layers cover it at the start and end, the scroll layers stay put. */
+  .tscroll, pre.cmd, .formula { --sbg: var(--paper); }
+  pre.cmd, .formula { --sbg: var(--panel); }
+  .tscroll, pre.cmd, .formula {
+    background:
+      linear-gradient(to right, var(--sbg) 30%, transparent) left center / 28px 100% no-repeat local,
+      linear-gradient(to left, var(--sbg) 30%, transparent) right center / 28px 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%, var(--shade), transparent) left center / 12px 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, var(--shade), transparent) right center / 12px 100% no-repeat scroll,
+      var(--sbg);
+  }
+  /* The row label stays put while the numbers slide under it. */
+  .tscroll th:first-child, .tscroll td:first-child { position: sticky; left: 0; z-index: 1; background: var(--paper); }
+  .tscroll { overscroll-behavior-x: contain; }
+  .scroll-hint { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--muted); text-align: right; margin: 0 0 6px; }
+  .wtable { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .wtable th {
+    text-align: left; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 2px solid var(--ink); padding: 6px 12px 8px 0;
+  }
+  .wtable td { border-bottom: 1px solid var(--line); padding: 10px 12px 10px 0; vertical-align: top; }
+  .wtable td.field { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; font-weight: 600; overflow-wrap: anywhere; }
+  .wtable td.num { white-space: nowrap; text-align: right; }
+  .wtable th.num { text-align: right; }
+  .wtable .sub { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .delta { font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .delta.good { color: var(--ok); background: var(--ok-soft); border-radius: 4px; padding: 1px 8px; }
+  .delta.bad { color: var(--bad); background: var(--bad-soft); border-radius: 4px; padding: 1px 8px; }
+  .delta.flat { color: var(--muted); }
+
+  /* ---------- sums ---------- */
+  .sums { display: flex; flex-direction: column; }
+  .sum { display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: baseline; padding: 11px 4px; border-bottom: 1px dashed var(--line); }
+  .sum:last-child { border-bottom: none; }
+  .sum .name { font-weight: 700; font-size: 14.5px; }
+  .sum .how { font-size: 14px; color: var(--muted); }
+  .sum .how code { font-size: 0.86em; }
+
+  .callout {
+    background: var(--ok-soft); border-radius: 8px;
+    padding: 12px 16px; margin: 22px 0 0; font-size: 14.5px; max-width: 74ch;
+  }
+  .callout p { margin: 0; }
+  .formula {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 15px; font-weight: 600;
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 20px; margin: 0 0 14px; overflow-x: auto; white-space: nowrap;
+  }
+  .formula .g { color: var(--ok); } .formula .b { color: var(--bad); }
+
+  /* ---------- commands ---------- */
+  pre.cmd {
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.55;
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 18px; margin: 10px 0 16px; overflow-x: auto;
+  }
+  pre.cmd .c { color: var(--muted); }
+  ol.run { margin: 0; padding-left: 22px; max-width: 74ch; }
+  ol.run > li { margin: 0 0 14px; padding-left: 4px; }
+  ol.run > li::marker { font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 700; color: var(--accent); }
+  ul.plain { margin: 0; padding-left: 20px; max-width: 72ch; }
+  ul.plain li { margin: 0 0 10px; }
+
+  footer { margin-top: 72px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  footer p { margin: 6px 0 0; }
+  footer p a { white-space: nowrap; }
+  footer .built { margin-top: 10px; font-weight: 600; color: var(--ink); }
+
+  @media (max-width: 440px) {
+    .formula { white-space: normal; }
+  }
+  @media (max-height: 500px) {
+    .langbar { position: static; }
+  }
+  @media print {
+    .langbar, .amp-consent, .amp-consent-open, .scroll-hint, .chev { display: none !important; }
+    body { background: #fff; color: #000; }
+    .wrap { max-width: none; padding: 0; }
+    html[data-js] .more { height: auto !important; }
+    section { margin-top: 28px; }
+    .step, .level, .tile, .fnode, .rung, .twin, .sum, tr, pre.cmd, .formula { break-inside: avoid; }
+    h2, h3 { break-after: avoid; }
+    a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #444; overflow-wrap: anywhere; }
+    .chips a::after, .langbar a::after { content: none; }
+  }
+  @media (pointer: coarse) {
+    .langbar .lang { min-height: 44px; padding-inline: 14px; }
+    .langbar .home, a.chip, .foot-nav a { min-height: 44px; display: inline-flex; align-items: center; }
+    .foot-nav a { min-width: 44px; }
+  }
+  @media (max-width: 640px) {
+    .wrap { padding: 16px 16px 72px; }
+    .sum { grid-template-columns: 1fr; gap: 2px; }
+    .callrow { grid-template-columns: 52px 1fr; gap: 8px; }
+    .calls { padding: 14px 14px 12px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .langbar .lang {
+      transition: color 160ms var(--ease-out-quart), border-color 160ms var(--ease-out-quart),
+                  background-color 160ms var(--ease-out-quart);
+    }
+    /* Each language, and each page, is its own URL; cross-fade the move. */
+    @view-transition { navigation: auto; }
+    ::view-transition-old(root), ::view-transition-new(root) {
+      animation-duration: 220ms;
+      animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    html[data-js] header > * { animation: amp-rise 640ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+    /* The heading and lede are the largest paint: move them in, never hide them. */
+    html[data-js] header > h1 { animation-name: amp-lift; animation-delay: 70ms; }
+    html[data-js] header > .lede { animation-name: amp-lift; animation-delay: 140ms; }
+    html[data-js] header > .chips { animation-delay: 210ms; }
+  }
+  @keyframes amp-rise { from { opacity: 0; transform: translateY(12px); } }
+  @keyframes amp-lift { from { transform: translateY(12px); } }
+
+  /* ---------- quickstart / compare ---------- */
+  .cmp th:not(:first-child), .cmp td:not(:first-child) { min-width: 136px; }
+  .cmp th:first-child, .cmp td:first-child { min-width: 118px; font-weight: 650; }
+  .cmp th.amp, .cmp td.amp { background: var(--accent-soft); padding-left: 10px; }
+  .agents td:nth-child(2) { white-space: nowrap; }
+  .fit { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; max-width: 74ch; }
+  .fit li { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; background: var(--panel); }
+  .fit li b { display: block; margin-bottom: 4px; }
+  .srcs { margin: 0; padding-left: 20px; font-size: 14px; max-width: 74ch; }
+  .srcs li { margin: 0 0 6px; overflow-wrap: anywhere; }
+  .tscroll + .note { margin-top: 14px; }
+  .foot-nav { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 10px; }
+  .foot-nav a[aria-current="page"] { color: var(--ink); text-decoration: none; font-weight: 650; }
+
+  /* ---------- agent memory guide ---------- */
+  pre.cmd.wrap { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .steps.pairs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .steps + .note { margin-top: 14px; }
+  @media (max-width: 520px) { .steps.pairs { grid-template-columns: minmax(0, 1fr); } }
+</style>
+<script>document.documentElement.setAttribute("data-js", "on");</script>
+</head>
+<body data-lang="en">
+
+<div class="wrap">
+
+  <nav class="langbar" aria-label="Language">
+    <a class="home" href="./">
+      <span class="t" lang="en">← AMP overview</span>
+    </a>
+    <a class="lang" href="agent-memory.html" hreflang="en" lang="en" aria-current="page">EN</a>
+    <a class="lang" href="zh-hant/agent-memory.html" hreflang="zh-Hant" lang="zh-Hant">繁中</a>
+  </nav>
+
+  <header>
+    <p class="eyebrow">RxAi AMP · Agent memory · <time datetime="2026-10-16">16 Oct 2026</time></p>
+    <h1>
+      <span class="t" lang="en">AI agent memory that stays accurate, consistent and shared across a team</span>
+    </h1>
+    <div class="lede">
+      <p class="t" lang="en">Agent memory is what an AI agent knows at the start of a session without having to rediscover it: the goal, the decisions made, the fixes that worked and the facts that have since changed. Without it, every session starts blank. This guide covers the four ways agent memory goes wrong (forgetting, stale facts, wrong recall, and agents talking past each other) and how RxAi AMP handles each one, with the protocol rule behind every claim.</p>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">IN SHORT</span>
+      <h2><span class="t" lang="en">Four problems, four mechanisms</span></h2>
+    </div>
+    <div class="tscroll">
+      <table class="wtable cmp">
+        <thead><tr><th><span class="t" lang="en">Problem</span></th><th><span class="t" lang="en">What goes wrong</span></th><th class="amp"><span class="t" lang="en">What AMP does</span></th><th><span class="t" lang="en">Spec</span></th></tr></thead>
+        <tbody>
+          <tr><td><span class="t" lang="en">Forgetting</span></td><td><span class="t" lang="en">Each session starts blank, so the agent re-reads the codebase and repeats fixes that already failed.</span></td><td class="amp"><span class="t" lang="en">Hooks put the project’s memories in context before the first task step, as titles with one-line summaries; the full record is fetched only when needed.</span></td><td>§15.1</td></tr>
+          <tr><td><span class="t" lang="en">Stale or contradictory facts</span></td><td><span class="t" lang="en">An old decision is still recalled after it was replaced, or two notes disagree.</span></td><td class="amp"><span class="t" lang="en">Nothing is overwritten. An invalidation that supersedes a record archives it on the next compile, and the newest invalidation wins.</span></td><td><span class="t" lang="en">Rule 8</span></td></tr>
+          <tr><td><span class="t" lang="en">Wrong recall</span></td><td><span class="t" lang="en">A confident memory that turned out to be wrong keeps being recommended.</span></td><td class="amp"><span class="t" lang="en">Every memory carries a weight: success +0.30, failure −0.20, decay with age, archived below 0.10.</span></td><td>§4.4</td></tr>
+          <tr><td><span class="t" lang="en">Agents talking past each other</span></td><td><span class="t" lang="en">Two agents work from different notes, overwrite each other, or reply to each other in a loop.</span></td><td class="amp"><span class="t" lang="en">One repository for every agent, each memory addressed from sender to recipient, one writer for the index, and a loop guard that holds runaway threads for a person.</span></td><td><span class="t" lang="en">§6 · Rule 3 · Rule 14</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note t" lang="en">Section and rule numbers refer to <a href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md</a> v2.13, the normative specification.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">DEFINITION</span>
+      <h2><span class="t" lang="en">What is agent memory?</span></h2>
+    </div>
+    <div class="prose">
+      <p class="t" lang="en">Agent memory is knowledge that outlasts a single session. A context window is not memory: it empties when the session ends, and a bigger window only delays that. Memory lives outside the model and is handed back to it in a later session, by the same agent or a different one.</p>
+      <p class="t" lang="en">In RxAi AMP each memory is one GitHub Issue in a repository you own. Its title says who wrote it, for whom, which project and topic it belongs to, and what kind of memory it is:</p>
+    </div>
+    <pre class="cmd wrap">[FROM:claudecowork→codex][REGION:acme-web][PLACE:checkout][TYPE:discovery] Cart total rounds tax twice</pre>
+    <p class="t" lang="en">Seven types cover what agents need to remember, each with its own lifespan (§4.3):</p>
+    <ul class="plain">
+      <li><code>intent</code> <span class="t" lang="en">the goal; read first, so later steps are judged against it.</span></li>
+      <li><code>facts</code> <span class="t" lang="en">confirmed states and configuration decisions.</span></li>
+      <li><code>pattern</code> <span class="t" lang="en">proven, reusable solutions; these last longest.</span></li>
+      <li><code>invalidation</code> <span class="t" lang="en">marks an older record stale and names what replaces it.</span></li>
+      <li><code>discovery</code> <span class="t" lang="en">findings and test results; these fade fastest, with events.</span></li>
+      <li><code>events</code> <span class="t" lang="en">what happened, each linked to the intent it served.</span></li>
+      <li><code>lifefact</code> <span class="t" lang="en">permanent facts that never decay, stored only when a person asks.</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">FORGETTING</span>
+      <h2><span class="t" lang="en">Why do AI agents forget between sessions?</span></h2>
+    </div>
+    <div class="prose">
+      <p class="t" lang="en">Language models are stateless: a new session knows only what is in its prompt and what it reads. So an agent re-reads files it read yesterday, asks again what was already answered, and retries fixes that already failed. Telling the agent to look its memory up does not fix this reliably, because it has to remember to look, and searching costs tokens.</p>
+      <p class="t" lang="en">AMP delivers memory instead. Lifecycle hooks, small scripts the agent’s own runtime runs at fixed points in a session, put the memory index in context before the agent’s first step. Records for the project at hand arrive as one-line pointers with a summary of at most 240 characters. On Claude Code, which sees your prompt first, the summary appears only for records whose title or place your prompt overlaps. The full issue is fetched only when it is needed (§15.1).</p>
+      <p class="t" lang="en">Delivery is what makes the difference. When four Codex models had to recall by hand, reading the index and then searching, they used 39–80% more input for 0–2 useful hits in four tasks. With hooks, the saving depends on the model: one that reads heavily read 18% less of the codebase and was 5% cheaper, while models that read little gained nothing and some runs cost more. <a href="benchmark.html">The benchmark page</a> shows how each number was measured.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">CONSISTENCY</span>
+      <h2><span class="t" lang="en">How do you keep agent memory consistent?</span></h2>
+    </div>
+    <p class="t" lang="en">Consistency breaks when a memory is silently overwritten, or when an old fact is still recalled after it was replaced. AMP prevents the first by design and handles the second mechanically.</p>
+    <ul class="plain">
+      <li><span class="t" lang="en"><b>Nothing is overwritten.</b> One issue per topic, and replies are comments. Two agents writing at the same moment add two comments; neither erases the other (§1, Rules 1–2).</span></li>
+      <li><span class="t" lang="en"><b>Replacing a fact archives the old one.</b> An invalidation issue with <code>Supersedes: #N</code> floors #N’s weight to 0 on the next compile, so it leaves recall. A wrong invalidation can itself be superseded, and the newest wins (Rule 8).</span></li>
+      <li><span class="t" lang="en"><b>One writer for the index.</b> Agents never edit the index. GitHub Actions rebuilds it from the issues every six hours, and a tracker lists anything posted since, so every agent reads the same state (Rule 3, §4.5).</span></li>
+      <li><span class="t" lang="en"><b>Goals stay separate from steps.</b> Agents read the intent before execution details, and every event links to the intent it served, so a failed attempt does not make the goal look wrong (Rules 7 and 11).</span></li>
+      <li><span class="t" lang="en"><b>Writes check live state.</b> Before posting, an agent refreshes the real GitHub thread; a local cache can never authorise a write (Rules 4 and 13).</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">ACCURACY</span>
+      <h2><span class="t" lang="en">How do you keep agent memory accurate?</span></h2>
+    </div>
+    <p class="t" lang="en">A memory can be consistent and still wrong. AMP treats trust as something a memory earns from outcomes, not something it keeps because someone wrote it down.</p>
+    <ul class="plain">
+      <li><span class="t" lang="en"><b>Outcomes move the weight.</b> When an agent relies on a memory, it reports the result on that issue: success adds 0.30, failure subtracts 0.20, and the weight stays between 0 and 1 (§4.4).</span></li>
+      <li><span class="t" lang="en"><b>Age and disuse fade it.</b> Weights decay every six hours at a rate set by type, and for each session that recorded a memory as shown but not used, it loses a further 5% at every compile. Below 0.10 a memory is archived, not deleted (§4.3, §4.4, §4.4b).</span></li>
+      <li><span class="t" lang="en"><b>Sessions account for what they used.</b> Each session summary ends with a recall manifest: which memories were shown, which were used and with what result, and what was stored, or declined with a reason. A <code>used → success</code> entry adds 0.15 even when no comment was posted, and a daily audit flags claimed successes that have no outcome on the thread (§15.2, §4.4c, §15.6).</span></li>
+      <li><span class="t" lang="en"><b>Memory is data, not instructions.</b> Recalled text is reference material. An agent never obeys instructions it finds inside a memory (§16.2).</span></li>
+    </ul>
+    <div class="callout">
+      <p class="t" lang="en">What this does not do: AMP matches memories by title and place, not by meaning, so it is not built for semantic search over thousands of records. Outcome weighting lowers the odds of wrong recall without removing them, and a bad memory can still be stored; attribution, weights and retraction contain it (§16.4). <a href="compare.html">See how AMP compares with Mem0, Zep and Letta.</a></p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">TEAMWORK</span>
+      <h2><span class="t" lang="en">How can several AI agents share memory and work as a team?</span></h2>
+    </div>
+    <p class="t" lang="en">Give every agent the same memory and a way to address each other. In AMP, Claude Code, Codex, agy, OpenClaw and Hermes all read and write one GitHub repository, each under its own identity and with its own credential. A memory can be addressed to one agent, to all of them, or to the writer’s own diary, and every session that did real work ends with a summary or an explicit decline (§1, §6, §15.1). The next agent, whichever it is, picks up where the last one stopped.</p>
+    <div class="steps pairs">
+      <div class="step">
+        <span class="k">1 · HAND OFF</span>
+        <h3><span class="t" lang="en">Claude Code leaves a note</span></h3>
+        <p class="t" lang="en">Late in a session on acme-web, Claude Code finds the bug but not the fix. It posts a discovery addressed to Codex, with a one-line Now: the cause, where it stands, the next step.</p>
+        <span class="trigger">[FROM:claudecowork→codex]</span>
+      </div>
+      <div class="step">
+        <span class="k">2 · RECALL</span>
+        <h3><span class="t" lang="en">Codex starts with it</span></h3>
+        <p class="t" lang="en">Next morning Codex opens acme-web. Its session-start hook injects the project’s top open records, this one with its one-line summary, before Codex takes its first step.</p>
+        <span class="trigger">#212 [discovery · checkout]</span>
+      </div>
+      <div class="step">
+        <span class="k">3 · OUTCOME</span>
+        <h3><span class="t" lang="en">The result is recorded</span></h3>
+        <p class="t" lang="en">Codex fixes it and comments on the issue. The weight rises, and its session summary records what it relied on.</p>
+        <span class="trigger">Outcome: success</span>
+      </div>
+      <div class="step">
+        <span class="k">4 · CORRECT</span>
+        <h3><span class="t" lang="en">A wrong fix is retracted</span></h3>
+        <p class="t" lang="en">If the fix later proves wrong, any agent posts an invalidation. The next compile archives #212, and the correction lives in the invalidation thread.</p>
+        <span class="trigger">Supersedes: #212</span>
+      </div>
+    </div>
+    <p class="note t" lang="en">Each step is an ordinary GitHub issue or comment that carries the name of the agent that wrote it, so a person can read, correct or close any of it.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">LOOPS</span>
+      <h2><span class="t" lang="en">How do you stop agents from looping on each other?</span></h2>
+    </div>
+    <p class="t" lang="en">Agents that react to each other’s comments can reply forever and burn tokens. Before any model runs on a repository event, AMP’s loop guard checks, without an LLM, whether the trigger was already handled, whether the agent would be answering itself, whether the thread has passed two automatic hops, whether the last three comments all came from agents, and whether recent attempts failed twice. If so, it skips the run or holds the thread for a person (Rule 14).</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="mono-label">NEXT</span>
+      <h2><span class="t" lang="en">Where to go next</span></h2>
+    </div>
+    <ul class="plain">
+      <li><span class="t" lang="en"><a href="quickstart.html">Quickstart</a>: set up shared agent memory for Claude Code, Codex and agy in about ten minutes.</span></li>
+      <li><span class="t" lang="en"><a href="benchmark.html">Benchmarks</a>: whether memory pays for itself on your model, and how to run the same test.</span></li>
+      <li><span class="t" lang="en"><a href="compare.html">Compare</a>: how AMP differs from Mem0, Zep, Letta and the MCP memory server.</span></li>
+      <li><span class="t" lang="en"><a href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md</a>: every rule cited on this page, in full.</span></li>
+      <li><span class="t" lang="en">Questions or corrections: <a href="https://github.com/RxAi-Aus/amp/discussions">GitHub Discussions</a>.</span></li>
+    </ul>
+  </section>
+
+  <footer>
+    <nav class="foot-nav" aria-label="Pages">
+      <a href="./"><span class="t" lang="en">Overview</span></a>
+      <a href="agent-memory.html" aria-current="page"><span class="t" lang="en">Agent memory</span></a>
+      <a href="quickstart.html"><span class="t" lang="en">Quickstart</span></a>
+      <a href="compare.html"><span class="t" lang="en">Compare</span></a>
+      <a href="benchmark.html"><span class="t" lang="en">Benchmarks</span></a>
+    </nav>
+    <span class="mono"><a href="./">RxAi AMP</a> · <a href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md</a>
+      <span class="t" lang="en">is the single source of truth · Issues in, knowledge out.</span>
+    </span>
+    <p class="built">
+      <span class="t" lang="en">Built by <a href="https://www.rxai.com.au/">RxAI</a> · <a href="https://www.rxai.com.au/case-studies.html#showcase-amp">In the RxAI project showcase</a></span>
+    </p>
+    <p>© 2026 James Ho · <a href="https://github.com/RxAi-Aus/amp/blob/main/LICENSE">Dual-licensed</a>: AGPL-3.0-or-later or commercial · patent pending (AU provisional 2026907694) · <a href="https://github.com/RxAi-Aus/amp">github.com/RxAi-Aus/amp</a></p>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  // A results table wider than the screen scrolls sideways; say so above the ones that do.
+  var HINT = { "en": "Swipe sideways for more columns →", "zh-Hant": "左右滑動看更多欄位 →" };
+  function mark() {
+    document.querySelectorAll(".tscroll").forEach(function (el) {
+      var over = el.scrollWidth > el.clientWidth + 1;
+      var prev = el.previousElementSibling;
+      var has = prev && prev.classList.contains("scroll-hint");
+      if (over && !has) {
+        var p = document.createElement("p");
+        p.className = "scroll-hint";
+        p.textContent = HINT[document.body.getAttribute("data-lang")] || HINT.en;
+        el.parentNode.insertBefore(p, el);
+      } else if (!over && has) {
+        prev.remove();
+      }
+    });
+  }
+  var queued = false;
+  window.addEventListener("resize", function () {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function () { queued = false; mark(); });
+  });
+  mark();
+})();
+</script>
+
+<script>
+  // Remember a language picked here, so the English page can send a returning
+  // visitor straight to it.
+  (function () {
+    function keep(e) {
+      var a = e.target.closest(".langbar a[hreflang]");
+      if (a) try { localStorage.setItem("amp-lang", a.getAttribute("hreflang")); } catch (err) {}
+    }
+    document.addEventListener("click", keep);
+    document.addEventListener("auxclick", keep);
+  })();
+</script>
+<script type="speculationrules">
+{"prefetch": [{"where": {"href_matches": "/*"}, "eagerness": "moderate"}]}
+</script>
+</body>
+</html>

@@ -6,8 +6,10 @@
 <script>
   // English is also the x-default. A visitor who chose another language before,
   // or whose browser asks for one this page has, goes to that version; a
-  // visitor on a language URL stays where the link sent them.
+  // visitor on a language URL stays where the link sent them. An automated
+  // browser (a crawler or an AI reader) gets the page it asked for.
   (function () {
+    if (navigator.webdriver) return;
     var alt = {"zh-Hant":"zh-hant/benchmark.html"};
     var l = null;
     try { l = localStorage.getItem("amp-lang"); } catch (e) {}
@@ -402,11 +404,13 @@
       animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
     }
     html[data-js] header > * { animation: amp-rise 640ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
-    html[data-js] header > h1 { animation-delay: 70ms; }
-    html[data-js] header > .lede { animation-delay: 140ms; }
+    /* The heading and lede are the largest paint: move them in, never hide them. */
+    html[data-js] header > h1 { animation-name: amp-lift; animation-delay: 70ms; }
+    html[data-js] header > .lede { animation-name: amp-lift; animation-delay: 140ms; }
     html[data-js] header > .chips { animation-delay: 210ms; }
   }
   @keyframes amp-rise { from { opacity: 0; transform: translateY(12px); } }
+  @keyframes amp-lift { from { transform: translateY(12px); } }
 </style>
 <script>document.documentElement.setAttribute("data-js", "on");</script>
 </head>
@@ -816,6 +820,7 @@ npm run benchmark:codex -- --cases 20 --hooks \
   <footer>
     <nav class="foot-nav" aria-label="Pages">
       <a href="./"><span class="t" lang="en">Overview</span></a>
+      <a href="agent-memory.html"><span class="t" lang="en">Agent memory</span></a>
       <a href="quickstart.html"><span class="t" lang="en">Quickstart</span></a>
       <a href="compare.html"><span class="t" lang="en">Compare</span></a>
       <a href="benchmark.html" aria-current="page"><span class="t" lang="en">Benchmarks</span></a>

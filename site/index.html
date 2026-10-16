@@ -24,11 +24,11 @@
 {
   "zh-Hant": {
     "title": "RxAi AMP · 代理記憶協定 Agent Memory Protocol",
-    "description": "開源的 AI 程式代理共享記憶，建在 GitHub Issues 上。Hook 把任務需要的記憶交給每個代理，成效結果再調整它信任哪些記憶。",
+    "description": "開源的 AI 代理記憶，建在 GitHub Issues 上。Hook 把任務需要的記憶交給每個代理，成效結果讓整個團隊的記憶保持準確。",
     "ogDescription": "建在 GitHub Issues 上的 AI 代理共享記憶：零後端、可用 Git 稽核、依成效加權。",
     "ld": {
       "name": "RxAi AMP · 代理記憶協定 — 共享大腦如何運作",
-      "description": "開源的 AI 程式代理共享記憶，建在 GitHub Issues 上。Hook 把任務需要的記憶交給每個代理，成效結果再調整它信任哪些記憶。"
+      "description": "開源的 AI 代理記憶，建在 GitHub Issues 上。Hook 把任務需要的記憶交給每個代理，成效結果讓整個團隊的記憶保持準確。"
     }
   },
   "ja": {
@@ -60,10 +60,10 @@
   }
 }
 </script>
-<title>RxAi AMP · Agent Memory Protocol</title>
-<meta name="description" content="Open-source shared memory for AI coding agents, built on GitHub Issues. Hooks give each agent the memories its task needs; outcomes reweight its trust.">
+<title>RxAi AMP · Agent Memory Protocol for AI agent teams</title>
+<meta name="description" content="Open-source agent memory for AI coding agents, built on GitHub Issues. Hooks give each agent what its task needs; outcomes keep a team's memory accurate.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
-<meta property="og:title" content="RxAi AMP · Agent Memory Protocol">
+<meta property="og:title" content="RxAi AMP · Agent Memory Protocol for AI agent teams">
 <meta property="og:description" content="A shared memory system for AI agents built on GitHub Issues — zero backend, git-auditable, outcome-weighted.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://amp.rxai.com.au/">
@@ -102,9 +102,9 @@
       "codeRepository": "https://github.com/RxAi-Aus/amp",
       "programmingLanguage": ["TypeScript", "JavaScript"],
       "runtimePlatform": "Node.js 22",
-      "softwareVersion": "2.12",
+      "softwareVersion": "2.13",
       "dateCreated": "2026-09-09",
-      "dateModified": "2026-09-24",
+      "dateModified": "2026-10-07",
       "license": "https://github.com/RxAi-Aus/amp/blob/main/LICENSE",
       "keywords": ["agent memory", "AI agents", "shared memory", "MCP", "GitHub Issues", "Claude Code", "Codex", "multi-agent"],
       "author": { "@type": "Person", "name": "James Ho" },
@@ -116,12 +116,12 @@
       "@id": "https://amp.rxai.com.au/#webpage",
       "url": "https://amp.rxai.com.au/",
       "name": "RxAi AMP · Agent Memory Protocol — how the shared brain works",
-      "description": "Open-source shared memory for AI coding agents, built on GitHub Issues. Hooks give each agent the memories its task needs; outcomes reweight its trust.",
+      "description": "Open-source agent memory for AI coding agents, built on GitHub Issues. Hooks give each agent what its task needs; outcomes keep a team's memory accurate.",
       "isPartOf": { "@id": "https://amp.rxai.com.au/#website" },
       "about": { "@id": "https://amp.rxai.com.au/#software" },
       "inLanguage": "en",
       "datePublished": "2026-08-14",
-      "dateModified": "2026-09-24",
+      "dateModified": "2026-10-16",
       "primaryImageOfPage": "https://amp.rxai.com.au/assets/social-preview.jpg"
     }
   ]
@@ -505,16 +505,17 @@
       <span class="t" lang="es">Cómo funciona el cerebro compartido</span>
     </h1>
     <div class="lede">
-      <p class="t" lang="en">Every memory is one GitHub Issue. Comments are the conversation about it. GitHub Actions compiles the index, not an AI. Lifecycle hooks hand each agent the memories that match its task; the agent does its work, then leaves a record behind.</p>
-      <p class="t" lang="zh-Hant">每一條記憶就是一則 GitHub Issue；留言是針對它的討論。索引由 GitHub Actions（而非任何 AI）自動編譯。生命週期 hook 把和任務相符的記憶交給代理；代理工作完，留下紀錄。</p>
-      <p class="t" lang="ja">記憶はすべて1件の GitHub Issue。コメントはそれをめぐる会話です。インデックスを編纂するのは AI ではなく GitHub Actions。ライフサイクルフックがタスクに合う記憶をエージェントに手渡し、エージェントは作業して記録を残します。</p>
-      <p class="t" lang="ko">모든 기억은 하나의 GitHub 이슈입니다. 댓글은 그 기억에 대한 대화입니다. 인덱스는 AI가 아니라 GitHub Actions가 컴파일합니다. 라이프사이클 훅이 작업에 맞는 기억을 에이전트에게 건네고, 에이전트는 작업한 뒤 기록을 남깁니다.</p>
-      <p class="t" lang="es">Cada recuerdo es un issue de GitHub. Los comentarios son la conversación sobre él. GitHub Actions —no ninguna IA— compila el índice. Los hooks de ciclo de vida entregan a cada agente los recuerdos que encajan con su tarea; el agente hace su trabajo y deja constancia.</p>
+      <p class="t" lang="en">Shared memory for teams of AI coding agents, such as Claude Code and Codex. Every memory is one GitHub Issue. Comments are the conversation about it. GitHub Actions compiles the index, not an AI. Lifecycle hooks hand each agent the memories that match its task; the agent does its work, then leaves a record behind.</p>
+      <p class="t" lang="zh-Hant">給 Claude Code、Codex 等 AI 程式代理團隊共用的記憶。每一條記憶就是一則 GitHub Issue；留言是針對它的討論。索引由 GitHub Actions（而非任何 AI）自動編譯。生命週期 hook 把和任務相符的記憶交給代理；代理工作完，留下紀錄。</p>
+      <p class="t" lang="ja">Claude Code や Codex など、AI コーディングエージェントのチームが共有する記憶です。記憶はすべて1件の GitHub Issue。コメントはそれをめぐる会話です。インデックスを編纂するのは AI ではなく GitHub Actions。ライフサイクルフックがタスクに合う記憶をエージェントに手渡し、エージェントは作業して記録を残します。</p>
+      <p class="t" lang="ko">Claude Code, Codex 같은 AI 코딩 에이전트 팀이 함께 쓰는 공유 메모리입니다. 모든 기억은 하나의 GitHub 이슈입니다. 댓글은 그 기억에 대한 대화입니다. 인덱스는 AI가 아니라 GitHub Actions가 컴파일합니다. 라이프사이클 훅이 작업에 맞는 기억을 에이전트에게 건네고, 에이전트는 작업한 뒤 기록을 남깁니다.</p>
+      <p class="t" lang="es">Memoria compartida para equipos de agentes de IA de programación, como Claude Code y Codex. Cada recuerdo es un issue de GitHub. Los comentarios son la conversación sobre él. GitHub Actions —no ninguna IA— compila el índice. Los hooks de ciclo de vida entregan a cada agente los recuerdos que encajan con su tarea; el agente hace su trabajo y deja constancia.</p>
     </div>
     <div class="chips">
       <a class="chip" href="https://github.com/RxAi-Aus/amp">GitHub ↗</a>
       <a class="chip" href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md ↗</a>
       <a class="chip" href="https://github.com/RxAi-Aus/amp#readme">README ↗</a>
+      <a class="chip" href="agent-memory.html"><span class="t" lang="en">Agent memory guide →</span><span class="t" lang="zh-Hant">代理記憶指南 →</span><span class="t" lang="ja">Agent memory guide →</span><span class="t" lang="ko">Agent memory guide →</span><span class="t" lang="es">Agent memory guide →</span></a>
       <a class="chip" href="quickstart.html">Quickstart →</a>
       <a class="chip" href="compare.html">Compare →</a>
       <a class="chip" href="benchmark.html">Benchmarks →</a>
@@ -563,7 +564,7 @@
     <dl class="brief-facts">
       <div><dt><span class="t" lang="en">Licence</span><span class="t" lang="zh-Hant">授權</span><span class="t" lang="ja">ライセンス</span><span class="t" lang="ko">라이선스</span><span class="t" lang="es">Licencia</span></dt><dd><span class="t" lang="en">AGPL-3.0-or-later, or a commercial licence</span><span class="t" lang="zh-Hant">AGPL-3.0-or-later 或商業授權</span><span class="t" lang="ja">AGPL-3.0-or-later または商用ライセンス</span><span class="t" lang="ko">AGPL-3.0-or-later 또는 상용 라이선스</span><span class="t" lang="es">AGPL-3.0-or-later o licencia comercial</span></dd></div>
       <div><dt><span class="t" lang="en">Maintainer</span><span class="t" lang="zh-Hant">維護者</span><span class="t" lang="ja">メンテナー</span><span class="t" lang="ko">관리자</span><span class="t" lang="es">Mantenedor</span></dt><dd>James Ho, <a href="https://www.rxai.com.au/">RxAI</a></dd></div>
-      <div><dt><span class="t" lang="en">Updated</span><span class="t" lang="zh-Hant">更新</span><span class="t" lang="ja">更新日</span><span class="t" lang="ko">업데이트</span><span class="t" lang="es">Actualizado</span></dt><dd><time datetime="2026-09-24"><span class="t" lang="en">24 September 2026</span><span class="t" lang="zh-Hant">2026 年 9 月 24 日</span><span class="t" lang="ja">2026年9月24日</span><span class="t" lang="ko">2026년 9월 24일</span><span class="t" lang="es">24 de septiembre de 2026</span></time></dd></div>
+      <div><dt><span class="t" lang="en">Updated</span><span class="t" lang="zh-Hant">更新</span><span class="t" lang="ja">更新日</span><span class="t" lang="ko">업데이트</span><span class="t" lang="es">Actualizado</span></dt><dd><time datetime="2026-10-16"><span class="t" lang="en">16 October 2026</span><span class="t" lang="zh-Hant">2026 年 10 月 16 日</span><span class="t" lang="ja">2026年10月16日</span><span class="t" lang="ko">2026년 10월 16일</span><span class="t" lang="es">16 de octubre de 2026</span></time></dd></div>
       <div><dt><span class="t" lang="en">Questions</span><span class="t" lang="zh-Hant">提問</span><span class="t" lang="ja">質問</span><span class="t" lang="ko">문의</span><span class="t" lang="es">Preguntas</span></dt><dd><a href="https://github.com/RxAi-Aus/amp/discussions">GitHub Discussions</a></dd></div>
     </dl>
   </section>
@@ -1376,6 +1377,7 @@
   <footer>
     <nav class="foot-nav" aria-label="Pages">
       <a href="index.html" aria-current="page"><span class="t" lang="en">Overview</span><span class="t" lang="zh-Hant">總覽</span><span class="t" lang="ja">概要</span><span class="t" lang="ko">개요</span><span class="t" lang="es">Resumen</span></a>
+      <a href="agent-memory.html"><span class="t" lang="en">Agent memory</span><span class="t" lang="zh-Hant">代理記憶</span><span class="t" lang="ja">Agent memory</span><span class="t" lang="ko">Agent memory</span><span class="t" lang="es">Agent memory</span></a>
       <a href="quickstart.html"><span class="t" lang="en">Quickstart</span><span class="t" lang="zh-Hant">快速開始</span><span class="t" lang="ja">Quickstart</span><span class="t" lang="ko">Quickstart</span><span class="t" lang="es">Quickstart</span></a>
       <a href="compare.html"><span class="t" lang="en">Compare</span><span class="t" lang="zh-Hant">比較</span><span class="t" lang="ja">Compare</span><span class="t" lang="ko">Compare</span><span class="t" lang="es">Compare</span></a>
       <a href="benchmark.html"><span class="t" lang="en">Benchmarks</span><span class="t" lang="zh-Hant">基準測試</span><span class="t" lang="ja">Benchmarks</span><span class="t" lang="ko">Benchmarks</span><span class="t" lang="es">Benchmarks</span></a>

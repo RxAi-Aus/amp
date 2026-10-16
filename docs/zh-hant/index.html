@@ -21,7 +21,7 @@
 <script defer src="../assets/amp-analytics.js"></script>
 <!-- Per-language head text for scripts/build-site.mjs; English is the markup below. -->
 <title>RxAi AMP · 代理記憶協定 Agent Memory Protocol</title>
-<meta name="description" content="開源的 AI 程式代理共享記憶，建在 GitHub Issues 上。Hook 把任務需要的記憶交給每個代理，成效結果再調整它信任哪些記憶。">
+<meta name="description" content="開源的 AI 代理記憶，建在 GitHub Issues 上。Hook 把任務需要的記憶交給每個代理，成效結果讓整個團隊的記憶保持準確。">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
 <meta property="og:title" content="RxAi AMP · 代理記憶協定 Agent Memory Protocol">
 <meta property="og:description" content="建在 GitHub Issues 上的 AI 代理共享記憶：零後端、可用 Git 稽核、依成效加權。">
@@ -86,9 +86,9 @@
         "JavaScript"
       ],
       "runtimePlatform": "Node.js 22",
-      "softwareVersion": "2.12",
+      "softwareVersion": "2.13",
       "dateCreated": "2026-09-09",
-      "dateModified": "2026-09-24",
+      "dateModified": "2026-10-07",
       "license": "https://github.com/RxAi-Aus/amp/blob/main/LICENSE",
       "keywords": [
         "agent memory",
@@ -114,7 +114,7 @@
       "@id": "https://amp.rxai.com.au/zh-hant/#webpage",
       "url": "https://amp.rxai.com.au/zh-hant/",
       "name": "RxAi AMP · 代理記憶協定 — 共享大腦如何運作",
-      "description": "開源的 AI 程式代理共享記憶，建在 GitHub Issues 上。Hook 把任務需要的記憶交給每個代理，成效結果再調整它信任哪些記憶。",
+      "description": "開源的 AI 代理記憶，建在 GitHub Issues 上。Hook 把任務需要的記憶交給每個代理，成效結果讓整個團隊的記憶保持準確。",
       "isPartOf": {
         "@id": "https://amp.rxai.com.au/#website"
       },
@@ -123,7 +123,7 @@
       },
       "inLanguage": "zh-Hant",
       "datePublished": "2026-08-14",
-      "dateModified": "2026-09-24",
+      "dateModified": "2026-10-16",
       "primaryImageOfPage": "https://amp.rxai.com.au/assets/social-preview.jpg"
     }
   ]
@@ -507,12 +507,13 @@
       <span class="t" lang="zh-Hant">共享大腦如何運作</span>
     </h1>
     <div class="lede">
-      <p class="t" lang="zh-Hant">每一條記憶就是一則 GitHub Issue；留言是針對它的討論。索引由 GitHub Actions（而非任何 AI）自動編譯。生命週期 hook 把和任務相符的記憶交給代理；代理工作完，留下紀錄。</p>
+      <p class="t" lang="zh-Hant">給 Claude Code、Codex 等 AI 程式代理團隊共用的記憶。每一條記憶就是一則 GitHub Issue；留言是針對它的討論。索引由 GitHub Actions（而非任何 AI）自動編譯。生命週期 hook 把和任務相符的記憶交給代理；代理工作完，留下紀錄。</p>
     </div>
     <div class="chips">
       <a class="chip" href="https://github.com/RxAi-Aus/amp">GitHub ↗</a>
       <a class="chip" href="https://github.com/RxAi-Aus/amp/blob/main/PROTOCOL.md">PROTOCOL.md ↗</a>
       <a class="chip" href="https://github.com/RxAi-Aus/amp#readme">README ↗</a>
+      <a class="chip" href="agent-memory.html"><span class="t" lang="zh-Hant">代理記憶指南 →</span></a>
       <a class="chip" href="quickstart.html">Quickstart →</a>
       <a class="chip" href="compare.html">Compare →</a>
       <a class="chip" href="benchmark.html">Benchmarks →</a>
@@ -545,7 +546,7 @@
     <dl class="brief-facts">
       <div><dt><span class="t" lang="zh-Hant">授權</span></dt><dd><span class="t" lang="zh-Hant">AGPL-3.0-or-later 或商業授權</span></dd></div>
       <div><dt><span class="t" lang="zh-Hant">維護者</span></dt><dd>James Ho, <a href="https://www.rxai.com.au/">RxAI</a></dd></div>
-      <div><dt><span class="t" lang="zh-Hant">更新</span></dt><dd><time datetime="2026-09-24"><span class="t" lang="zh-Hant">2026 年 9 月 24 日</span></time></dd></div>
+      <div><dt><span class="t" lang="zh-Hant">更新</span></dt><dd><time datetime="2026-10-16"><span class="t" lang="zh-Hant">2026 年 10 月 16 日</span></time></dd></div>
       <div><dt><span class="t" lang="zh-Hant">提問</span></dt><dd><a href="https://github.com/RxAi-Aus/amp/discussions">GitHub Discussions</a></dd></div>
     </dl>
   </section>
@@ -986,6 +987,7 @@
   <footer>
     <nav class="foot-nav" aria-label="Pages">
       <a href="./" aria-current="page"><span class="t" lang="zh-Hant">總覽</span></a>
+      <a href="agent-memory.html"><span class="t" lang="zh-Hant">代理記憶</span></a>
       <a href="quickstart.html"><span class="t" lang="zh-Hant">快速開始</span></a>
       <a href="compare.html"><span class="t" lang="zh-Hant">比較</span></a>
       <a href="benchmark.html"><span class="t" lang="zh-Hant">基準測試</span></a>
