@@ -26,7 +26,7 @@
  *
  * docs/*.html and docs/sitemap.xml are output: edit site/, then run
  * `npm run site:build`. test/site.test.mjs fails when they disagree.
- * CNAME, robots.txt, llms.txt and assets/ in docs/ are hand-maintained.
+ * CNAME, robots.txt, llms.txt, the IndexNow key file (<key>.txt) and assets/ in docs/ are hand-maintained.
  *
  * Zero dependencies. `--check` compares instead of writing (exit 1 on drift).
  */
